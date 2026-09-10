@@ -24,7 +24,7 @@ execution: code
 
 ### Summary
 
-A proof-of-concept where a Skip external service speaks convex-backend's sync WebSocket protocol directly, with no backend changes, treating each Convex transaction as one atomic write into Skip. A chatroom app combining a Skip example with the Convex tutorial demonstrates a cross-table aggregate computed correctly and incrementally — something the existing snapshot-diffing adapter branch cannot guarantee, because it receives Convex's per-query updates torn apart.
+A proof-of-concept where a Skip sync client speaks convex-backend's sync WebSocket protocol directly, with no backend changes, treating each Convex transaction as one atomic write into Skip. A chatroom app combining a Skip example with the Convex tutorial demonstrates a cross-table aggregate computed correctly and incrementally — something the existing snapshot-diffing adapter branch cannot guarantee, because it receives Convex's per-query updates torn apart.
 
 ### Problem Frame
 
@@ -34,7 +34,7 @@ convex-backend's own reactivity model is coarse — a changed query is fully re-
 
 ### Key Decisions
 
-- **Direct sync-protocol client, not a JS-client wrapper.** The Skip service owns its own WebSocket to `/api/sync` instead of going through `ConvexClient`, so it operates on whole `Transition` messages instead of per-query callbacks. (session-settled: user-directed — chosen over emulating reactivity through polling or a client-side shim, which was explicitly rejected from the outset.) Governs R1, R2.
+- **Direct sync-protocol client, not a JS-client wrapper.** The Skip sync client owns its own WebSocket to `/api/sync` instead of going through `ConvexClient`, so it operates on whole `Transition` messages instead of per-query callbacks. (session-settled: user-directed — chosen over emulating reactivity through polling or a client-side shim, which was explicitly rejected from the outset.) Governs R1, R2.
 - **Each Convex transaction is one atomic write into Skip.** Every query in one `Transition` is written to Skip together, so a cross-table derived value never observes a state where one table advanced and another didn't. Governs R2.
 - **No hand-rolled value diffing.** The service writes each query's full current row set into Skip with `isInit: true` and lets Skip's own reconciliation compute what changed, rather than retaining a previous-snapshot map and diffing in TypeScript the way the adapter branch does. Governs R3.
 - **In-process TypeScript, not an out-of-process Rust pump.** (session-settled: user-directed — chosen over a Rust process reusing convex-backend's existing Rust sync client: matches "prove first, generalize later"; the Rust route pays a real generalization cost this PoC doesn't need to pay yet.) Governs R1.
@@ -44,7 +44,7 @@ convex-backend's own reactivity model is coarse — a changed query is fully re-
 ### Requirements
 
 **Sync-protocol client**
-- R1. The Skip service subscribes to Convex queries by speaking the `/api/sync` WebSocket protocol directly, with no dependency on the JS `ConvexClient` and no changes to convex-backend itself.
+- R1. The Skip sync client subscribes to Convex queries by speaking the `/api/sync` WebSocket protocol directly, with no dependency on the JS `ConvexClient` and no changes to convex-backend itself.
 - R2. Each `Transition` message the client receives is applied to Skip as a single atomic update spanning every query in that transition, not as independent per-query writes.
 
 **Reconciliation**
@@ -145,3 +145,23 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 - `~/src/skip`, `skipruntime-ts/skiplang/core/src/Runtime.sk` and `skipruntime-ts/core/src/index.ts` — `isInit` reset semantics and the `ExternalService.update` wiring.
 - `~/src/skip`, `skipruntime-ts/adapters/convex/src/index.ts` on branch `billf/convex/adapter` — the baseline being improved on.
 - `npm-packages/convex/src/browser/sync/client.ts` — `BaseConvexClient` and `addOnTransitionHandler`, the de-risking spike's entry point.
+
+## Deferred / Open Questions
+
+### From 2026-09-10 review
+
+- **No instruction for handling removed queries** — Requirements (P2, scope-guardian, confidence 75)
+
+  The plan names three wire-level change types the sync client must handle but writes requirements for only two, leaving no instruction for what happens when a subscribed query is removed by the server. This risks stale or orphaned rows lingering in Skip's derived state if the demo ever unsubscribes or resubscribes (e.g. switching rooms), undermining the correctness bar the plan is meant to guarantee.
+
+- **Correctness-only bar doesn't test whether this integration is worth generalizing** — Goal Capsule / Requirements (P2, adversarial, confidence 75)
+
+  Every requirement in the plan could be satisfied while its own stated goal — deciding whether this integration path is worth generalizing — stays unanswered. The one acceptance bar (R6, the correctness-only success bar) only tests one small demo shape and explicitly excludes performance, reconnects, and larger transactions, so a technically-passing demo may still leave the real decision resting on tacit judgment.
+
+- **Atomicity guarantee doesn't account for chunked transitions** — Key Decisions / Sources and Research (P2, adversarial, confidence 75)
+
+  The plan's atomic-per-transaction guarantee (R2, one atomic write into Skip per transaction) assumes the sync protocol always delivers a transaction as a single message. The protocol can fragment a large transaction across multiple chunks for certain client types, and the plan does not say whether the new client avoids or handles that case, so the atomicity guarantee is not actually assured as written.
+
+- **De-risking spike validates only one narrow claim, not the load-bearing raw-client decision** — Dependencies / Assumptions (P2, adversarial, confidence 75)
+
+  The plan's only pre-build validation step checks just one claim — that transactions arrive as a whole — rather than whether building and maintaining a from-scratch protocol client is tractable at all. The riskiest, hardest-to-reverse part of the plan (the decision to own a raw socket instead of the JS client) could only be found unworkable after most of the build is already done.
