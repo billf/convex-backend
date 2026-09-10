@@ -53,6 +53,29 @@ actually affects. This gap is the central motivation for the integration.
   `billf/convex/adapter` branch (snapshot-based polling with reactive
   diffing — its concrete limitations set the bar for "a better
   integration").
+- [`research-skip-client-v2.md`](research-skip-client-v2.md) —
+  Track 1 construction spec resolving the externals-adapter gaps
+  (bounded-query contract, scope/auth, failure matrix).
+- [`research-delta-seam.md`](research-delta-seam.md) —
+  ranked reactivity seams with OCC/persistence exclusion and
+  `QueryPatched` sketch.
+- [`research-native-operator-spec.md`](research-native-operator-spec.md) —
+  Track 2 construction spec recommending composable
+  `QueryOperator::Skip` with touch list and wire example.
+- [`research-build-slices.md`](research-build-slices.md) —
+  ordered testable build slices with done-criteria.
+- [`research-sync-protocol-skip-mapping.md`](research-sync-protocol-skip-mapping.md) —
+  sub-direction 1a wire→Skip mapping (lifecycle, versions, chunks,
+  bundle-preserving no-diff writes, PoC vehicle, correctness bar).
+- [`research-sync-wire-ts-checklist.md`](research-sync-wire-ts-checklist.md) —
+  per-message/field/lifecycle checklist for the in-process TS
+  `/api/sync` client (R1/R2/R5) plus unknowns.
+- [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
+  `isInit`/`native_eq` reconciliation, per-query fork/merge finding,
+  missing batch primitive, no-diff rule, reducer bar (R2/R3/R4).
+- [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
+  PoC queries, aggregates, keying/encoding rules, R6 harness sketch
+  (R4/R6/R7/R8).
 
 ## Status
 
