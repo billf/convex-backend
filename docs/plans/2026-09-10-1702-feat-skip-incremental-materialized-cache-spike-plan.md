@@ -105,7 +105,7 @@ flowchart TB
 
 **Index alignment**
 
-- R17. Each table the pre-registered view depends on (rooms, users, memberships, messages, and likes, per R7) receives implicit base materializations corresponding to Convex's built-in `by_id` and `by_creation_time` indexes without requiring per-view declarations. Extending implicit base materializations to every table in the experimental deployment, eagerly and by default, is deferred generalization work (see Outstanding Questions).
+- R17. Every application table exposes implicit Skip base-view definitions corresponding to Convex's built-in `by_id` and `by_creation_time` indexes, while the spike materializes those views only for rooms, users, memberships, messages, and likes per R7.
 - R18. Every additional Skip-maintained lookup, range, or ordering is backed by its corresponding enabled Convex application index.
 - R19. View registration and activation validate the required Convex index definitions for the pre-registered view's tables, and any missing, staged, disabled, removed, or incompatible application index makes the accelerated path ineligible until it can be rebuilt against a compatible enabled index.
 
@@ -191,7 +191,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
   - **Then:** Reads use the native fallback until rebuild and catch-up complete, after which the accelerated result matches the native result at the same version.
 - AE6. Index lifecycle gate
   - **Covers:** R14, R17-R19, R22.
-  - **Given:** Every table the pre-registered view depends on has implicit `by_id` and `by_creation_time` base materializations, and the pre-registered view declares an enabled Convex application index for each additional indexed lookup and ordering.
+  - **Given:** Every application table exposes implicit `by_id` and `by_creation_time` base-view definitions, the five tables used by the pre-registered view have those views materialized, and the view declares an enabled Convex application index for each additional indexed lookup and ordering.
   - **When:** One required index is staged, removed, disabled, or changed incompatibly.
   - **Then:** The accelerated view is not activated or served under the stale index contract, normal Convex behavior remains authoritative, and metrics identify the index-compatibility reason.
 - AE7. Dangling typed reference
@@ -206,7 +206,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - The scaling evidence shows that update work is governed by the changed dependency neighborhood for at least one join-and-reduction path, and it states the maintained-state cost alongside the time complexity.
 - Healthy steady-state benchmark traffic uses the accelerated path often enough to produce a scaling curve; a run that silently falls back for all relevant requests does not pass.
 - Fallback, lag, rebuild, and mismatch metrics make every native-path substitution attributable.
-- Every table the pre-registered view depends on has its two implicit base materializations, and the view's additional lookup manifest matches those tables' Convex index definitions, and the lifecycle test proves that incompatible index changes cannot leave acceleration active.
+- Every application table exposes the two implicit base-view definitions, only the pre-registered view's five tables allocate their backing state, and the lifecycle test proves that incompatible index changes cannot leave acceleration active.
 - Every forward schema-derived join targets the declared table's `by_id` base materialization, every reverse fan-out uses an enabled application index, and both match native behavior for present and missing referenced documents.
 - The completed spike identifies whether the backend integration is viable, which lifecycle or resource costs limit it, and whether later generalization is justified.
 
@@ -247,7 +247,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - Will one combined Skip input domain or a scoped multi-collection atomic update mechanism satisfy R2 with less risk?
 - Which rebuild, checkpoint, or replay strategy best demonstrates R6 without turning the spike into a new persistence system?
 - Which logical-work counters and dataset scale points make the asymptotic comparison reproducible?
-- Should later versions retain both implicit base materializations for every table eagerly, or activate their backing state only when a registered or just-in-time view depends on the table?
+- Should later versions activate the two implicit base views eagerly for every table, or allocate their backing state only when a registered or just-in-time view depends on the table?
 
 ### Sources / Research
 
