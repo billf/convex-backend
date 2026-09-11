@@ -111,9 +111,9 @@ flowchart TB
 
 **Schema-derived joins**
 
-- R20. A schema field validated as `v.id("targetTable")` supplies an implicit join edge from that field to the target table's `by_id` base materialization.
-- R21. Schema-derived joins preserve the pre-registered view's native behavior when the referenced target document is missing and never treat `v.id` as a referential-integrity guarantee.
-- R22. A reverse join from a target document to its referencing documents requires an enabled Convex application index on the referencing ID field.
+- R20. For the pre-registered view's validated ID fields connecting rooms, users, memberships, messages, and likes (per R7), each field validated as `v.id("targetTable")` supplies an implicit join edge from that field to the target table's `by_id` base materialization. Deriving this join edge for schema fields outside the pre-registered view is ahead-of-time schema-derived generation and is excluded from this spike per R8.
+- R21. The pre-registered view's schema-derived joins preserve its native behavior when the referenced target document is missing and never treat `v.id` as a referential-integrity guarantee.
+- R22. A reverse join from a target document to its referencing documents within the pre-registered view (per R7) requires an enabled Convex application index on the referencing ID field. Deriving reverse-join support outside the pre-registered view is excluded from this spike per R8.
 
 <!-- ce-section: work-relationships -->
 ### How This Work Fits Together
