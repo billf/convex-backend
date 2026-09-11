@@ -71,5 +71,11 @@
     "actual_citations": "none",
     "citation_risk": "high - document was designed to unify spike measurement but is not referenced by any spike plan; spikes define their own metric requirements (R12/R14/R17/R18) instead of citing this framework, risking inconsistent measurement and duplication"
   },
-  "notes": "All verified code references are accurate and current. Document provides the conceptual framework for cross-spike measurement but lacks concrete implementation guidance. Spike plans independently define metrics (1b-R12, 1c-R17/R18, Dir 2-R12/R15) rather than adopting this doc's shared catalog, suggesting either poor discoverability or insufficient specificity. Document lacks YAML frontmatter (should include: title, type: research-note, status: active, direction: shared, date: 2026-09-11). Recommendation: Add frontmatter, enhance counter/timer sections with explicit per-spike mappings, and add explicit citations in spike plans to establish this as authoritative measurement framework."
+  "notes": "All verified code references are accurate and current. Document provides the conceptual framework for cross-spike measurement but lacks concrete implementation guidance. Spike plans independently define metrics (1b-R12, 1c-R17/R18, Dir 2-R12/R15) rather than adopting this doc's shared catalog, suggesting either poor discoverability or insufficient specificity. Document lacks YAML frontmatter (should include: title, type: research-note, status: active, direction: shared, date: 2026-09-11). Recommendation: Add frontmatter, enhance counter/timer sections with explicit per-spike mappings, and add explicit citations in spike plans to establish this as authoritative measurement framework.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

@@ -9,7 +9,7 @@
       "present": true,
       "section": "isInit:true reconciles natively and minimally",
       "key_claims": [
-        "native_eq(new, old) == 0 returns early — no dirty marking, no reducer work",
+        "native_eq(new, old) == 0 returns early \u2014 no dirty marking, no reducer work",
         "isInit is a caller assertion of full-snapshotness, not persisted state",
         "Cost: dir.keys() enumeration + per-key writeEntry + full snapshot over FFI"
       ],
@@ -29,7 +29,7 @@
       ],
       "evidence": {
         "implementation": "skipruntime-ts/core/src/index.ts:476-501",
-        "ffi_binding": "binding.ts:70-74 → FFI.sk:135-156 → Runtime.sk:834-854 → writeInCollection",
+        "ffi_binding": "binding.ts:70-74 \u2192 FFI.sk:135-156 \u2192 Runtime.sk:834-854 \u2192 writeInCollection",
         "constraint": "needGC forbids writes inside mapper/reducer/createGraph"
       }
     },
@@ -87,7 +87,7 @@
   "spot_checks": [
     {
       "id": 1,
-      "claim": "native_eq(new, old) == 0 returns early — no dirty marking, no reducer work",
+      "claim": "native_eq(new, old) == 0 returns early \u2014 no dirty marking, no reducer work",
       "status": "verifiable",
       "note": "Specific path/line reference provided (EagerDir.sk:1717-1729); mechanism clearly explained as optimization path for unchanged keys",
       "confidence": "high"
@@ -129,7 +129,7 @@
       "Enforcement of the full-snapshot invariant",
       "Reducer remove correctness review for the chosen aggregate"
     ],
-    "coverage": "Appropriate — gaps align with R2/R3/R4 requirements"
+    "coverage": "Appropriate \u2014 gaps align with R2/R3/R4 requirements"
   },
   "reference_integrity": {
     "file_paths_cited": 12,
@@ -157,5 +157,11 @@
       "no-diff rule",
       "reducer bar"
     ]
+  },
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
   }
 }

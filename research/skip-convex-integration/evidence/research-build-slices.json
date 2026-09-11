@@ -78,7 +78,7 @@
     "purpose_fulfilled": true,
     "evidence": [
       "Doc provides 5 clearly-ordered build slices (T1-MVP, T1-scale, Wire spike, T2-spike, Index-cache generalization)",
-      "Each slice has explicit done-criteria (e.g., 'bounded-query contract held', 'partition-key immutability enforced', 'mixed-version interop demonstrated', 'TS→Rust round-trip verified')",
+      "Each slice has explicit done-criteria (e.g., 'bounded-query contract held', 'partition-key immutability enforced', 'mixed-version interop demonstrated', 'TS\u2192Rust round-trip verified')",
       "Done-criteria are testable and measurable",
       "Serves as template for slice-discipline approach: dependencies, testability, ordering",
       "README correctly identifies doc as historical and kept for template reference only",
@@ -91,5 +91,11 @@
       "type": "readme_clarification",
       "suggestion": "Add note to README that the 'three specs above' reference in research-build-slices.md is vague; infer from spike plans' content rather than doc's synthesis claim"
     }
-  ]
+  ],
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }
