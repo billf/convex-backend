@@ -1,0 +1,119 @@
+{
+  "document": "research-1b-page-topology.md",
+  "validated_date": "2026-09-11",
+  "claim_verdicts": [
+    {
+      "claim_id": "1.1",
+      "description": "PaginationResult contract includes page, isDone, continueCursor, splitCursor, pageStatus fields",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/server/pagination.ts",
+      "line_range": "28-58",
+      "quote": "export interface PaginationResult<T> { page: T[]; isDone: boolean; continueCursor: Cursor; splitCursor?: Cursor | null; pageStatus?: \"SplitRecommended\" | \"SplitRequired\" | null; }",
+      "document_line": "9-10"
+    },
+    {
+      "claim_id": "1.2",
+      "description": "numItems is initial target only; may differ in reactive queries",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/server/pagination.ts",
+      "line_range": "68-78",
+      "quote": "numItems: number; /**  Note: This is only an initial value! If you are running this paginated query in a reactive query function, you may receive more or less items than this if items were added to or removed from the query range.*/",
+      "document_line": "11"
+    },
+    {
+      "claim_id": "1.3",
+      "description": "cursor:null = start; endCursor bounds (cursor,endCursor] for gapless adjacency",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/server/pagination.ts",
+      "line_range": "84-98",
+      "quote": "cursor: Cursor | null; ... endCursor?: Cursor | null; ... explicitly sets the range of documents the query will return, from `cursor` to `endCursor`. It's used by reactive pagination clients to ensure there are no gaps between pages when data changes",
+      "document_line": "12"
+    },
+    {
+      "claim_id": "1.4",
+      "description": "paginate() returns all items in range after first call",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/server/query.ts",
+      "line_range": "212-229",
+      "quote": "After the first invocation, `paginate` will return all items in the original query range. This ensures that all pages will remain adjacent and non-overlapping.",
+      "document_line": "13"
+    },
+    {
+      "claim_id": "2.1",
+      "description": "Split lifecycle: detect on splitCursor + (Recommended|Required|len > 2x); subscribe to both halves; record ongoingSplits; complete when both have results",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/browser/sync/paginated_query_client.ts",
+      "line_range": "359-383",
+      "quote": "for (const [pageKey, [splitKey1, splitKey2]] of ongoingSplits) { const bothNewPagesLoaded = getResult(pageKeyToQuery.get(splitKey1)!.queryToken) !== undefined && getResult(pageKeyToQuery.get(splitKey2)!.queryToken) !== undefined; if (bothNewPagesLoaded) { this.completePaginatedQuerySplit(...); } }",
+      "document_line": "14-19"
+    },
+    {
+      "claim_id": "2.2",
+      "description": "Split completion via splice and unsubscribe: pageKeys.splice(pageIndex, 1, splitKey1, splitKey2) then originalQuery.unsubscribe()",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/browser/sync/paginated_query_client.ts",
+      "line_range": "532-544",
+      "quote": "paginatedQuery.pageKeys.splice(pageIndex, 1, splitKey1, splitKey2); paginatedQuery.ongoingSplits.delete(pageKey); originalQuery.unsubscribe();",
+      "document_line": "19"
+    },
+    {
+      "claim_id": "2.3",
+      "description": "SplitRequired = hard limit hit, page possibly incomplete; SplitRecommended = soft 3/4 rows/bytes or oversize",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/crates/isolate/src/environment/udf/async_syscall.rs",
+      "line_range": "1685-1804",
+      "quote": "page_status = Some(QueryPageStatus::SplitRequired); ... if page_status.is_none() && (query.is_approaching_data_limit() || page.len() > SOFT_MAX_PAGE_LEN) { page_status = Some(QueryPageStatus::SplitRecommended); }",
+      "document_line": "20-21"
+    },
+    {
+      "claim_id": "3.1",
+      "description": "Backend split construction: Reactive-only split_cursor, fingerprint-gated end_cursor validation",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/crates/database/src/query/mod.rs",
+      "line_range": "332-386",
+      "quote": "let should_compute_split_cursor = match &pagination_options { PaginationOptions::ReactivePagination { .. } => true, ... anyhow::ensure!(Some(&end_cursor.query_fingerprint) == fingerprint.as_ref(), invalid_cursor());",
+      "document_line": "24-26"
+    },
+    {
+      "claim_id": "3.2",
+      "description": "cursor-bounded unfetched interval: split(cursor) to bound interval; middle split_cursor = intermediate[len/2]",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/crates/database/src/query/index_range.rs",
+      "line_range": "65-126, 318-324",
+      "quote": "cursor_interval defines bounded range; unfetched_interval = intersection of interval with cursor_interval; intermediate_cursors.get(intermediate_cursors.len() / 2)",
+      "document_line": "26-27"
+    },
+    {
+      "claim_id": "4.1",
+      "description": "onBaseTransition fans changed tokens into one ExtendedTransition with paginatedQueries",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/browser/sync/paginated_query_client.ts",
+      "line_range": "244-273",
+      "quote": "const changed = this.queriesContainingTokens(changedBaseTokens); ... paginatedQueries = changed.map((token) => ({ token, modification: { kind: \"Updated\" as const, result: this.localQueryResultByToken(token), }, }));",
+      "document_line": "28-30"
+    },
+    {
+      "claim_id": "5.1",
+      "description": "One external resource per page; each page update is reconciled via native_eq with one tick per writeInCollection",
+      "status": "verified",
+      "file_path": "/Users/bill/src/convex-backend/npm-packages/convex/src/browser/sync/paginated_query_client.ts",
+      "line_range": "158-241",
+      "quote": "localQueryResultByToken returns PaginatedQueryResult combining all active page results; each page managed separately; transitions fire with full reconciliation",
+      "document_line": "35-36"
+    }
+  ],
+  "adequacy_assessment": {
+    "readme_purpose": "Direction 1b: paginated reactive source: pagination mechanics, per-page Skip regions with atomic split-swap options, disjointness/ordering, metrics without backend changes.",
+    "coverage": {
+      "pagination_mechanics": "comprehensive - Section 1 covers contract (page, isDone, continueCursor, splitCursor, pageStatus), numItems as initial target, cursor semantics, and paginate() lifecycle",
+      "per_page_skip_regions": "adequate - Section 2 covers split lifecycle (ongoingSplits, completion via splice+unsubscribe), split conditions (SplitRequired/SplitRecommended)",
+      "atomic_split_swap": "comprehensive - Section 2 details split trigger conditions, completion logic with both-pages-ready guard, atomic splice operation, old-page unsubscribe",
+      "disjointness_ordering": "partial - Section 3 discusses Skip mapper for enforcing disjointness (singleton _id assertion, violation quarantine), ordering via composite key, but concrete Skip-side implementation deferred to planning",
+      "metrics_without_backend_changes": "comprehensive - Section 4 enumerates harness-side metrics (received results, pageKeys.length, changed tokens, splits/rebuilds, delivered bytes, timers) without backend-specific measurements"
+    },
+    "missing_elements": "Concrete disjointness mapper spec deferred to planning; per-page metrics aggregation pattern (reducer definition) left as design decision.",
+    "verdict": "pass"
+  },
+  "frontmatter_status": "missing",
+  "notes": "Document lacks YAML frontmatter. Needs: title, type: research-note, status: active, direction: 1b, date: 2026-09-11. All verified claims are accurate and map precisely to implementation. Split lifecycle, fingerprint gating, cursor bounding, and metrics enumeration all match source code. Disjointness/ordering constraints are deferred appropriately as Skip-side mapper design decisions per README. Document adequately grounds the 1b spike plan requirements."
+}
