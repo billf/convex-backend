@@ -217,3 +217,4 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 - `npm-packages/convex/src/react/use_paginated_query.ts` — the existing keep-old-until-replacements-load split behavior.
 - `crates/database/src/query/mod.rs` — cursor-bounded index ranges, query fingerprints, and reactive split-cursor construction.
 - `crates/isolate/src/environment/udf/async_syscall.rs` — actual page growth and `SplitRecommended` or `SplitRequired` selection.
+- `research/skip-convex-integration/research-1b-page-topology.md` — pagination mechanics, per-page Skip regions, atomic split-swap, disjointness/ordering, metrics foundations for 1b.
