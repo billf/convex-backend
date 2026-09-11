@@ -118,6 +118,22 @@ The concrete methodology behind this (from `research-skip-source-state.md`): a p
 
 ---
 
+## Known Constraints and Unknowns
+
+**No public multi-collection atomic write in Skip's TypeScript API.** All four independent spikes hit the same structural gap as an open planning question: Skip Runtime's current public API does not expose one atomic write spanning several external collections, only single-collection updates. This surfaces in every plan's Dependencies/Assumptions and Outstanding Questions sections (1a, 1b, 1c's requirements framing, and Direction 2), each proposing its own workaround (a single combined input domain, or a narrowly scoped multi-collection atomic-write capability) without a shared resolution. This is one structural gap in the shared vehicle, not four separate minor concerns.
+
+**Shared fault-injection surface.** `research-skip-source-state.md` defines a fault list all four plans independently instantiate subsets of: disconnect-before-checkpoint, cursor expiry/invalid/ahead, table replacement, oversized transactions, `QueryFailed` vs. `QueryRemoved`, slow-consumer/backlog exhaustion, mid-CDC restart, and page-split + invalid-cursor reset.
+
+**Per-plan outstanding questions** (each plan's own Outstanding Questions section is the source of truth — these are signposts, not the full text):
+- **1a** (~3 questions): which cross-table aggregate the demo computes; the demo's auth mode; single-domain vs. scoped-atomic-update choice for R2.
+- **1b** (~7 questions): page-size/dataset matrix; harness surface reuse; atomic multi-region representation for R4; internal metrics; deterministic failure injection; author-ID display choice; proceed/reject/narrow criteria.
+- **1c** (~10 questions): route/event-envelope naming; per-page vs. periodic-status emission; progress visibility without forcing writes; a narrow wait API; buffering/cancellation limits; combined-input representation; watermark/tombstone idempotency; deterministic fault injection; scan-vs-emit metrics; N/K/F value selection.
+- **Direction 2** (~8 questions): committed-change hook choice; index-metadata seam; schema representation for `v.id` joins; process lifetime; combined-domain vs. scoped-atomic choice for R2; rebuild/checkpoint/replay strategy for R6; logical-work counters; eager-vs-lazy base-view activation.
+
+**Taxonomy caveat.** The tool/model attribution in General Approach above is a git-history reconstruction, not a documented fact — no manifest or frontmatter convention confirms which combination produced which doc batch. It could be upgraded from inferred to documented if such a convention is added later.
+
+---
+
 ## Next Steps
 
 For another agent extending this overview:
