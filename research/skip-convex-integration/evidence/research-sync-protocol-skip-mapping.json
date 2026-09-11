@@ -67,11 +67,11 @@
     }
   ],
   "adequacy_assessment": {
-    "stated_purpose": "sub-direction 1a wire→Skip mapping (lifecycle, versions, chunks, bundle-preserving no-diff writes, PoC vehicle, correctness bar)",
+    "stated_purpose": "sub-direction 1a wire\u2192Skip mapping (lifecycle, versions, chunks, bundle-preserving no-diff writes, PoC vehicle, correctness bar)",
     "coverage": {
       "wire_mapping": {
         "status": "pass",
-        "detail": "Section 2 provides comprehensive wire→Skip mapping table covering ModifyQuerySet→subscribe/unsubscribe, QueryUpdated→update callbacks, atomicity, failure handling, row identity, and auth"
+        "detail": "Section 2 provides comprehensive wire\u2192Skip mapping table covering ModifyQuerySet\u2192subscribe/unsubscribe, QueryUpdated\u2192update callbacks, atomicity, failure handling, row identity, and auth"
       },
       "lifecycle": {
         "status": "pass",
@@ -91,7 +91,7 @@
       },
       "poc_vehicle": {
         "status": "pass",
-        "detail": "Section 4 provides concrete PoC: chatrooms × tutorial with schema (messages, users), queries (getMessages), and reducer-based aggregate (per-user message count)"
+        "detail": "Section 4 provides concrete PoC: chatrooms \u00d7 tutorial with schema (messages, users), queries (getMessages), and reducer-based aggregate (per-user message count)"
       },
       "correctness_bar": {
         "status": "pass",
@@ -114,5 +114,11 @@
     "notes": "Document is internally consistent; Section 2 mapping table accurately reflects wire facts from Section 1; PoC vehicle in Section 4 correctly applies mapping rules; no contradictions detected"
   },
   "overall_verdict": "pass",
-  "summary": "All 8 verified claims about concrete wire protocol facts, file paths, and line numbers are accurate. Document comprehensively covers all required elements of 1a scope: wire→Skip mapping (detailed table), lifecycle (liveness, backoff, demand-driven), versions (StateVersion semantics), chunks (TransitionChunk reassembly), bundle-preserving writes (no-diff rule, atomicity), PoC vehicle (chatroom tutorial), and correctness bar (acceptance criteria). Frontmatter is missing and should be added."
+  "summary": "All 8 verified claims about concrete wire protocol facts, file paths, and line numbers are accurate. Document comprehensively covers all required elements of 1a scope: wire\u2192Skip mapping (detailed table), lifecycle (liveness, backoff, demand-driven), versions (StateVersion semantics), chunks (TransitionChunk reassembly), bundle-preserving writes (no-diff rule, atomicity), PoC vehicle (chatroom tutorial), and correctness bar (acceptance criteria). Frontmatter is missing and should be added.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

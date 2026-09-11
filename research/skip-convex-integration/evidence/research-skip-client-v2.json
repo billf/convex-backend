@@ -54,7 +54,7 @@
       "evidence": "Function at line 109 checks typeof bigint (line 110), ArrayBuffer/ArrayBuffer.isView (line 115)"
     },
     {
-      "claim": "Full-snapshot onUpdate → one callbacks.update batch per re-evaluation",
+      "claim": "Full-snapshot onUpdate \u2192 one callbacks.update batch per re-evaluation",
       "line_ref": "18",
       "source": "skipruntime-ts/adapters/convex/src/index.ts:307-332",
       "status": "PASS",
@@ -105,14 +105,18 @@
     }
   ],
   "adequacy_assessment": {
-    "readme_purpose": "Track 1 construction spec resolving externals-adapter gaps (bounded-query contract, scope/auth, failure matrix). Transport recommendation superseded for 1a by mapping doc — contract/failure sections still hold.",
+    "readme_purpose": "Track 1 construction spec resolving externals-adapter gaps (bounded-query contract, scope/auth, failure matrix). Transport recommendation superseded for 1a by mapping doc \u2014 contract/failure sections still hold.",
     "contract_section_adequate": true,
-    "reason": "Contract section (lines 49-55) remains minimal and sufficient despite transport supersession. Key requirements (getKey non-empty/stable/unique, JSON assertion, scope tenant injection, partition-by-query) are still valid and referenced in 1a sync-protocol mapping.",
+    "reason": "Auth and scope design (frozen ConvexServiceScope with tenantId, per-adapter scope injection via argsFromParams) is independent of transport and remains valid for both onUpdate and sync-protocol variants.",
     "failure_matrix_adequate": true,
-    "reason": "All failure modes (bootstrap reject, mid-stream reject, max-attempts inert, shutdown drain, restart-initial) are verified in adapter tests and remain applicable regardless of transport choice.",
-    "auth_scope_adequate": true,
-    "reason": "Auth and scope design (frozen ConvexServiceScope with tenantId, per-adapter scope injection via argsFromParams) is independent of transport and remains valid for both onUpdate and sync-protocol variants."
+    "auth_scope_adequate": true
   },
   "verdict": "PASS",
-  "recommendation": "Add YAML frontmatter. Document is adequate for its stated purpose. Contract/failure/auth sections remain grounded despite transport supersession."
+  "recommendation": "Add YAML frontmatter. Document is adequate for its stated purpose. Contract/failure/auth sections remain grounded despite transport supersession.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

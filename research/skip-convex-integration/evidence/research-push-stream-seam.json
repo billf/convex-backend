@@ -57,7 +57,9 @@
     "date": "2026-09-11",
     "author": "Haiku",
     "status": "research",
-    "depends_on": ["research-data-sync-source.md"]
+    "depends_on": [
+      "research-data-sync-source.md"
+    ]
   },
   "adequacy_analysis": {
     "readable_timestamp_wait": "ADDRESSED - Section 1 details wait_for_higher_ts() derivative, check-then-register pattern, snapshot manager coordination, and lost-wake protection via atomic lock semantics",
@@ -78,5 +80,11 @@
       "Route name, stream-version field, and status-event cadence (noted at line 57-58)"
     ]
   },
-  "evidence_summary": "All 5 spot-checked claims verified against source code. Document provides detailed design of push-stream wait/frame/checkpoint seam grounded in concrete code patterns from snapshot_manager, committer, data_sync, and logs. Frontmatter added per pattern. Adequate readiness for design planning; open questions are scoped to dependent planning decisions, not architectural gaps."
+  "evidence_summary": "All 5 spot-checked claims verified against source code. Document provides detailed design of push-stream wait/frame/checkpoint seam grounded in concrete code patterns from snapshot_manager, committer, data_sync, and logs. Frontmatter added per pattern. Adequate readiness for design planning; open questions are scoped to dependent planning decisions, not architectural gaps.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }
