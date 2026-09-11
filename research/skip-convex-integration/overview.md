@@ -64,7 +64,21 @@ Skip runs inside convex-backend and maintains one pre-registered cached view (th
 
 ## General Approach
 
-**Research:** This directory holds 20 research docs gathered across multiple tool/model combinations (Opencode+Muse, Claude+{Sonnet,Haiku}, Codex+{terra,luna,sol}), validated in Phase 1 to confirm their adequacy. Phase 1 results: 14 docs PASS, 6 PARTIAL (technical details, some citations to fix). These research docs ground the architectural choices and feasibility assumptions in each spike.
+**Research:** This directory holds 20 research docs, each backed by an evidence dossier in `evidence/`, validated in a Phase 1 adequacy pass recorded in `gists-consolidated.json`. The six tool/model combinations named informally elsewhere in this project's history (Opencode+Muse, Claude+{Sonnet,Haiku}, Codex+{terra,luna,sol}) are an informal label, not a documented fact — git history shows 5 commits that each plausibly batch-added a group of docs, but no manifest or frontmatter field confirms which combination(s) produced which batch, and a single batch may reflect more than one combination. Treat the taxonomy as informally named and unverified (see Known Constraints and Unknowns below).
+
+### Phase 1 validation results
+
+Phase 1 validated all 20 docs: **12 PASS / 8 PARTIAL / 0 FAIL**. No research doc was found inadequate outright — every PARTIAL finding is a refinement (a citation to fix, a scope note to correct), not a reason the doc can't be relied on for its stated purpose.
+
+The 8 PARTIAL docs and why:
+- `research-convex-reactivity.md` — citation error (`reads.rs:233-239` claimed vs. actual `reads.rs:187-191`); coverage otherwise adequate.
+- `research-convex-query-composition.md` — file reference inaccurate (`queryStreamNext` is in `async_syscall.rs`, not `syscall.rs`); the V8/isolate section is thinner than the query-composition section.
+- `research-skip-externals-adapter.md` — references removed `convex_reactive`/`convex_tanstack` examples, undercutting its "detailed teardown" framing.
+- `research-spike-comparison.md` — the N/K/F framework itself is sound, but it has zero citations from the four target spike plans and lacks explicit per-spike mappings (see Measurement Framework below).
+- `research-skip-source-state.md` — cites `ServiceInstance.update` where the code shows `CollectionWriter.update`; its frontmatter claims all-four-spikes scope but no spike plan currently cites it.
+- `research-poc-vehicle-and-harness.md` — harness design is underspecified for implementation planning, its metrics framework is incomplete, and its proof example is missing tables Direction 2's R7 requires; only Direction 2 actually cites it despite a "shared" framing.
+- `research-native-operator-spec.md` — claims `MAX_QUERY_OPERATORS` as 22 vs. the actual 256; lacks incremental-maintenance detail for R3; doesn't address Direction 2's R12-R16.
+- `research-build-slices.md` — a vague, undefined "three specs above" reference; outdated file-count claims; a historical doc superseded by the spike plans.
 
 **Planning and spikes:** A higher-capability planning pass (Codex, serialized small steps) produces the four spike plans in `docs/plans/`, each narrowly scoped to one technical question. Each spike owns its own metrics, correctness harness, and scaling evidence. The spikes do not entangle; you can evaluate them independently and decide later which directions warrant implementation.
 
