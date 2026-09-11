@@ -1,3 +1,11 @@
+---
+title: "Index + v.id metadata (Direction 2 R17-R22, R7)"
+date: 2026-09-11
+status: "research-validated"
+scope: "Skip/convex-backend integration Direction 2"
+audience: ["design-planning", "skip-integration-working-group"]
+---
+
 # Index + v.id metadata (Direction 2 R17-R22, R7)
 
 Which existing metadata drives Skip lookups and joins without coupling to

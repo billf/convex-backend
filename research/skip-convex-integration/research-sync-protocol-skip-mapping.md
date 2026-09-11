@@ -1,3 +1,11 @@
+---
+title: "Sync-protocol → Skip mapping"
+type: research-note
+status: active
+direction: 1a
+date: 2026-09-11
+---
+
 # Sync-protocol → Skip mapping (sub-direction 1a)
 
 Thinking log: 1a mandates a Skip client speaking the real `/api/sync`

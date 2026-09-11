@@ -1,3 +1,11 @@
+---
+title: Skip Externals/Resources and Convex Adapter Research
+type: research-note
+status: active
+direction: foundation
+date: 2026-09-11
+---
+
 # Skip Externals/Resources and Convex Adapter Research
 
 ## Part A: Skip Externals/Resources and skipruntime-ts

@@ -1,3 +1,11 @@
+---
+title: Convex Query Composition Research
+type: research-note
+status: active
+direction: foundation
+date: 2026-09-11
+---
+
 # Convex Query Composition Research
 
 ## Executive Summary
