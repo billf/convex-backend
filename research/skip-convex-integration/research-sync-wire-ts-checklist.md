@@ -1,3 +1,11 @@
+---
+title: Sync wire TS checklist (R1/R2/R5)
+type: research-note
+status: active
+direction: 1a
+date: 2026-09-11
+---
+
 # Sync wire TS checklist (R1/R2/R5)
 
 What an in-process TypeScript client must implement to speak `/api/sync`
