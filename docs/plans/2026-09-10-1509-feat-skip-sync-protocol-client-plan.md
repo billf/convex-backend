@@ -47,6 +47,10 @@ convex-backend's reactivity is coarse: an invalidated query is run again and the
 - R1. The Skip sync client implements the read-only `/api/sync` subset required for the proof without depending on the JS `ConvexClient` or changing convex-backend: connect, one pinned authentication mode, query-set changes, transitions, liveness, fatal errors, and reconnect with a fresh query snapshot.
 - R2. Each fully reassembled `Transition` is applied to Skip as one atomic update spanning every included query modification, not as independent per-query writes.
 
+**Removal and transition integrity**
+- R9. When the server acknowledges an unsubscribe with `QueryRemoved`, the client removes that query's rows inside the enclosing R2 atomic update; it does not preserve them as last-good state.
+- R10. A chunk-eligible client reassembles and validates every `TransitionChunk` sequence before performing the single R2 update; individual chunks are never visible to Skip.
+
 **Reconciliation**
 - R3. The client presents each updated query's complete current row set to Skip with snapshot semantics, and Skip derives row additions, updates, and removals through its `isInit: true` reconciliation path rather than a bridge-computed diff.
 
@@ -54,9 +58,7 @@ convex-backend's reactivity is coarse: an invalidated query is run again and the
 - R4. At least one derived value is computed inside Skip via its reducer mechanism from data spanning more than one Convex query/table, so the demo evidences genuine incremental computation rather than a 1:1 relay of Convex data.
 
 **Failure handling**
-- R5. When a subscribed query enters a failed state, its previously-derived Skip view is retained (frozen at last-good) rather than cleared, and the demo surfaces that the value may be stale.
-- R9. When the server acknowledges an unsubscribe with `QueryRemoved`, the client removes that query's rows inside the enclosing R2 atomic update; it does not preserve them as last-good state.
-- R10. A chunk-eligible client reassembles and validates every `TransitionChunk` sequence before performing the single R2 update; individual chunks are never visible to Skip.
+- R5. When a subscribed query enters a failed state, its previously-derived Skip view is retained (frozen at last-good) rather than cleared, and the demo surfaces that the value may be stale. If the query has never previously succeeded, the client instead shows an explicit not-yet-loaded state, distinct from both a frozen stale value and a removed query; it never renders as an empty frozen row set.
 
 **Acceptance bar**
 - R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived aggregate matches an independent Convex reader across bootstrap, a multi-table update, query failure and recovery, unsubscribe, and reconnect with a fresh snapshot. No formal latency or resource-overhead comparison is required.
@@ -130,6 +132,21 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
   - **Given:** The demo has received a correct aggregate and then loses its WebSocket.
   - **When:** It reconnects, re-adds its live queries, and receives fresh full results.
   - **Then:** Skip reconciles to the fresh synchronized state without a bridge-side diff or stale rows from the prior connection.
+- AE6. Bootstrap checkpoint
+  - **Covers:** R1, R3, R6.
+  - **Given:** A fresh sync connection to a convex-backend deployment with existing data in the demo's subscribed tables.
+  - **When:** The client connects, establishes its query set, and receives the initial full result for each query.
+  - **Then:** Before any subsequent write, the Skip-derived aggregate matches an independent Convex reader over that initial data.
+- AE7. First-attempt failure
+  - **Covers:** R5.
+  - **Given:** A subscribed query has never previously produced a successful result.
+  - **When:** That query enters a failed state on its first attempt.
+  - **Then:** The client shows an explicit not-yet-loaded state, distinct from a frozen stale value (AE2) and from a removed query (AE4).
+- AE8. Row removal on a live query
+  - **Covers:** R2, R4.
+  - **Given:** A chatroom demo with a per-room message count computed via Skip's reducer, already showing a nonzero count for a room.
+  - **When:** A Convex mutation deletes one of that room's messages while the query remains subscribed and live.
+  - **Then:** The Skip-derived count decrements correctly, verifying the reducer's remove path independent of unsubscribe (AE4) or failure freezing (AE2).
 
 ### Success Criteria
 
