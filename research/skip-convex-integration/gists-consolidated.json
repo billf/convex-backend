@@ -121,7 +121,7 @@
     {
       "doc": "research-index-id-metadata.md",
       "adequacy_verdict": "pass",
-      "reason": "All spot-checked assertions (30+ citations) are accurate. Stable vs internal split is clearly delineated; lifecycle validation covers index state transitions (Backfilling→Backfilled→Enabled); v.id joins explain value-check-only validation, no-fetch enforcement, and dangling-reference semantics. Adequately grounds Direction 2 requirements R17-R22.",
+      "reason": "All spot-checked assertions (30+ citations) are accurate. Stable vs internal split is clearly delineated; lifecycle validation covers index state transitions (Backfilling\u2192Backfilled\u2192Enabled); v.id joins explain value-check-only validation, no-fetch enforcement, and dangling-reference semantics. Adequately grounds Direction 2 requirements R17-R22.",
       "direction": "2",
       "readme_edits": null
     },
@@ -164,7 +164,26 @@
   "summary": {
     "phase_1_results": "All 20 docs validated in Phase 1 (13 agents) + backfill (7 agents); 12 PASS, 8 PARTIAL, 0 FAIL",
     "coverage_by_direction": "foundation (2 partial), 1a (3 pass), 1b (1 pass), 1c (2 pass/partial), cross-cutting (3 partial), Direction 2 (4 pass), historical (1 partial)",
-    "attention_needed": "8 PARTIAL docs: MAX_QUERY_OPERATORS=22→256 inaccuracy, harness sketchy/metrics incomplete/proof incomplete, 'three specs above' vague, ServiceInstance.update inaccuracy, not-cited-despite-claim docs, README mislabeling",
+    "attention_needed": "8 PARTIAL docs: MAX_QUERY_OPERATORS=22\u2192256 inaccuracy, harness sketchy/metrics incomplete/proof incomplete, 'three specs above' vague, ServiceInstance.update inaccuracy, not-cited-despite-claim docs, README mislabeling",
     "evidence_dossiers": "20 evidence dossier files written and consolidated at research/skip-convex-integration/evidence/"
+  },
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only; full report in ../xverif-report.md",
+    "method": "exhaustive citation resolution (~230 pins) + quote diff + cross-doc matrix + traceability + archeology on moves",
+    "fixed_before_pass": [
+      "reads.rs pin",
+      "queryStreamNext dispatch",
+      "crates/ prefixes",
+      "per-spike mappings",
+      "poc-vehicle direction",
+      "MAX_QUERY_OPERATORS=256"
+    ],
+    "open_findings": [
+      "mapping QueryFailed row contradicts plan R5",
+      "bare-path pins never-accurate (index_registry, bootstrap_model)",
+      "paraphrase-as-quote pattern",
+      "plans-side citation gaps (mapping, index-metadata, operator-spec, comparison, source-state)"
+    ]
   }
 }

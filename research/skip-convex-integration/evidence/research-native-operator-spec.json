@@ -7,7 +7,14 @@
   "readme_edits": null,
   "validation_details": {
     "stated_purpose": "composable `QueryOperator::Skip` touch list and wire example",
-    "direction_2_requirements_cited": ["R3", "R12", "R13", "R14", "R15", "R16"],
+    "direction_2_requirements_cited": [
+      "R3",
+      "R12",
+      "R13",
+      "R14",
+      "R15",
+      "R16"
+    ],
     "claims_verified": [
       {
         "claim": "QueryOperator union should extend with skip variant (npm-packages/convex/src/server/impl/query_impl.ts:24)",
@@ -116,7 +123,10 @@
       "correctness_verification": {
         "coverage": "none",
         "detail": "No discussion of correctness checking, testing strategy, or result validation",
-        "requirements": ["R13", "R14"]
+        "requirements": [
+          "R13",
+          "R14"
+        ]
       },
       "scaling_characterization": {
         "coverage": "none",
@@ -140,5 +150,11 @@
       "Memory/CPU budgeting for materialized state"
     ]
   },
-  "footnote": "Document provides a minimal spec for composable operator interface (stated purpose). However, Direction 2 plan relies on it for R3 (incremental maintenance) and R12-R16 (metrics, correctness, scaling, regression), none of which receive substantive coverage beyond the operator interface skeleton. For the narrow touch-list purpose, it is adequate with one factual correction needed (MAX_QUERY_OPERATORS). For Direction 2's full planning context, it is incomplete. Future work should expand this spec with incremental maintenance semantics, metrics design, correctness framework, and fallback strategy."
+  "footnote": "Document provides a minimal spec for composable operator interface (stated purpose). However, Direction 2 plan relies on it for R3 (incremental maintenance) and R12-R16 (metrics, correctness, scaling, regression), none of which receive substantive coverage beyond the operator interface skeleton. For the narrow touch-list purpose, it is adequate with one factual correction needed (MAX_QUERY_OPERATORS). For Direction 2's full planning context, it is incomplete. Future work should expand this spec with incremental maintenance semantics, metrics design, correctness framework, and fallback strategy.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }
