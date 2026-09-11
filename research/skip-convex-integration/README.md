@@ -86,6 +86,10 @@ actually affects. This gap is the central motivation for the integration.
   closes the four 1a review questions (QueryRemoved delete rule,
   chunk eligibility + reassemble-then-write, raw-client cost,
   R6 limits).
+- [`research-1b-page-topology.md`](research-1b-page-topology.md) —
+  paginated reactive source: pagination mechanics, per-page Skip
+  regions with atomic split-swap options, disjointness/ordering,
+  metrics without backend changes.
 
 ## Status
 
