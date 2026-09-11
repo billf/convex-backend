@@ -1,12 +1,9 @@
 ---
 title: Push-stream seam
-direction: "1c/1d"
-requirements: "R3/R4/R5/R8/R9/R10/R11"
+type: research-note
+status: active
+direction: 1c
 date: 2026-09-11
-author: Haiku
-status: research
-depends_on:
-  - research-data-sync-source.md
 ---
 
 # Push-stream seam (Direction 1c/1d R3-R5)

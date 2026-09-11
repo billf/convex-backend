@@ -1,13 +1,9 @@
 ---
-title: "Skip atomic write (R2/R3/R4)"
-author: bill
-direction: "Direction 1: Skip as reactive client"
-scope: "1a-direct-sync-protocol-mapping"
-key_topics:
-  - "isInit/native_eq reconciliation"
-  - "per-query fork/merge finding"
-  - "missing batch primitive"
-  - "no-diff rule"
+title: Skip atomic write
+type: research-note
+status: active
+direction: cross-cutting
+date: 2026-09-11
   - "reducer bar"
 ---
 

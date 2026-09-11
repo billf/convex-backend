@@ -1,13 +1,10 @@
 ---
 title: Delta seam ranking for Skip backend integration
-description: Ranked reactivity seams with OCC/persistence exclusion and QueryPatched sketch
+type: research-note
+status: active
 direction: 2
-status: grounded
-scope: research
-type: architecture
 date: 2026-09-11
-verified_date: 2026-09-11
-verified_against_codebase: convex-backend crates/database/src, crates/sync/src, crates/local_backend/src
+---
 ---
 
 # Delta seam ranking (reactivity plug-in order)
