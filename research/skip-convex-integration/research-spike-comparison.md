@@ -57,6 +57,29 @@ unrelated-log scan work are counted, never presented as delivery.
 | 1c | monolithic snapshot `O(N)` | same N/K/F point; report `O(N)` bootstrap/retained + scan + readable-lag |
 | Dir 2 | strongest idiomatic Convex (indexes, exact counts, counters, denormalization) | same feed semantics at same commit version; report fallback rate + lifecycle/index-gate costs |
 
+## Per-spike metric mapping
+
+Which catalog entries each spike's harness must record (plan requirement
+refs in parentheses):
+
+- 1a (correctness-only): settled-checkpoint equality (R6); torn-intermediate
+  absence via reducer correctness; protocol footprint + untested-concerns
+  log (R11). No counters/timers required — unordered here by decision.
+- 1b (R12): received page results; live + changed pages; query-set
+  Add/Remove; rows + bytes delivered; Skip keys reconciled; dependent nodes
+  updated; reducer add/remove; splits + rebuilds (`id` changes); end-to-end
+  publication timers. Fail time-only or all-rows-republished runs (R14).
+- 1c (R17/R18): native wake-ups by cause; empty vs non-empty pages;
+  snapshot vs CDC pages; document-log rows examined (if available);
+  revisions + bytes emitted; transactions; truncations; reconnects;
+  replayed/ignored revisions; cursor resets; Skip keys added/changed/
+  removed; nodes updated; reducer add/remove; publications; stale
+  intervals. Full timer chain with logical-vs-wall separation.
+- Direction 2 (R4/R12): logical work per maintained stage; accelerated vs
+  fallback counts, fallback rate + reason; view progress vs required
+  version; rebuild state; mismatches. Version-gated freshness timers
+  (R9/R10).
+
 ## Comparator normalization
 
 Anchor on `Transition.endVersion.ts` / DataSync `UpToDate(ts)` / required

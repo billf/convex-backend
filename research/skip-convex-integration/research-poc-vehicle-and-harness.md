@@ -1,7 +1,7 @@
 ---
 topic: proof-vehicle
 phase: research
-direction: Direction 2
+direction: shared
 validates_requirements:
   - R2
   - R3
@@ -10,8 +10,15 @@ validates_requirements:
   - R7
   - R8
 related_plans:
+  - 2026-09-10-1509-feat-skip-sync-protocol-client-plan.md
+  - 2026-09-10-1843-feat-skip-paginated-reactive-source-spike-plan.md
+  - 2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md
   - 2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md
-citation_note: README labels as "Shared Direction 1 inputs" but only Direction 2 spike plan cites it
+serves:
+  - 1a: A1/A2 aggregates, keying/encoding rules, R6 parallel-reader harness
+  - 1b: take(N) placement, order-key design, key stability rules
+  - 1c: messages/users source tables, Unknown fallback, harness shape
+  - Direction 2: all sections (proof queries, aggregates, harness)
 ---
 
 # PoC vehicle and harness (R4/R6/R7/R8)
