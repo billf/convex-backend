@@ -1,3 +1,19 @@
+---
+title: Backend committed-change hook comparison
+description: Analysis of backend seams for Skip cache integration via change hook
+status: validated
+date: 2026-09-11
+direction: 2
+issues: R1 R2 R6
+recommendation: LogReader tail with ts-grouped atomic apply
+validation_scope: |
+  - Code path verification (Committer::go sole writer, ts monotonicity)
+  - Retention parameters (30s/300s/50MB defaults)
+  - Subscription tail pattern integration
+  - IndexKeyWrites structure and ordering guarantees
+verified_against_codebase: convex-backend crates/database/src
+---
+
 # Backend committed-change hook (Direction 2 R1/R2/R6)
 
 Which internal seam feeds a backend-owned Skip cache with ordered,

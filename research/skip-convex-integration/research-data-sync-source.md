@@ -1,8 +1,16 @@
+---
+title: Data Sync source contract (Direction 1c/1d)
+direction: 1c/1d
+scope: research
+status: grounded
+verified_date: 2026-09-11
+---
+
 # Data Sync source contract (Direction 1c/1d)
 
 What the existing `/api/v1/data/sync` API guarantees, so the push stream
 reuses its contract instead of reimplementing snapshot/recovery. All paths
-under `/Users/bill/src/convex-backend` unless noted.
+relative to repo root (`crates/...` for workspace crates) unless noted.
 
 ## Snapshot vs CDC
 

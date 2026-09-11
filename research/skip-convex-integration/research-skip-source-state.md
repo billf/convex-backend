@@ -1,3 +1,10 @@
+---
+title: "Skip source-state design"
+purpose: "Specification for Convex data in Skip across all integration spikes"
+coverage: ["combined input shapes", "revision watermarks", "GC", "tombstones", "ordering", "restart-rebuild", "fault injection"]
+spikes: ["1a", "1b", "1c", "Direction 2"]
+---
+
 # Skip source-state design (all spikes)
 
 How Convex source data lives in Skip: combined input shapes, revision

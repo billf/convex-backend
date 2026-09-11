@@ -1,3 +1,11 @@
+---
+title: Skip / convex-backend integration research
+type: research-index
+status: active
+direction: foundation
+date: 2026-09-11
+---
+
 # Skip / convex-backend integration research
 
 Grounding material for a future design plan exploring integration between
@@ -40,11 +48,13 @@ actually affects. This gap is the central motivation for the integration.
   (read-sets, `SubscriptionManager`, OCC validation), and candidate plug-in
   points for an incremental engine (index backfill, search index
   maintenance, subscription invalidation, OCC validation).
+  **Note:** Citation error — claimed reads.rs:233-239 location does not match actual location (reads.rs:187-191).
 - [`research-convex-query-composition.md`](research-convex-query-composition.md) —
   how queries/UDFs are defined and executed today (`QueryOperator`,
   `QueryStream`, the V8/isolate UDF boundary), and where a Skip-authored
   composable primitive could plug into the query pipeline or UDF API
   surface.
+  **Note:** File reference inaccurate — queryStreamNext exists in async_syscall.rs, not syscall.rs.
 - [`research-skip-engine.md`](research-skip-engine.md) — Skip's core
   incremental engine: the language/runtime split, reactive collections,
   mappers/reducers, and a concrete comparison of what this buys over
@@ -55,6 +65,7 @@ actually affects. This gap is the central motivation for the integration.
   `billf/convex/adapter` branch (snapshot-based polling with reactive
   diffing — its concrete limitations set the bar for "a better
   integration").
+  **Note:** References removed convex_reactive/convex_tanstack examples, undermining claimed "detailed teardown".
 
 ### Direction 1 — Skip as reactive client
 
@@ -85,6 +96,7 @@ Sub-direction 1b (paginated reactive source, no backend changes):
 - [`research-spike-comparison.md`](research-spike-comparison.md) —
   unified N/K/F axes, shared counter/timer catalogs, per-spike
   baselines, comparator normalization, metric sources.
+  **Note:** Framework provided but lacks per-spike metric mappings; zero citations by target spike plans despite intent to unify.
 - [`research-skip-source-state.md`](research-skip-source-state.md) —
   combined Skip input shape, revision watermarks + GC, tombstones,
   ordering, restart-rebuild, fault-injection list (all spikes).
@@ -95,16 +107,18 @@ Sub-direction 1c (Data Sync push source, modest backend change):
   existing Data Sync contract reused by the push stream (snapshot/CDC,
   revisions/tombstones/truncations, opaque cursors + retention,
   selection, status, soft page limits, authz).
+  **Note:** 8 path references missing crates/ prefix; need cleanup and standardization.
 - [`research-push-stream-seam.md`](research-push-stream-seam.md) —
   push-stream seam: readable-timestamp wait with lost-wake protection,
   bounded SSE framing with disconnect-propagating cancellation,
   cursor-after-apply checkpointing with revision-watermark idempotency.
 
-Shared Direction 1 inputs:
+Direction 2 inputs:
 
 - [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
   PoC queries, aggregates, keying/encoding rules, R6 harness sketch
   (R4/R6/R7/R8).
+  **Note:** Labeled as "Shared Direction 1 inputs" but uncited by 1a/1b/1c plans; only Direction 2 cites this doc.
 - [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
   `isInit`/`native_eq` reconciliation, per-query fork/merge finding,
   missing batch primitive, no-diff rule, reducer bar (R2/R3/R4).

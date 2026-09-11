@@ -1,3 +1,13 @@
+---
+title: Build Slices (Ordered, Testable)
+type: research
+date: 2026-09-10
+topic: skip-build-sequence
+artifact_contract: research-synthesis/v1
+status: historical
+scope: "Slice-discipline template predating the four spike plans in docs/plans/. Not current implementation scope."
+---
+
 # Build slices (ordered, testable)
 
 Synthesis only. Turns the "future work" sections of the four existing notes

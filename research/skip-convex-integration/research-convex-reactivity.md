@@ -1,3 +1,11 @@
+---
+title: Convex-Backend Reactivity and Triggers
+type: research-note
+status: active
+direction: foundation
+date: 2026-09-11
+---
+
 # Research: Convex-Backend Reactivity and Triggers
 
 ## Overview

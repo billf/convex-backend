@@ -109,24 +109,24 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 
 ### Acceptance Examples
 
-- AE1. **Covers:** R2, R4.
+- AE1. **Covers:** R2, R4, R6.
   - **Given:** A chatroom demo subscribed to per-table queries, with a per-room message count computed in Skip via its reducer mechanism.
   - **When:** A single Convex mutation inserts a message and updates the room's activity field in one transaction.
-  - **Then:** The Skip-derived count updates once, correctly; no intermediate render shows the message inserted without the count having incremented, or vice versa.
-- AE2. **Covers:** R5.
+  - **Then:** The Skip-derived count updates once, correctly, and matches an independent Convex reader at that checkpoint; no intermediate render shows the message inserted without the count having incremented, or vice versa.
+- AE2. **Covers:** R5, R6.
   - **Given:** The demo is running and displaying a live per-room count.
   - **When:** The subscribed query underlying that count enters a failed state.
-  - **Then:** The displayed count remains at its last-good value and the UI indicates it may be stale, until the query recovers.
+  - **Then:** The displayed count remains at its last-good value and the UI indicates it may be stale, until the query recovers, at which point the count matches an independent Convex reader.
 - AE3. Chunked transition atomicity
   - **Covers:** R2, R10.
   - **Given:** A protocol fixture divides one valid transition into several ordered chunks.
   - **When:** The client receives all chunks.
   - **Then:** Skip observes exactly one complete update after reassembly and no partial update before it.
 - AE4. Removal is not failure
-  - **Covers:** R5, R9.
+  - **Covers:** R5, R6, R9.
   - **Given:** A live query contributes rows to the cross-table aggregate.
   - **When:** The client unsubscribes and the server returns `QueryRemoved`.
-  - **Then:** Those rows stop contributing within the enclosing transition, while `QueryFailed` still preserves last-good rows.
+  - **Then:** Those rows stop contributing within the enclosing transition, and the resulting aggregate matches an independent Convex reader at that checkpoint, while `QueryFailed` still preserves last-good rows.
 - AE5. Reconnect snapshot
   - **Covers:** R1, R3, R6.
   - **Given:** The demo has received a correct aggregate and then loses its WebSocket.
@@ -147,13 +147,23 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
   - **Given:** A chatroom demo with a per-room message count computed via Skip's reducer, already showing a nonzero count for a room.
   - **When:** A Convex mutation deletes one of that room's messages while the query remains subscribed and live.
   - **Then:** The Skip-derived count decrements correctly, verifying the reducer's remove path independent of unsubscribe (AE4) or failure freezing (AE2).
+- AE9. Liveness tolerance
+  - **Covers:** R1.
+  - **Given:** The demo is connected and displaying a correct aggregate with no pending writes.
+  - **When:** The server sends a liveness signal.
+  - **Then:** The client processes it without disrupting Skip state or the displayed aggregate.
+- AE10. Fatal error surfacing
+  - **Covers:** R1.
+  - **Given:** The demo is connected and displaying a correct aggregate.
+  - **When:** The server sends a `FatalError` message.
+  - **Then:** The demo shows a distinct, visible failure state that is neither silent, a crash, nor indistinguishable from R5's frozen-stale indicator.
 
 ### Success Criteria
 
 - Every R6 scenario produces the same aggregate as the independent Convex result at its controlled settled checkpoint.
 - The aggregate uses a Skip reducer with correct add and remove behavior; forwarding Convex snapshots without maintained Skip computation does not pass.
 - The protocol fixture suite proves that chunk boundaries and query removal cannot expose torn or orphaned Skip state.
-- The final report identifies the raw-client surface implemented by the proof and separately lists untested production concerns, including token refresh and expiry, concurrent sessions, mutation and action correlation, durable replay, and end-to-end transitions above the chunk threshold.
+- The final report identifies the raw-client surface implemented by the proof and separately lists untested production concerns, including rotating/refreshing user authentication tokens, concurrent sessions, mutation and action correlation, durable replay, and end-to-end transitions above the chunk threshold.
 - A passing proof supports a later generalization decision but does not make that decision by itself.
 
 ### Scope Boundaries
@@ -164,7 +174,7 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 - The simpler one-collection-per-query variant of this plan's approach (without the transaction-atomicity mechanism) — a legitimate lighter-weight alternative worth its own follow-up if the atomicity mechanism turns out to add more complexity than value in practice.
 - An out-of-process Rust client reusing convex-backend's existing Rust sync client, for a future publishable or language-agnostic version.
 - A quantified latency/resource-overhead comparison against the `billf/convex/adapter` branch.
-- Production sync-client behavior beyond the bounded read-only proof, including rotating user authentication, concurrent sessions, mutation and action request correlation, and durable replay.
+- Production sync-client behavior beyond the bounded read-only proof, including rotating/refreshing user authentication tokens, concurrent sessions, mutation and action request correlation, and durable replay.
 - End-to-end testing with transitions above the chunk threshold; the proof covers chunk reassembly with protocol fixtures.
 
 **Outside this product's identity**

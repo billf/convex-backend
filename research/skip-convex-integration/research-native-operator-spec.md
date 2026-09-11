@@ -1,3 +1,12 @@
+---
+title: Native Skip Operator Spec
+type: research-note
+status: active
+direction: 2
+date: 2026-09-11
+url: https://github.com/convex-dev/convex-backend/tree/main/research/skip-convex-integration/research-native-operator-spec.md
+---
+
 # Native Skip operator spec (Track 2 construction spec)
 
 Augments `research-convex-query-composition.md` §4 (Options A/B/C) and §6
