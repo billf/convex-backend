@@ -178,9 +178,12 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
   - **Then:** The application receives the native Convex result, while metrics count the fallback and identify its reason.
 - AE4. Scaling demonstration
   - **Covers:** R3, R4, R14, R15.
-  - **Given:** Equivalent datasets whose unrelated rooms grow while the changed room and its affected join fan-out stay fixed.
+  - **Given (unrelated-data axis):** Equivalent datasets whose unrelated rooms grow while the changed room and its affected join fan-out stay fixed.
   - **When:** The same one-row update is applied to each dataset.
   - **Then:** The measured Skip work follows the fixed affected neighborhood rather than the total unrelated data size, and the report compares that curve with the strongest applicable Convex-native design.
+  - **Given (affected-fan-out axis):** Equivalent datasets where the changed room's own membership and like counts grow while unrelated rooms and their data stay fixed.
+  - **When:** The same one-row update is applied to each dataset.
+  - **Then:** The measured Skip work follows the expected complexity terms for the growing affected fan-out itself, distinguishing genuine incremental maintenance from a reducer that recomputes over its whole group on every change.
 - AE5. Restart without stale publication
   - **Covers:** R6, R11-R13.
   - **Given:** The cache has served a correct view and then loses its process-local state.
