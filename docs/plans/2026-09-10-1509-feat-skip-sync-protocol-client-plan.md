@@ -217,3 +217,4 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 - `~/src/skip`, `skipruntime-ts/skiplang/core/src/Runtime.sk` and `skipruntime-ts/core/src/index.ts` — `isInit` reset semantics and the `ExternalService.update` wiring.
 - `~/src/skip`, `skipruntime-ts/adapters/convex/src/index.ts` on branch `billf/convex/adapter` — the baseline being improved on.
 - `npm-packages/convex/src/browser/sync/client.ts` — `BaseConvexClient` and `addOnTransitionHandler`, the lower-cost transition-grouping alternative.
+- `research/skip-convex-integration/research-sync-protocol-skip-mapping.md` — 1a wire→Skip mapping: lifecycle, versions, chunks, bundle-preserving writes, PoC vehicle, correctness bar.
