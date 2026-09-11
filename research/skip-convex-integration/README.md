@@ -33,6 +33,8 @@ actually affects. This gap is the central motivation for the integration.
 
 ## Documents
 
+### Foundation (read first)
+
 - [`research-convex-reactivity.md`](research-convex-reactivity.md) —
   convex-backend triggers, subscription/invalidation model
   (read-sets, `SubscriptionManager`, OCC validation), and candidate plug-in
@@ -53,46 +55,90 @@ actually affects. This gap is the central motivation for the integration.
   `billf/convex/adapter` branch (snapshot-based polling with reactive
   diffing — its concrete limitations set the bar for "a better
   integration").
-- [`research-skip-client-v2.md`](research-skip-client-v2.md) —
-  Track 1 construction spec resolving the externals-adapter gaps
-  (bounded-query contract, scope/auth, failure matrix).
-- [`research-delta-seam.md`](research-delta-seam.md) —
-  ranked reactivity seams with OCC/persistence exclusion and
-  `QueryPatched` sketch.
-- [`research-native-operator-spec.md`](research-native-operator-spec.md) —
-  Track 2 construction spec recommending composable
-  `QueryOperator::Skip` with touch list and wire example.
-- [`research-build-slices.md`](research-build-slices.md) —
-  ordered testable build slices with done-criteria.
+
+### Direction 1 — Skip as reactive client
+
+Sub-direction 1a (direct sync-protocol client, no backend changes):
+
 - [`research-sync-protocol-skip-mapping.md`](research-sync-protocol-skip-mapping.md) —
   sub-direction 1a wire→Skip mapping (lifecycle, versions, chunks,
   bundle-preserving no-diff writes, PoC vehicle, correctness bar).
 - [`research-sync-wire-ts-checklist.md`](research-sync-wire-ts-checklist.md) —
   per-message/field/lifecycle checklist for the in-process TS
   `/api/sync` client (R1/R2/R5) plus unknowns.
-- [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
-  `isInit`/`native_eq` reconciliation, per-query fork/merge finding,
-  missing batch primitive, no-diff rule, reducer bar (R2/R3/R4).
-- [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
-  PoC queries, aggregates, keying/encoding rules, R6 harness sketch
-  (R4/R6/R7/R8).
-- [`research-backend-change-hook.md`](research-backend-change-hook.md) —
-  committed-change hook comparison recommending `LogReader` tail with
-  ts-grouped atomic apply, seed/rebuild paths, retention budget.
-- [`research-index-id-metadata.md`](research-index-id-metadata.md) —
-  stable-vs-internal index metadata split, lifecycle validation,
-  `v.id` join edges with dangling-reference semantics.
 - [`research-1a-review-answers.md`](research-1a-review-answers.md) —
   closes the four 1a review questions (QueryRemoved delete rule,
   chunk eligibility + reassemble-then-write, raw-client cost,
   R6 limits).
+- [`research-skip-client-v2.md`](research-skip-client-v2.md) —
+  Track 1 construction spec resolving the externals-adapter gaps
+  (bounded-query contract, scope/auth, failure matrix).
+  Transport recommendation superseded for 1a by the mapping doc above —
+  contract/failure sections still hold.
+
+Sub-direction 1b (paginated reactive source, no backend changes):
+
 - [`research-1b-page-topology.md`](research-1b-page-topology.md) —
   paginated reactive source: pagination mechanics, per-page Skip
   regions with atomic split-swap options, disjointness/ordering,
   metrics without backend changes.
+- [`research-spike-comparison.md`](research-spike-comparison.md) —
+  unified N/K/F axes, shared counter/timer catalogs, per-spike
+  baselines, comparator normalization, metric sources.
+- [`research-skip-source-state.md`](research-skip-source-state.md) —
+  combined Skip input shape, revision watermarks + GC, tombstones,
+  ordering, restart-rebuild, fault-injection list (all spikes).
+
+Sub-direction 1c (Data Sync push source, modest backend change):
+
+- [`research-data-sync-source.md`](research-data-sync-source.md) —
+  existing Data Sync contract reused by the push stream (snapshot/CDC,
+  revisions/tombstones/truncations, opaque cursors + retention,
+  selection, status, soft page limits, authz).
+- [`research-push-stream-seam.md`](research-push-stream-seam.md) —
+  push-stream seam: readable-timestamp wait with lost-wake protection,
+  bounded SSE framing with disconnect-propagating cancellation,
+  cursor-after-apply checkpointing with revision-watermark idempotency.
+
+Shared Direction 1 inputs:
+
+- [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
+  PoC queries, aggregates, keying/encoding rules, R6 harness sketch
+  (R4/R6/R7/R8).
+- [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
+  `isInit`/`native_eq` reconciliation, per-query fork/merge finding,
+  missing batch primitive, no-diff rule, reducer bar (R2/R3/R4).
+
+### Direction 2 — backend-native Skip cache
+
+- [`research-backend-change-hook.md`](research-backend-change-hook.md) —
+  committed-change hook comparison recommending `LogReader` tail with
+  ts-grouped atomic apply, seed/rebuild paths, retention budget.
+  (For external-source Direction 1c, superseded by the Data Sync
+  contract above — retained for the backend-owned cache question.)
+- [`research-index-id-metadata.md`](research-index-id-metadata.md) —
+  stable-vs-internal index metadata split, lifecycle validation,
+  `v.id` join edges with dangling-reference semantics.
+- [`research-delta-seam.md`](research-delta-seam.md) —
+  ranked reactivity seams with OCC/persistence exclusion and
+  `QueryPatched` sketch. Early orientation; seam choice since settled
+  per-direction by the hook note (Dir 2) and Data Sync note (1c).
+- [`research-native-operator-spec.md`](research-native-operator-spec.md) —
+  composable `QueryOperator::Skip` touch list and wire example.
+  Predates the spike plans; one-shot-operator path explicitly rejected
+  by the Direction 2 spike in favor of persistent maintenance.
+
+### Sequencing (historical)
+
+- [`research-build-slices.md`](research-build-slices.md) —
+  ordered testable build slices with done-criteria. Predates the four
+  spike plans in `docs/plans/`; kept for the slice-discipline template,
+  not current scope.
 
 ## Status
 
-Research only — no design decisions have been made yet. Next step is to
-fold this in once the parallel Codex-drafted plan lands, then refine with
-higher-quality models in bite-sized, serialized passes.
+Research only — no design decisions have been made yet. Four spike plans in
+`docs/plans/` now own the active scope (1a sync-protocol client, 1b
+paginated source, 1c Data Sync push source, Direction 2 materialized
+cache); the index above marks which notes feed each plan and which early
+notes are superseded or historical.
