@@ -134,12 +134,10 @@ The concrete methodology behind this (from `research-skip-source-state.md`): a p
 
 ---
 
-## Next Steps
+## Possible Future Extensions
 
-For another agent extending this overview:
-- Expand "General Approach" with details on the research taxonomy and Phase 1 validation results
-- Add a "Known Constraints and Unknowns" section summarizing outstanding questions from each plan
-- Document the measurement framework and why all four spikes use the same metric axes (N = total rows, K = changed rows, F = join fan-out)
-- Explain the correctness baseline: each spike compares against an independent native Convex query, not just internal consistency
+- Add explicit per-spike metric-mapping citations to `research-spike-comparison.md` (tracked as a real-gap in `docs/plans/README.md`, not fixed here — that's a change to the spike plans, not this overview).
+- If a spike is selected for implementation, this overview should gain a section linking to the implementation plan and noting which spike findings carried over.
+- The reconstructed tool/model taxonomy (General Approach) could be upgraded from inferred to documented if a manifest or frontmatter convention is added later.
 
 This overview is a starting point. The spike plans themselves are the source of truth for details, constraints, and scope boundaries.
