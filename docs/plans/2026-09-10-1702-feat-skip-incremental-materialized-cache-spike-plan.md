@@ -264,3 +264,5 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - `npm-packages/convex/src/values/validators.ts`, `crates/common/src/schemas/validator.rs`, and `npm-packages/convex/src/server/database.ts` — `v.id` target-table metadata, table validation, and the absence of an existence guarantee.
 - [Convex indexes](https://docs.convex.dev/database/reading-data/indexes/) — the explicit `withIndex` contract, automatic system indexes, and staged-index lifecycle.
 - [Skip introduction](https://skiplabs.io/docs/introduction) and [Skip externals](https://skiplabs.io/docs/externals) — official conceptual and external-source contracts.
+- `research/skip-convex-integration/research-index-id-metadata.md` — stable vs. internal index metadata split, index lifecycle validation, `v.id` join edges and dangling-reference semantics.
+- `research/skip-convex-integration/research-native-operator-spec.md` — composable `QueryOperator::Skip` interface design, touch list, and wire protocol example.

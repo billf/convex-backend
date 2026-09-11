@@ -261,5 +261,7 @@ Direction 1c can later be judged against 1a and 1b as a source-granularity trade
 - `research/skip-convex-integration/research-delta-seam.md` and `research-backend-change-hook.md` — earlier candidate backend seams, superseded for this external-source direction by the existing Data Sync contract.
 - `docs/plans/2026-09-10-1509-feat-skip-sync-protocol-client-plan.md` — Direction 1a boundaries and transaction-grouped query-result baseline.
 - `docs/plans/2026-09-10-1843-feat-skip-paginated-reactive-source-spike-plan.md` — Direction 1b page-granularity baseline and scaling evidence requirements.
+- `research/skip-convex-integration/research-data-sync-source.md` — Data Sync contract reused by the push stream (snapshot/CDC, revisions/tombstones/truncations, cursors, retention, selection, status, authz).
+- `research/skip-convex-integration/research-push-stream-seam.md` — push-stream seam design: readable-timestamp wait with lost-wake protection, bounded SSE framing, cursor-after-apply checkpointing.
 - `/Users/bill/src/convex-tutorial/convex/chat.ts` and `schema.ts` — proof query, message-to-user relation, missing-user behavior, and two selected source tables.
 - `/Users/bill/src/skip/examples/chatroom/reactive_service/src/chatroom.service.ts` and `/Users/bill/src/skip/examples/convex_reactive/skip/service.ts` — Skip join/reducer and Convex-adapter examples to reuse selectively.
