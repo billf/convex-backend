@@ -86,6 +86,25 @@ The 8 PARTIAL docs and why:
 
 ---
 
+## Measurement Framework
+
+`research-spike-comparison.md` is the canonical cross-cutting framework doc defining the three scaling axes each spike measures against: **N** (total scope the monolithic path re-touches), **K** (change size per transaction), and **F** (derived fan-out of K). It also defines a shared counter catalog, a shared timer catalog (`commit(ack) → readable → delivered → applied → published`), a baselines table, and metric sources available without backend changes.
+
+In practice, the four spikes use this framework unevenly — same shape, different vocabulary:
+
+| Plan | N | K | F | Explicit O() notation |
+|---|---|---|---|---|
+| 1a | none | none | none | No — correctness-only |
+| 1b | total loaded rows / dataset size | target page size / affected-page counts | none (no join in this vehicle) | No |
+| 1c | "total selected rows N" | "changed selected documents per transaction K" | "affected join fan-out F" | Yes — O(K), O(K+F), O(N) in R16 |
+| Direction 2 | total data size / total unrelated data size | implicit (single-row update held fixed) | affected dependency fan-out/neighborhood | No, same conceptual shape as 1c |
+
+Only 1c literally uses the N/K/F symbols and Big-O notation. Direction 2 uses the same conceptual axes without symbols. 1b uses two axes only, since its proof vehicle has no cross-table join at the input boundary. 1a has zero scaling requirements by explicit Key Decision — its Key Decisions state that success is bounded semantic correctness, not performance, and that quantifying latency or resource overhead was chosen against.
+
+`research-spike-comparison.md`'s own Phase 1 verdict is PARTIAL for exactly this reason: it's cited by none of the four plans, and it lacks explicit per-spike metric mappings. So "all four spikes use the same metric axes" is directionally true — the underlying framework covers all four — but not yet citationally true: the plans don't point back to it, and only one plan (1c) actually adopts its notation as written. `docs/plans/README.md`'s citation-hygiene/real-gap table already tracks this as a real-gap follow-up.
+
+---
+
 ## Next Steps
 
 For another agent extending this overview:
