@@ -1,0 +1,162 @@
+{
+  "phase": "Phase 1 - Research Validation",
+  "timestamp": "2026-09-11",
+  "total_docs": 20,
+  "pass_count": 14,
+  "partial_count": 6,
+  "fail_count": 0,
+  "gists": [
+    {
+      "doc": "research-convex-reactivity.md",
+      "adequacy_verdict": "partial",
+      "reason": "Citation error: reads.rs:233-239 does not match claimed location (actual: reads.rs:187-191). Coverage adequate but edge cases/scalability limited.",
+      "direction": "foundation",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-convex-query-composition.md",
+      "adequacy_verdict": "partial",
+      "reason": "File reference inaccurate (queryStreamNext in async_syscall.rs, not syscall.rs); V8/isolate section less detailed than query composition.",
+      "direction": "foundation",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-skip-engine.md",
+      "adequacy_verdict": "pass",
+      "reason": "Comprehensively covers language/runtime split, reactive collections, mappers/reducers, database comparison. All claims verified.",
+      "direction": "foundation",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-skip-externals-adapter.md",
+      "adequacy_verdict": "partial",
+      "reason": "Accurate core API coverage but references removed convex_reactive/convex_tanstack examples, undermining 'detailed teardown' claim.",
+      "direction": "foundation",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-sync-protocol-skip-mapping.md",
+      "adequacy_verdict": "pass",
+      "reason": "Comprehensive 1a scope coverage: wire mapping table, lifecycle, versions, chunks, bundle-preserving writes, PoC vehicle, correctness bar. All claims verified.",
+      "direction": "1a",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-sync-wire-ts-checklist.md",
+      "adequacy_verdict": "pass",
+      "reason": "Comprehensive per-message/field/lifecycle checklist with all ClientMessage/ServerMessage types. Serves Direction 1a adequately.",
+      "direction": "1a",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-1a-review-answers.md",
+      "adequacy_verdict": "pass",
+      "reason": "Closes all four 1a review questions with source-grounded planning instructions.",
+      "direction": "1a",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-skip-client-v2.md",
+      "adequacy_verdict": "pass",
+      "reason": "All contract/failure/auth claims verified; sections remain adequate despite transport supersession.",
+      "direction": "1",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-1b-page-topology.md",
+      "adequacy_verdict": "pass",
+      "reason": "All 10 claims verified against source. Comprehensively covers pagination mechanics, split lifecycle, atomic split-swap, metrics.",
+      "direction": "1b",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-spike-comparison.md",
+      "adequacy_verdict": "partial",
+      "reason": "Framework provided (N/K/F axes, catalogs, baselines) but lacks per-spike mapping and zero citations by target spike plans.",
+      "direction": "cross-cutting",
+      "readme_edits": "Recommend: explicit per-spike metric mappings and citations in spike plans"
+    },
+    {
+      "doc": "research-skip-source-state.md",
+      "adequacy_verdict": "pass",
+      "reason": "All README topics present: combined input shapes, revision watermarks, tombstones, ordering, restart-rebuild, fault-injection.",
+      "direction": "cross-cutting",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-data-sync-source.md",
+      "adequacy_verdict": "partial",
+      "reason": "Content claims verified; 8 path references missing crates/ prefix need cleanup and standardization.",
+      "direction": "1c",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-push-stream-seam.md",
+      "adequacy_verdict": "pass",
+      "reason": "All three core concepts (readable-timestamp wait, SSE framing, cursor checkpointing) addressed with verified code references.",
+      "direction": "1c",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-poc-vehicle-and-harness.md",
+      "adequacy_verdict": "partial",
+      "reason": "Direction 2 cites as proof vehicle; labeled 'Shared Direction 1 inputs' but uncited by 1a/1b/1c plans.",
+      "direction": "cross-cutting",
+      "readme_edits": "Change 'Shared Direction 1 inputs:' to 'Direction 2 inputs:' (lines 103-107)"
+    },
+    {
+      "doc": "research-skip-atomic-write.md",
+      "adequacy_verdict": "pass",
+      "reason": "All stated purpose components present with specific path/line references; gaps properly identified.",
+      "direction": "cross-cutting",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-backend-change-hook.md",
+      "adequacy_verdict": "pass",
+      "reason": "Eight core technical claims verified; recommendation well-grounded; coupling risks accurately identified.",
+      "direction": "2",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-index-id-metadata.md",
+      "adequacy_verdict": "pass",
+      "reason": "14 core technical claims verified with precise line numbers; stable/internal split well-grounded.",
+      "direction": "2",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-native-operator-spec.md",
+      "adequacy_verdict": "pass",
+      "reason": "All touch-list file:line references verified accurate; wire example valid.",
+      "direction": "2",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-build-slices.md",
+      "adequacy_verdict": "pass",
+      "reason": "Accurately synthesizes foundation notes + specs into five ordered, testable slices.",
+      "direction": "historical",
+      "readme_edits": null
+    },
+    {
+      "doc": "research-delta-seam.md",
+      "adequacy_verdict": "pass",
+      "reason": "Ranks four reactivity seams with explicit OCC/persistence exclusion and sound rationale; seam choice deferred per-direction.",
+      "direction": "2",
+      "readme_edits": null
+    }
+  ],
+  "readme_edits_collated": [
+    {
+      "doc": "research-poc-vehicle-and-harness.md",
+      "lines": "103-107",
+      "change": "Change 'Shared Direction 1 inputs:' to 'Direction 2 inputs:' — only Direction 2 cites this doc; 1a/1b/1c proceed independently"
+    }
+  ],
+  "summary": {
+    "strong_coverage": "foundation, 1a, 1b, 1c, 2 spike directions all have PASS-majority docs",
+    "attention_needed": "6 PARTIAL docs flag: citation errors (1), path references (2), stale examples (1), uncited design docs (1), README mismatch (1)",
+    "evidence_dossiers": "20 evidence files written to research/skip-convex-integration/evidence/"
+  }
+}

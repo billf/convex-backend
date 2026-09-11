@@ -1,0 +1,156 @@
+{
+  "document": "research-skip-externals-adapter.md",
+  "validation_date": "2026-09-11",
+  "status": "partial",
+  "summary": "Document covers foundation topics accurately but references non-existent example code, undermining adequacy as a 'detailed teardown'. Core APIs verified; examples removed from codebase.",
+  "verified_claims": [
+    {
+      "claim": "ConvexExternalService<Row> implements ExternalService",
+      "section": "Part B, Section 3",
+      "line_range": "244-262",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/adapters/convex/src/index.ts",
+      "evidence": "export class ConvexExternalService<Row extends Json> implements ExternalService (line 166-167)"
+    },
+    {
+      "claim": "ConvexExternalService constructor signature: convex: string | ConvexSubscriber, resources object, options",
+      "section": "Part B, Section 3",
+      "line_range": "244-253",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/adapters/convex/src/index.ts",
+      "evidence": "constructor(convex: string | ConvexSubscriber, private readonly resources: {...}, options: ConvexExternalServiceOptions) (lines 182-188)"
+    },
+    {
+      "claim": "ConvexExternalService.subscribe() method exists with callback signature",
+      "section": "Part B, Section 3",
+      "line_range": "255-261",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/adapters/convex/src/index.ts",
+      "evidence": "async subscribe(instance: string, resourceName: string, params: Json, callbacks: {...}) (lines 214-225)"
+    },
+    {
+      "claim": "diffSnapshot function uses isDeepStrictEqual for value comparison",
+      "section": "Part B, Section 3",
+      "line_range": "289-300",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/adapters/convex/src/index.ts",
+      "evidence": "import { isDeepStrictEqual } from 'node:util' (line 7); used in diffSnapshot at line 155"
+    },
+    {
+      "claim": "diffSnapshot returns { next: Map<string, Row>, updates: Entry<string, Row>[] }",
+      "section": "Part B, Section 3",
+      "line_range": "289-300",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/adapters/convex/src/index.ts",
+      "evidence": "function diffSnapshot signature (lines 133-139) matches described return type"
+    },
+    {
+      "claim": "skipruntime-ts directory structure includes core, addon, server, helpers, adapters, examples, wasm",
+      "section": "Part A, Section 3",
+      "line_range": "68-82",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/",
+      "evidence": "ls -la shows: core, addon, server, helpers, adapters, examples, wasm directories all present"
+    },
+    {
+      "claim": "billf/convex/adapter branch exists in skip repository",
+      "section": "Part B, Section 1",
+      "line_range": "202-207",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip",
+      "evidence": "git branch -a shows: billf/convex/adapter (current), remotes/origin/billf/convex/adapter, remotes/origin/billf/convex/adapter-2"
+    },
+    {
+      "claim": "Mapper interface with mapEntry(key, values, context) method",
+      "section": "Part A, Section 3",
+      "line_range": "92-101",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/core/src/api.ts",
+      "evidence": "export interface Mapper<K1, V1, K2, V2> { mapEntry(key: K1, values: Values<V1>, context: Context): Iterable<[K2, V2]> }"
+    },
+    {
+      "claim": "Reducer interface with initial, add, remove properties/methods",
+      "section": "Part A, Section 3",
+      "line_range": "104-110",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/core/src/api.ts",
+      "evidence": "export interface Reducer<V, A> { initial: A | null; add(...): A; remove(...): A | null; }"
+    },
+    {
+      "claim": "EagerCollection and LazyCollection exist as interfaces",
+      "section": "Part A, Section 3",
+      "line_range": "86-90",
+      "verdict": "verified",
+      "source": "/Users/bill/src/skip/skipruntime-ts/core/src/api.ts",
+      "evidence": "export interface EagerCollection<K, V>; export interface LazyCollection<K, V>"
+    }
+  ],
+  "stale_claims": [
+    {
+      "claim": "examples/convex_reactive/ (~400 lines of application code + config) demonstrates Skip + Convex integration",
+      "section": "Part B, Section 2",
+      "line_range": "221-227",
+      "verdict": "stale",
+      "severity": "high",
+      "current_status": "examples directory removed from billf/convex/adapter branch",
+      "evidence": "Git history shows examples existed (convex_reactive/) but are not present in current working tree or HEAD. Last commit to examples: 'fix(examples): build the Convex adapter before tests'",
+      "impact": "Section B.4 references this example extensively (lines 314-376) to explain data flow and integration patterns, but the example code is no longer available"
+    },
+    {
+      "claim": "examples/convex_tanstack/ demonstrates TanStack Query/DB integration",
+      "section": "Part B, Section 2",
+      "line_range": "227-228",
+      "verdict": "stale",
+      "severity": "high",
+      "current_status": "examples directory removed from billf/convex/adapter branch",
+      "evidence": "Git history shows examples existed but are not present in current working tree or HEAD",
+      "impact": "Example code reference without availability weakens the document's claim to provide a 'detailed teardown'"
+    },
+    {
+      "claim": "convex_reactive example has a detailed DESIGN.md explaining architecture and limitations",
+      "section": "Part B, Section 4",
+      "line_range": "223-225",
+      "verdict": "stale",
+      "severity": "medium",
+      "current_status": "DESIGN.md was part of removed examples directory",
+      "evidence": "Git show HEAD~2:examples/convex_reactive/DESIGN.md confirms file existed with detailed findings and production plan",
+      "impact": "Document references design principles from DESIGN.md (lines 395-405) but the source is no longer available"
+    }
+  ],
+  "adequacy_assessment": {
+    "stated_purpose": [
+      "Skip's externals/polling model for ingesting outside data",
+      "skipruntime-ts's public API shape",
+      "detailed teardown of the existing billf/convex/adapter branch (snapshot-based polling with reactive diffing — its concrete limitations set the bar for 'a better integration')"
+    ],
+    "coverage": {
+      "externals_polling_model": {
+        "status": "adequate",
+        "evidence": "Part A Sections 1-2 thoroughly explain ExternalService, PolledExternalService, polling interval mechanics, and converter functions"
+      },
+      "skipruntime_ts_api": {
+        "status": "adequate",
+        "evidence": "Part A Section 3 covers Collections (EagerCollection, LazyCollection), Mappers, Reducers, Resources, ServiceDefinition, and ServiceInstance API"
+      },
+      "adapter_teardown": {
+        "status": "partial",
+        "evidence": "Part B.1-3 cover architecture, subscription flow, diffing strategy, and error handling. Part B.4 references examples that no longer exist, reducing the 'detailed' nature of the teardown. The document describes limitations (B.6) but cannot demonstrate them with working examples."
+      }
+    },
+    "missing_elements": [
+      "Working example code to ground the architectural description",
+      "Integration patterns that would be visible in convex_reactive example",
+      "Browser integration pattern that relied on examples"
+    ],
+    "verdict": "partial",
+    "reasoning": "Document adequately covers the technical topics but claims a 'detailed teardown' while examples that were supposed to provide that detail are missing. The core adapter API and integration approach are well-documented, but the practical demonstration layer is absent."
+  },
+  "frontmatter_required": true,
+  "frontmatter_recommendation": {
+    "title": "Skip Externals/Resources and Convex Adapter Research",
+    "type": "research-note",
+    "status": "active",
+    "direction": "foundation",
+    "date": "2026-09-11"
+  }
+}

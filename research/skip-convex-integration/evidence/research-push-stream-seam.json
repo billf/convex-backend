@@ -1,0 +1,82 @@
+{
+  "document": "research-push-stream-seam.md",
+  "timestamp": "2026-09-11",
+  "validation_status": "pass",
+  "adequacy_verdict": "pass",
+  "readme_purpose": "push-stream seam: readable-timestamp wait with lost-wake protection, bounded SSE framing with disconnect-propagating cancellation, cursor-after-apply checkpointing with revision-watermark idempotency",
+  "sections_addressed": [
+    "Wait primitive: SnapshotManager, not timers",
+    "Empty wake-ups",
+    "Framing / backpressure / cancellation",
+    "Cursor checkpoint + idempotency",
+    "Failure mapping",
+    "Acceptance"
+  ],
+  "spot_checks": [
+    {
+      "claim": "wait_for_higher_ts(target) check-then-register under one lock with check-then-register pattern and race-free future ownership",
+      "source_file": "crates/database/src/snapshot_manager.rs",
+      "source_lines": "610-627",
+      "verification": "CONFIRMED - Line 612 calls notify_waiters(), line 614 checks if latest_ts <= target_ts under lock, lines 615-616 register oneshot channel if still needed, async block at 622-625 owns receiver for race-free semantics",
+      "status": "pass"
+    },
+    {
+      "claim": "Every publish_commit wakes the snapshot manager via snapshot_manager.push()",
+      "source_file": "crates/database/src/committer.rs",
+      "source_lines": "1092-1139",
+      "verification": "CONFIRMED - Line 1136 shows snapshot_manager.push(commit_ts, new_snapshot, write_bytes) called in every publish_commit path",
+      "status": "pass"
+    },
+    {
+      "claim": "Every push() invocation calls notify_waiters() to wake all waiting tasks",
+      "source_file": "crates/database/src/snapshot_manager.rs",
+      "source_lines": "741-755",
+      "verification": "CONFIRMED - Line 753 shows self.notify_waiters() called in every push() invocation after version management",
+      "status": "pass"
+    },
+    {
+      "claim": "data_sync.rs guarantees no-split transactions and per-document increasing timestamp order",
+      "source_file": "crates/table_iteration/src/data_sync.rs",
+      "source_lines": "20-48",
+      "verification": "CONFIRMED - Lines 22 and 45 both state 'Transactions are not split across pages when advancing synced_ts', line 35-36 states 'Each rev of a given document will be emitted in increasing timestamp order'",
+      "status": "pass"
+    },
+    {
+      "claim": "Liveness/select pattern using select_biased! between stream, timeout, and shutdown signals",
+      "source_file": "crates/local_backend/src/logs.rs",
+      "source_lines": "38-71",
+      "verification": "CONFIRMED - Lines 46-70 show select_biased! with three branches: entries_future (line 47), timeout (line 59), zombify_rx shutdown (line 66), exactly matching the pattern described for liveness monitoring",
+      "status": "pass"
+    }
+  ],
+  "frontmatter_status": "added",
+  "frontmatter_content": {
+    "title": "Push-stream seam",
+    "direction": "1c/1d",
+    "requirements": "R3/R4/R5/R8/R9/R10/R11",
+    "date": "2026-09-11",
+    "author": "Haiku",
+    "status": "research",
+    "depends_on": ["research-data-sync-source.md"]
+  },
+  "adequacy_analysis": {
+    "readable_timestamp_wait": "ADDRESSED - Section 1 details wait_for_higher_ts() derivative, check-then-register pattern, snapshot manager coordination, and lost-wake protection via atomic lock semantics",
+    "lost_wake_protection": "ADDRESSED - Achieved through check-then-register (notification always happens after registration or immediate satisfaction), documented at lines 14-30 with explicit cancel-safe select! guidance",
+    "bounded_sse_framing": "ADDRESSED - Section 3 proposes bounded channel(N) with try-send, disconnect detection, and SSE chunked encoding without Content-Length for proper disconnect propagation",
+    "disconnect_propagating_cancellation": "ADDRESSED - Lines 51-55 detail disconnect propagation via channel-based backpressure and SSE chunked framing (no Content-Length), with precedent from http_actions.rs",
+    "cursor_after_apply": "ADDRESSED - Section 4 documents atomic group-by-ts apply semantics at lines 65-71, with explicit ordering (truncations before values) and page boundary rules",
+    "revision_watermark_idempotency": "ADDRESSED - Lines 66-68 require revision watermark retention and dropping replayed_ts <= retained_ts for idempotent replay, with tombstone retention policy noted as planning question",
+    "failure_handling": "ADDRESSED - Section 5 maps expiry/validation errors to typed events, reuses cursor_expired_error mapping, and specifies error accounting per R10/R11"
+  },
+  "coverage_assessment": {
+    "all_readme_elements_present": true,
+    "code_references_verified": 5,
+    "technical_depth": "high - detailed seam-level design with explicit code locations and algorithm descriptions",
+    "planning_readiness": "high - acceptance criteria at end clearly summarizes all three core concepts with their grounding patterns",
+    "open_questions": [
+      "Tombstone retention policy and watermark lifecycle (noted at line 68-69)",
+      "Route name, stream-version field, and status-event cadence (noted at line 57-58)"
+    ]
+  },
+  "evidence_summary": "All 5 spot-checked claims verified against source code. Document provides detailed design of push-stream wait/frame/checkpoint seam grounded in concrete code patterns from snapshot_manager, committer, data_sync, and logs. Frontmatter added per pattern. Adequate readiness for design planning; open questions are scoped to dependent planning decisions, not architectural gaps."
+}
