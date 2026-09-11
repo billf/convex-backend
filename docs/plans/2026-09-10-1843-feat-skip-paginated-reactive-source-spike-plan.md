@@ -161,7 +161,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 
 - Every published current result matches the monolithic indexed baseline at its controlled settled checkpoint.
 - Page splitting, query failure, and reconnect never publish a complete-looking result with missing or duplicate rows.
-- At least one steady-state workload shows delivered rows and Skip reconciliation governed by observed affected-page size rather than total loaded rows.
+- Across a predefined matrix of loaded-row counts, target page sizes, and representative update positions, the aggregate measurements classify the page-granularity claim as supported, disproved, or inconclusive rather than accepting a single favorable workload.
 - The report states the corresponding growth in bootstrap work, live queries, and retained page state; a smaller update path is not presented as a free reduction in total system cost.
 - Skip maintains a real reducer across page updates and page replacement, including correct removal behavior.
 - Metrics contain both counts and timers, and explain any run whose apparent improvement came from missing work, stale output, or an incomplete page.
@@ -203,6 +203,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 - Which internal metrics can count actual page query executions and rows read without changing backend behavior?
 - Which failure injection produces `SplitRequired`, invalid-cursor reset, query failure, and reconnect deterministically?
 - Should the proof display author IDs or use a separately measured, fixed-size user lookup source for names?
+- What measured update-work and bootstrap or subscription trade-off constitutes a proceed, reject, or narrowly scoped result for Direction 1b?
 
 ### Sources / Research
 
