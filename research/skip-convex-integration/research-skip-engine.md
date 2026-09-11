@@ -1,3 +1,11 @@
+---
+title: Skip's Core Incremental Engine
+type: research-note
+status: active
+direction: foundation
+date: 2026-09-11
+---
+
 # Skip's Core Incremental Engine: Research Findings
 
 ## Executive Summary

@@ -1,3 +1,11 @@
+---
+title: Spike Comparison Framework
+type: research-note
+status: active
+direction: shared
+date: 2026-09-11
+---
+
 # Spike comparison framework (1a / 1b / 1c / Direction 2)
 
 Unified axes, counters, timers, baselines, and comparator rules so the four
