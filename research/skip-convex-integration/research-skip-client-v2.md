@@ -1,3 +1,11 @@
+---
+title: Skip-as-client v2 (Track 1 construction spec)
+type: research-note
+status: active
+direction: 1
+date: 2026-09-11
+---
+
 # Skip-as-client v2 (Track 1 construction spec)
 
 Augments `research-skip-externals-adapter.md` §6. Does not repeat the

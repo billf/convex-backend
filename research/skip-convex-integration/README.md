@@ -95,8 +95,8 @@ Sub-direction 1b (paginated reactive source, no backend changes):
   baselines and metric mappings, comparator normalization, metric sources.
 - [`research-skip-source-state.md`](research-skip-source-state.md) —
   combined Skip input shape, revision watermarks + GC, tombstones,
-  ordering, restart-rebuild, fault-injection list (all spikes).
-  **Note:** Intended for all four spikes but none of the spike plans currently cite it; verify integration before relying on this as cross-spike testing contract.
+  ordering, restart-rebuild, per-spike usage map, fault-injection list
+  (all spikes).
 
 Sub-direction 1c (Data Sync push source, modest backend change):
 
@@ -109,18 +109,18 @@ Sub-direction 1c (Data Sync push source, modest backend change):
   bounded SSE framing with disconnect-propagating cancellation,
   cursor-after-apply checkpointing with revision-watermark idempotency.
 
-Direction 2 inputs:
+Shared inputs (Direction 1 + Direction 2):
 
-- [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
-  PoC queries, aggregates, keying/encoding rules, R6 harness sketch
-  (R4/R6/R7/R8).
-  **Note:** Labeled as "Shared Direction 1 inputs" but uncited by 1a/1b/1c plans; only Direction 2 cites this doc.
 - [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
-  `isInit`/`native_eq` reconciliation, per-query fork/merge finding,
+  `isInit`/`native_eq` reconciliation, per-resource fork/merge finding
+  (`CollectionWriter.update`; `ServiceInstance.update` is inputs-only),
   missing batch primitive, no-diff rule, reducer bar (R2/R3/R4).
 
 ### Direction 2 — backend-native Skip cache
 
+- [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
+  PoC queries, aggregates, keying/encoding rules, R6 harness sketch
+  (Direction 2 R4/R6/R7/R8; 1a/1b/1c readers see pointers in frontmatter).
 - [`research-backend-change-hook.md`](research-backend-change-hook.md) —
   committed-change hook comparison recommending `LogReader` tail with
   ts-grouped atomic apply, seed/rebuild paths, retention budget.
@@ -143,8 +143,7 @@ Direction 2 inputs:
 - [`research-build-slices.md`](research-build-slices.md) —
   ordered testable build slices with done-criteria. Predates the four
   spike plans in `docs/plans/`; kept for the slice-discipline template,
-  not current scope.
-  **Note:** The 'three specs above' reference is vague; refer to `docs/plans/` for authoritative scope.
+  not current scope (its "three specs" are named explicitly in the doc).
 
 ## Status
 

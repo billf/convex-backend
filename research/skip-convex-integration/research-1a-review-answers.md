@@ -1,3 +1,11 @@
+---
+title: 1a review answers (QueryRemoved, chunks, tractability, bar)
+type: research-note
+status: active
+direction: 1a
+date: 2026-09-11
+---
+
 # 1a review answers (QueryRemoved, chunks, tractability, bar)
 
 Closes the four 2026-09-10 review questions on the 1a sync-protocol client
