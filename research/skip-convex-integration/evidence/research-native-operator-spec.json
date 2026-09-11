@@ -1,0 +1,144 @@
+{
+  "doc": "research-native-operator-spec.md",
+  "validation_date": "2026-09-11",
+  "adequacy_verdict": "partial",
+  "reason": "Document delivers stated purpose (touch list + wire example) but contains inaccuracy (MAX_QUERY_OPERATORS=22 claimed vs actual 256), lacks incremental maintenance semantics detail for R3, and does not address Direction 2's R12-R16 (metrics, correctness verification, scaling characterization, no-regression guarantees).",
+  "direction": "2",
+  "readme_edits": null,
+  "validation_details": {
+    "stated_purpose": "composable `QueryOperator::Skip` touch list and wire example",
+    "direction_2_requirements_cited": ["R3", "R12", "R13", "R14", "R15", "R16"],
+    "claims_verified": [
+      {
+        "claim": "QueryOperator union should extend with skip variant (npm-packages/convex/src/server/impl/query_impl.ts:24)",
+        "status": "noted_as_future_work",
+        "evidence": "Current code at line 24 shows only { filter: JSONValue } | { limit: number }; skip variant does not exist yet. This is a proposed change, not current state.",
+        "severity": "none - doc is spec, not current code review"
+      },
+      {
+        "claim": "MAX_QUERY_OPERATORS:22",
+        "status": "inaccurate",
+        "actual_value": 256,
+        "locations": [
+          {
+            "file": "npm-packages/convex/src/server/impl/query_impl.ts",
+            "line": 22,
+            "quote": "const MAX_QUERY_OPERATORS = 256;"
+          },
+          {
+            "file": "crates/common/src/query.rs",
+            "line": 912,
+            "quote": "pub const MAX_QUERY_OPERATORS: usize = 256;"
+          }
+        ],
+        "document_line": 34,
+        "severity": "moderate - affects constraint on query depth"
+      },
+      {
+        "claim": "filter implementation at npm-packages/convex/src/server/impl/query_impl.ts:225-241",
+        "status": "verified",
+        "evidence": "Filter method exists and follows described pattern, pushing to operators array",
+        "locations": [
+          {
+            "file": "npm-packages/convex/src/server/impl/query_impl.ts",
+            "lines": "225-241"
+          }
+        ]
+      },
+      {
+        "claim": "limit implementation at npm-packages/convex/src/server/impl/query_impl.ts:243-248",
+        "status": "verified",
+        "evidence": "Limit method exists and follows described pattern",
+        "locations": [
+          {
+            "file": "npm-packages/convex/src/server/impl/query_impl.ts",
+            "lines": "243-248"
+          }
+        ]
+      },
+      {
+        "claim": "crates/common/src/query.rs:899-904 with QueryOperator::Skip variant",
+        "status": "noted_as_future_work",
+        "evidence": "Current enum only has Filter and Limit; Skip variant proposed by spec but not yet implemented",
+        "locations": [
+          {
+            "file": "crates/common/src/query.rs",
+            "lines": "899-904"
+          }
+        ]
+      },
+      {
+        "claim": "crates/database/src/query/skip.rs modeled on filter.rs:28-85 / limit.rs:23-83",
+        "status": "not_yet_created",
+        "evidence": "File does not exist; filter.rs and limit.rs exist and are valid reference patterns",
+        "reference_files": [
+          {
+            "file": "crates/database/src/query/filter.rs",
+            "lines": "28-85"
+          },
+          {
+            "file": "crates/database/src/query/limit.rs",
+            "lines": "23-83"
+          }
+        ]
+      },
+      {
+        "claim": "syscall.rs:232-238 Query::try_from carries skip variant automatically",
+        "status": "noted_as_future_work",
+        "evidence": "Query::try_from exists at crates/isolate/src/environment/udf/syscall.rs:234; variant routing would auto-carry any new QueryOperator variant, so claim is structurally sound",
+        "locations": [
+          {
+            "file": "crates/isolate/src/environment/udf/syscall.rs",
+            "lines": "232-238"
+          }
+        ]
+      }
+    ],
+    "coverage_assessment": {
+      "operator_interface_skeleton": {
+        "coverage": "good",
+        "detail": "Identifies touch points for adding Skip as QueryOperator variant, with file/line precision"
+      },
+      "wire_example": {
+        "coverage": "adequate",
+        "detail": "JSON example shows skip operator with filter codeRef; minimal but clear"
+      },
+      "incremental_maintenance_semantics": {
+        "coverage": "minimal",
+        "detail": "Document does not explain state-retention strategy, how deltas propagate, or memoization boundaries required for R3's 'incrementally maintains joins, filters, grouped reductions'",
+        "requirement": "R3"
+      },
+      "metrics_specification": {
+        "coverage": "none",
+        "detail": "No mention of metrics, observability, or instrumentation",
+        "requirement": "R12"
+      },
+      "correctness_verification": {
+        "coverage": "none",
+        "detail": "No discussion of correctness checking, testing strategy, or result validation",
+        "requirements": ["R13", "R14"]
+      },
+      "scaling_characterization": {
+        "coverage": "none",
+        "detail": "No analysis of complexity terms or scaling behavior",
+        "requirement": "R15"
+      },
+      "no_regression_guarantees": {
+        "coverage": "none",
+        "detail": "No discussion of fallback semantics or unchanged behavior guarantee",
+        "requirement": "R16"
+      }
+    },
+    "missing_topics_for_direction_2": [
+      "Persistence layer integration (where/how skip state is stored)",
+      "Incremental update mechanics (how deltas feed through the operator)",
+      "Fiber/scheduling implications of running Skip code server-side",
+      "Error handling and fallback strategy",
+      "Lifecycle: bootstrap, steady-state, recovery",
+      "Skip code reference resolution (bundle hash -> actual code)",
+      "Operator ordering constraints and interaction rules",
+      "Memory/CPU budgeting for materialized state"
+    ]
+  },
+  "footnote": "Document provides a minimal spec for composable operator interface (stated purpose). However, Direction 2 plan relies on it for R3 (incremental maintenance) and R12-R16 (metrics, correctness, scaling, regression), none of which receive substantive coverage beyond the operator interface skeleton. For the narrow touch-list purpose, it is adequate with one factual correction needed (MAX_QUERY_OPERATORS). For Direction 2's full planning context, it is incomplete. Future work should expand this spec with incremental maintenance semantics, metrics design, correctness framework, and fallback strategy."
+}
