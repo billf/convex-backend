@@ -1,3 +1,19 @@
+---
+topic: proof-vehicle
+phase: research
+direction: Direction 2
+validates_requirements:
+  - R2
+  - R3
+  - R4
+  - R6
+  - R7
+  - R8
+related_plans:
+  - 2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md
+citation_note: README labels as "Shared Direction 1 inputs" but only Direction 2 spike plan cites it
+---
+
 # PoC vehicle and harness (R4/R6/R7/R8)
 
 Freezes the demo shape: which queries, which aggregates, how keys work, and

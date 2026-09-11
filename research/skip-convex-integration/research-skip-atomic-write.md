@@ -1,3 +1,16 @@
+---
+title: "Skip atomic write (R2/R3/R4)"
+author: bill
+direction: "Direction 1: Skip as reactive client"
+scope: "1a-direct-sync-protocol-mapping"
+key_topics:
+  - "isInit/native_eq reconciliation"
+  - "per-query fork/merge finding"
+  - "missing batch primitive"
+  - "no-diff rule"
+  - "reducer bar"
+---
+
 # Skip atomic write (R2/R3/R4)
 
 How each Transition becomes one atomic `isInit:true` write per query with no
