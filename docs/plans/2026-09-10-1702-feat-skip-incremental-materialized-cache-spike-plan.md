@@ -52,7 +52,7 @@ The open question is whether Convex can host that incremental capability without
 
 ### Why This Can Be Effective and Minimally Invasive
 
-The engine is effective only if it receives committed row changes before Convex turns them back into whole query results. R1-R4 let Skip retain operator state across commits and update only the affected join, filter, ordering, and reduction dependencies. R17-R21 mirror Convex's system indexes, application indexes, and typed ID relationships instead of constructing a second, unrelated query planner. A one-shot Skip function inside the existing query pipeline would run Skip code but would not supply that persistent incremental maintenance.
+The engine is effective only if it receives committed row changes before Convex turns them back into whole query results. R1-R4 let Skip retain operator state across commits and update only the affected join, filter, ordering, and reduction dependencies. R17-R22 mirror Convex's system indexes, application indexes, and typed ID relationships instead of constructing a second, unrelated query planner. A one-shot Skip function inside the existing query pipeline would run Skip code but would not supply that persistent incremental maintenance.
 
 The change is minimally invasive because the new state is an opt-in cache, not a second database. R5, R9, R11, and R16 leave authoritative writes, normal UDF execution, result shapes, and the native read path intact. The backend commit/write log is a plausible internal construction point, but it is not treated as an existing stable extension API or as a new public changefeed.
 
