@@ -60,7 +60,7 @@ The optimization disappears at the Skip boundary if JavaScript concatenates ever
 
 **Correctness and lifecycle**
 
-- R9. At controlled settled checkpoints, the Skip feed and aggregate match an independent monolithic indexed Convex query covering the same loaded prefix across bootstrap, insert, update, delete, page split, load-more, reconnect, and query failure recovery.
+- R9. At controlled settled checkpoints, with writes quiesced or tagged by a workload revision, the Skip feed and aggregate match an independent monolithic indexed Convex query covering the same loaded prefix across bootstrap, insert, update, delete, page split, load-more, reconnect, and query failure recovery. Both paths must report results for the same revision before correctness is evaluated, including after rebuilds and reconnects.
 - R10. When any required page fails or its cursor becomes invalid, the source retains the last complete window as stale until it rebuilds a coherent page set; it never labels a partial window current.
 
 **Scaling evidence**
@@ -125,7 +125,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 - F3. Comparison run
   - **Trigger:** A5 runs the same controlled workload at another dataset or page size.
   - **Actors:** A1, A3, A5
-  - **Steps:** A5 compares the paginated Skip result with the monolithic indexed result at settled checkpoints and records logical-work counts, state size, payload, and timers for both paths.
+  - **Steps:** A5 quiesces writes or tags them with a workload revision, compares paginated and monolithic results for that same revision at settled checkpoints, and records logical-work counts, state size, payload, and timers for both paths.
   - **Outcome:** The report shows where page granularity changes the scaling curve and what subscription or bootstrap cost it introduces.
   - **Covers:** R9, R11-R14.
 
