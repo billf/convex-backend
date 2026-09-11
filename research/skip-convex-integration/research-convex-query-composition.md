@@ -254,7 +254,7 @@ User JavaScript code runs in a V8 isolate (Deno runtime). When user code calls `
 
 ### 2.2 Query Syscall Interface (isolate/src/environment/udf/syscall.rs)
 
-#### Main Syscall Dispatch (syscall.rs:127-151)
+#### Main Syscall Dispatch (syscall.rs:127-151, sync syscalls only)
 
 ```rust
 pub fn syscall_impl<RT: Runtime, P: SyscallProviderInternal<RT>>(
@@ -265,9 +265,11 @@ pub fn syscall_impl<RT: Runtime, P: SyscallProviderInternal<RT>>(
     match name {
         "1.0/queryCleanup" => syscall_query_cleanup(provider, args),
         "1.0/queryStream" => syscall_query_stream(provider, args),
-        "1.0/queryStreamNext" => syscall_query_next(...),
-        "1.0/queryPage" => syscall_query_page(...),
-        // ... other syscalls
+        // ... other sync syscalls (normalizeId, componentArgument, ...)
+        // NOTE: "1.0/queryStreamNext" and "1.0/queryPage" are NOT here —
+        // they are async/batched syscalls dispatched in async_syscall.rs
+        // ("1.0/queryStreamNext" joins the Reads batch, "1.0/queryPage"
+        // goes through the Unbatched query_page path).
     }
 }
 ```
@@ -544,7 +546,8 @@ This would serialize the Skip filter code and add it to the QueryOperator chain.
 | `database/src/query/limit.rs` | Limit operator | 23-83: Limit struct and QueryStream impl |
 | `database/src/query/index_range.rs` | IndexRange source | IndexRange implementation |
 | `common/src/query.rs` | Query types | 662-669: QuerySource enum; 899-904: QueryOperator enum; 675-712: Expression enum |
-| `isolate/src/environment/udf/syscall.rs` | Syscall dispatch | 127-151: syscall_impl dispatch; 221-246: syscall_query_stream; 96-107: start_query |
+| `isolate/src/environment/udf/syscall.rs` | Sync syscall dispatch | 127-151: syscall_impl dispatch (`queryCleanup`, `queryStream` only); 221-246: syscall_query_stream; 96-107: start_query |
+| `isolate/src/environment/udf/async_syscall.rs` | Async/batched dispatch | `queryStreamNext` joins the Reads batch; `queryPage` via the Unbatched query_page path |
 
 ---
 

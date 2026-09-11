@@ -144,14 +144,16 @@ pub struct IndexKeyWrites {
 - **Overlap detection**: Boolean check: "Did a write overlap with a read?" (yes/no)
 - **Coarse triggering**: "Query result may have changed, re-run it"
 
-**Evidence File**: `crates/database/src/reads.rs:233-239`
+**Evidence File**: `crates/database/src/reads.rs:187-191`
 ```rust
-/// writes_overlap_by_index is the core logic for
+/// writes_overlap_docs is the core logic for
 /// detecting whether a transaction or subscription intersects a commit.
 /// If a write transaction intersects, it will be retried to maintain
 /// serializability. If a subscription intersects, it will be rerun and the
 /// result sent to all clients.
 ```
+(The index-efficient variant used by subscriptions and OCC validation is
+`writes_overlap_by_index`, `reads.rs:229-239`.)
 
 #### What Convex-Backend DOES NOT Have:
 - **No fine-grained delta propagation**: Writes are not decomposed into deltas that flow through query pipeline stages.
