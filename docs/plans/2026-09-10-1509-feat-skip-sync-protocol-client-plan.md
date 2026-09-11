@@ -13,10 +13,10 @@ execution: code
 
 ## Goal Capsule
 
-- **Objective:** Demonstrate that Skip can derive a correct, incrementally-computed, cross-table aggregate from convex-backend's live data — using a chatroom-style app — by consuming convex-backend's reactivity directly, with no backend changes and no client-side value diffing, establishing whether this integration path is worth generalizing.
-- **Means:** An in-process TypeScript Skip external service that owns its own WebSocket to convex-backend's `/api/sync` protocol, writes each Convex transaction into Skip as one atomic update per query (`isInit: true`), and lets Skip's own reconciliation — not hand-rolled diffing — maintain the derived collections.
+- **Objective:** Demonstrate that Skip can derive a correct, transaction-consistent, incrementally computed cross-table aggregate from convex-backend's live data, and bound the work a general sync-protocol integration would still require.
+- **Means:** An in-process TypeScript Skip external service owns a WebSocket to convex-backend's `/api/sync` protocol, applies each fully assembled server transition to Skip as one atomic update, and relies on Skip's snapshot reconciliation instead of bridge-side row diffing.
 - **Product authority:** Settled by the user across two sessions (an interrupted prior session and this one). This plan owns sub-direction 1a only — see How This Work Fits Together for the surrounding, deliberately-separated directions that are not active scope.
-- **Open blockers:** None — dialogue reached its exit conditions and every checkable claim in this plan was verified against source.
+- **Open blockers:** None at product scope. Planning must choose between one combined Skip input domain and a narrowly scoped multi-collection atomic-write capability to satisfy R2.
 
 ---
 
@@ -24,40 +24,43 @@ execution: code
 
 ### Summary
 
-A proof-of-concept where a Skip sync client speaks convex-backend's sync WebSocket protocol directly, with no backend changes, treating each Convex transaction as one atomic write into Skip. A chatroom app combining a Skip example with the Convex tutorial demonstrates a cross-table aggregate computed correctly and incrementally — something the existing snapshot-diffing adapter branch cannot guarantee, because it receives Convex's per-query updates torn apart.
+A proof of concept where a Skip sync client speaks convex-backend's sync WebSocket protocol directly, with no backend changes. It preserves each synchronized server state transition as one atomic Skip update. A chatroom app combining a Skip example with the Convex tutorial demonstrates a cross-table aggregate maintained by Skip's incremental engine without bridge-side row diffing.
 
 ### Problem Frame
 
-The only existing Skip+Convex integration is the `billf/convex/adapter` branch (in `~/src/skip`). It already avoids literal polling — it uses `ConvexClient.onUpdate`, a real push subscription — but it still runs through the JS `ConvexClient` and a Node-side `ExternalService` that diffs each new query snapshot against an in-memory copy of the previous one before feeding Skip. It also receives Convex's per-query updates one callback at a time, so a single Convex mutation that touches two tables can arrive at Skip as two separate, temporally torn updates.
+The only existing Skip+Convex integration is the `billf/convex/adapter` branch in `~/src/skip`. It already avoids polling by using the push-based `ConvexClient.onUpdate` callback. However, its Node-side `ExternalService` diffs every new query snapshot against a retained copy before feeding Skip, and independent per-query callbacks can expose intermediate cross-query states to the Skip graph.
 
-convex-backend's own reactivity model is coarse — a changed query is fully re-run on invalidation, not incrementally recomputed — so the adapter's approach isn't an obviously wrong reading of what the client layer exposes. But the sync protocol underneath the JS client exposes more than the client surfaces: it bundles every query that changed in one Convex transaction into a single `Transition` message, and the protocol is not JS- or browser-specific. That structural fact is unused today and is the basis for this proof-of-concept.
+convex-backend's reactivity is coarse: an invalidated query is run again and the sync protocol sends its full new result, not row-level changes. The protocol nevertheless groups the query modifications for one synchronized state advance in a `Transition`. The lower-level `BaseConvexClient.addOnTransitionHandler` also exposes this grouping, so owning the raw socket is not the only way to preserve it. This proof of concept keeps the direct-protocol choice to establish a client baseline with no dependency on `ConvexClient`; Direction 1c owns any future row-level backend changefeed.
 
 ### Key Decisions
 
-- **Direct sync-protocol client, not a JS-client wrapper.** The Skip sync client owns its own WebSocket to `/api/sync` instead of going through `ConvexClient`, so it operates on whole `Transition` messages instead of per-query callbacks. (session-settled: user-directed — chosen over emulating reactivity through polling or a client-side shim, which was explicitly rejected from the outset.) Governs R1, R2.
-- **Each Convex transaction is one atomic write into Skip.** Every query in one `Transition` is written to Skip together, so a cross-table derived value never observes a state where one table advanced and another didn't. Governs R2.
-- **No hand-rolled value diffing.** The service writes each query's full current row set into Skip with `isInit: true` and lets Skip's own reconciliation compute what changed, rather than retaining a previous-snapshot map and diffing in TypeScript the way the adapter branch does. Governs R3.
+- **Direct sync-protocol client, not a JS-client wrapper.** (session-settled: user-directed — chosen over emulating reactivity through polling or a client-side snapshot-diff shim, which was explicitly rejected from the outset.) Governs R1.
+- **Preserve server-transition atomicity.** Every fully assembled `Transition` becomes one Skip update unit. Governs R2, R10.
+- **No hand-rolled row diffing.** Skip's native snapshot reconciliation owns change detection. Governs R3.
 - **In-process TypeScript, not an out-of-process Rust pump.** (session-settled: user-directed — chosen over a Rust process reusing convex-backend's existing Rust sync client: matches "prove first, generalize later"; the Rust route pays a real generalization cost this PoC doesn't need to pay yet.) Governs R1.
-- **Success is correctness, not performance.** (session-settled: user-directed — chosen over also quantifying latency/overhead against the adapter branch.) Governs R6.
+- **Success is bounded semantic correctness, not performance or production readiness.** (session-settled: user-directed — chosen over also quantifying latency or resource overhead against the adapter branch.) Governs R6, R11.
 - **Failed queries freeze at last-good rather than going blank.** (session-settled: user-directed — chosen over blanking on `QueryFailed`, which is how the adapter branch behaves today: freezing is more graceful but requires the demo to be honest that a frozen value can be stale.) Governs R5.
 
 ### Requirements
 
 **Sync-protocol client**
-- R1. The Skip sync client subscribes to Convex queries by speaking the `/api/sync` WebSocket protocol directly, with no dependency on the JS `ConvexClient` and no changes to convex-backend itself.
-- R2. Each `Transition` message the client receives is applied to Skip as a single atomic update spanning every query in that transition, not as independent per-query writes.
+- R1. The Skip sync client implements the read-only `/api/sync` subset required for the proof without depending on the JS `ConvexClient` or changing convex-backend: connect, one pinned authentication mode, query-set changes, transitions, liveness, fatal errors, and reconnect with a fresh query snapshot.
+- R2. Each fully reassembled `Transition` is applied to Skip as one atomic update spanning every included query modification, not as independent per-query writes.
 
 **Reconciliation**
-- R3. Row-level adds, updates, and removals for a query are derived by writing that query's full current row set into Skip with `isInit: true` on each transition, not by the client computing a diff against a retained previous value.
+- R3. The client presents each updated query's complete current row set to Skip with snapshot semantics, and Skip derives row additions, updates, and removals through its `isInit: true` reconciliation path rather than a bridge-computed diff.
 
 **Skip-side computation**
 - R4. At least one derived value is computed inside Skip via its reducer mechanism from data spanning more than one Convex query/table, so the demo evidences genuine incremental computation rather than a 1:1 relay of Convex data.
 
 **Failure handling**
 - R5. When a subscribed query enters a failed state, its previously-derived Skip view is retained (frozen at last-good) rather than cleared, and the demo surfaces that the value may be stale.
+- R9. When the server acknowledges an unsubscribe with `QueryRemoved`, the client removes that query's rows inside the enclosing R2 atomic update; it does not preserve them as last-good state.
+- R10. A chunk-eligible client reassembles and validates every `TransitionChunk` sequence before performing the single R2 update; individual chunks are never visible to Skip.
 
 **Acceptance bar**
-- R6. The demo's Skip-derived aggregate matches Convex's own data for the same point in time. No formal latency or resource-overhead comparison against the `billf/convex/adapter` branch is required.
+- R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived aggregate matches an independent Convex reader across bootstrap, a multi-table update, query failure and recovery, unsubscribe, and reconnect with a fresh snapshot. No formal latency or resource-overhead comparison is required.
+- R11. The proof records the implemented protocol surface, its code and test footprint, and every production concern it does not exercise, so a passing R6 establishes bounded semantic feasibility rather than an unqualified recommendation to generalize.
 
 **Proof vehicle**
 - R7. The demonstration combines a Skip chatroom example from `~/src/skip/examples/*` with the Convex tutorial app (`~/src/convex-tutorial`).
@@ -84,9 +87,9 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 ### Key Flows
 
 - F1. Live cross-table aggregate update
-  - **Trigger:** A user action causes a Convex mutation that touches two or more of the demo's subscribed tables in one transaction (e.g. posting a message and updating a per-room counter).
+  - **Trigger:** A user action changes two or more of the demo's subscribed query results in one Convex transaction.
   - **Actors:** A1, A2, A3, A4
-  - **Steps:** A1 commits the mutation and sends one `Transition` covering every changed query. A2 applies all of that transition's row-set writes to Skip atomically (`isInit: true` per query). A3's reducer recomputes the derived aggregate from the now-consistent state. A4 sees the updated aggregate.
+  - **Steps:** A1 advances the synchronized state and sends one `Transition` covering the changed query results. A2 reassembles it if necessary and applies its snapshot writes to Skip atomically. A3 incrementally updates the affected derived state. A4 sees the updated aggregate.
   - **Outcome:** The aggregate reflects a state where both tables have advanced together; it never displays an intermediate state where only one has.
   - **Covers:** R2, R3, R4.
 - F2. Query failure and recovery
@@ -95,6 +98,12 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
   - **Steps:** A1 sends a failed-query modification. A2 leaves the query's existing rows in Skip untouched rather than clearing them. A4 continues to see the last-good derived value, with a visible indicator that it may be stale. When the query recovers, A2 resumes writing fresh `isInit: true` row sets and the view un-freezes.
   - **Outcome:** The demo never goes blank on a transient failure, and the viewer is not misled into thinking a stale value is current.
   - **Covers:** R5.
+- F3. Unsubscribe cleanup
+  - **Trigger:** The client removes a live query from its query set.
+  - **Actors:** A1, A2, A3
+  - **Steps:** A1 acknowledges the removal in a `Transition`. A2 clears the query's rows in the same atomic Skip update as the transition's other modifications. A3 removes their contributions from derived collections.
+  - **Outcome:** An unsubscribed query cannot leave ghost rows in a reducer or join.
+  - **Covers:** R2, R9.
 
 ### Acceptance Examples
 
@@ -106,6 +115,29 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
   - **Given:** The demo is running and displaying a live per-room count.
   - **When:** The subscribed query underlying that count enters a failed state.
   - **Then:** The displayed count remains at its last-good value and the UI indicates it may be stale, until the query recovers.
+- AE3. Chunked transition atomicity
+  - **Covers:** R2, R10.
+  - **Given:** A protocol fixture divides one valid transition into several ordered chunks.
+  - **When:** The client receives all chunks.
+  - **Then:** Skip observes exactly one complete update after reassembly and no partial update before it.
+- AE4. Removal is not failure
+  - **Covers:** R5, R9.
+  - **Given:** A live query contributes rows to the cross-table aggregate.
+  - **When:** The client unsubscribes and the server returns `QueryRemoved`.
+  - **Then:** Those rows stop contributing within the enclosing transition, while `QueryFailed` still preserves last-good rows.
+- AE5. Reconnect snapshot
+  - **Covers:** R1, R3, R6.
+  - **Given:** The demo has received a correct aggregate and then loses its WebSocket.
+  - **When:** It reconnects, re-adds its live queries, and receives fresh full results.
+  - **Then:** Skip reconciles to the fresh synchronized state without a bridge-side diff or stale rows from the prior connection.
+
+### Success Criteria
+
+- Every R6 scenario produces the same aggregate as the independent Convex result at its controlled settled checkpoint.
+- The aggregate uses a Skip reducer with correct add and remove behavior; forwarding Convex snapshots without maintained Skip computation does not pass.
+- The protocol fixture suite proves that chunk boundaries and query removal cannot expose torn or orphaned Skip state.
+- The final report identifies the raw-client surface implemented by the proof and separately lists untested production concerns, including token refresh and expiry, concurrent sessions, mutation and action correlation, durable replay, and end-to-end transitions above the chunk threshold.
+- A passing proof supports a later generalization decision but does not make that decision by itself.
 
 ### Scope Boundaries
 
@@ -115,7 +147,8 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 - The simpler one-collection-per-query variant of this plan's approach (without the transaction-atomicity mechanism) — a legitimate lighter-weight alternative worth its own follow-up if the atomicity mechanism turns out to add more complexity than value in practice.
 - An out-of-process Rust client reusing convex-backend's existing Rust sync client, for a future publishable or language-agnostic version.
 - A quantified latency/resource-overhead comparison against the `billf/convex/adapter` branch.
-- Durable delta replay across reconnects — a limitation of the underlying sync protocol itself (reconnection re-sends the query set and re-snapshots), not something this integration changes.
+- Production sync-client behavior beyond the bounded read-only proof, including rotating user authentication, concurrent sessions, mutation and action request correlation, and durable replay.
+- End-to-end testing with transitions above the chunk threshold; the proof covers chunk reassembly with protocol fixtures.
 
 **Outside this product's identity**
 - Direction 2 — convex-backend natively running Skip-authored logic (triggers, composable queries/filters/mappers) inside the backend itself. A separate, distant direction, not a later phase of this one.
@@ -125,13 +158,22 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 
 - Assumes local checkouts of `~/src/skip` (for skipruntime-ts and the chatroom example) and `~/src/convex-tutorial` remain available and roughly in their current shape.
 - Assumes a running convex-backend deployment to connect to. The auth mode for the demo's sync connection (e.g. an admin key vs. a real user token) has no product-facing consequence for a correctness-only PoC and is left to planning.
-- A half-day de-risking spike is available before committing to owning the raw socket: `BaseConvexClient.addOnTransitionHandler` (still the JS client, not the deliverable) already exposes the full `Transition` with its timestamp, so the transaction-atomicity claim behind Key Decision 2 can be validated cheaply before R1/R2 are built against the raw protocol.
+- Skip Runtime's public TypeScript API does not currently expose one atomic write spanning several external collections. Planning must satisfy R2 with one combined input domain or a narrowly scoped atomic multi-collection update capability.
+- `BaseConvexClient.addOnTransitionHandler` provides a lower-cost way to validate transition grouping before the raw client is built, but it does not validate raw connection, authentication, query-set, chunk, liveness, or reconnect behavior.
 
 ### Outstanding Questions
 
 **Deferred to Planning**
 - Which specific cross-table aggregate the demo computes (e.g. per-room message count vs. another candidate) — any real aggregate spanning more than one query satisfies R4.
 - The demo's auth mode for its sync connection (see Dependencies / Assumptions).
+- Whether one combined Skip input domain or a scoped multi-collection atomic update is the smaller way to satisfy R2.
+
+### Alternatives Considered
+
+- **Use `BaseConvexClient.addOnTransitionHandler`.** This preserves transition grouping with much less protocol code. It remains a valid fallback, but it does not establish the direct-protocol client baseline selected for 1a and still inherits the JS client's broader lifecycle and optimistic-update machinery.
+- **Keep the existing per-query adapter and remove only its JavaScript diff.** Skip would own reconciliation, but separate callbacks could still expose intermediate cross-query states.
+- **Reuse the Rust sync client in a sidecar.** This reduces protocol reimplementation and may suit a publishable follow-up. It adds a process boundary and does not provide the TypeScript `isInit: true` path directly, so it is outside this bounded proof.
+- **Add backend row-level change events first.** This would remove full-query snapshots from the bridge, but it is Direction 1c and would violate 1a's no-backend-change boundary.
 
 ### Sources / Research
 
@@ -139,29 +181,12 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 - `research/skip-convex-integration/research-skip-engine.md` — Skip's incremental engine internals (`EagerCollection`/`LazyCollection`, `Mapper`/`Reducer`).
 - `research/skip-convex-integration/research-skip-externals-adapter.md` — Skip's externals model, skipruntime-ts's public API shape, and the `billf/convex/adapter` branch's design and limitations.
 - `research/skip-convex-integration/research-convex-query-composition.md` — convex-backend's query/UDF execution model.
+- `research/skip-convex-integration/research-skip-atomic-write.md` — Skip Runtime's per-collection update boundary and the missing public multi-collection batch primitive.
+- `research/skip-convex-integration/research-sync-wire-ts-checklist.md` — the read-only TypeScript protocol surface and transition-chunk behavior.
+- `research/skip-convex-integration/research-1a-review-answers.md` — verified answers to the four review findings and the limits of a correctness-only proof.
 - `crates/convex/sync_types/src/types/mod.rs` — the wire contract: `StateModification` (`QueryUpdated`/`QueryFailed`/`QueryRemoved`, each carrying a query's full new value, not a row-level diff), `ServerMessage::Transition` (bundles all changed queries at one state version), `AuthenticationToken`.
 - `crates/convex/src/client/` — the existing Rust sync client, confirming the protocol has no browser/JS-specific requirements.
 - `~/src/skip`, `skiplang/prelude/src/skstore/EagerDir.sk` — the structural-equality (`native_eq`) short-circuit that makes `isInit: true` writes a free, exact diff.
 - `~/src/skip`, `skipruntime-ts/skiplang/core/src/Runtime.sk` and `skipruntime-ts/core/src/index.ts` — `isInit` reset semantics and the `ExternalService.update` wiring.
 - `~/src/skip`, `skipruntime-ts/adapters/convex/src/index.ts` on branch `billf/convex/adapter` — the baseline being improved on.
-- `npm-packages/convex/src/browser/sync/client.ts` — `BaseConvexClient` and `addOnTransitionHandler`, the de-risking spike's entry point.
-
-## Deferred / Open Questions
-
-### From 2026-09-10 review
-
-- **No instruction for handling removed queries** — Requirements (P2, scope-guardian, confidence 75)
-
-  The plan names three wire-level change types the sync client must handle but writes requirements for only two, leaving no instruction for what happens when a subscribed query is removed by the server. This risks stale or orphaned rows lingering in Skip's derived state if the demo ever unsubscribes or resubscribes (e.g. switching rooms), undermining the correctness bar the plan is meant to guarantee.
-
-- **Correctness-only bar doesn't test whether this integration is worth generalizing** — Goal Capsule / Requirements (P2, adversarial, confidence 75)
-
-  Every requirement in the plan could be satisfied while its own stated goal — deciding whether this integration path is worth generalizing — stays unanswered. The one acceptance bar (R6, the correctness-only success bar) only tests one small demo shape and explicitly excludes performance, reconnects, and larger transactions, so a technically-passing demo may still leave the real decision resting on tacit judgment.
-
-- **Atomicity guarantee doesn't account for chunked transitions** — Key Decisions / Sources and Research (P2, adversarial, confidence 75)
-
-  The plan's atomic-per-transaction guarantee (R2, one atomic write into Skip per transaction) assumes the sync protocol always delivers a transaction as a single message. The protocol can fragment a large transaction across multiple chunks for certain client types, and the plan does not say whether the new client avoids or handles that case, so the atomicity guarantee is not actually assured as written.
-
-- **De-risking spike validates only one narrow claim, not the load-bearing raw-client decision** — Dependencies / Assumptions (P2, adversarial, confidence 75)
-
-  The plan's only pre-build validation step checks just one claim — that transactions arrive as a whole — rather than whether building and maintaining a from-scratch protocol client is tractable at all. The riskiest, hardest-to-reverse part of the plan (the decision to own a raw socket instead of the JS client) could only be found unworkable after most of the build is already done.
+- `npm-packages/convex/src/browser/sync/client.ts` — `BaseConvexClient` and `addOnTransitionHandler`, the lower-cost transition-grouping alternative.
