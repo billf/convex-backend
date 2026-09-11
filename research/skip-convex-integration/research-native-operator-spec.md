@@ -31,7 +31,8 @@ with a less explicit wire shape.
 TS (`npm-packages/convex/src/server/`):
 - `impl/query_impl.ts:24` extend `QueryOperator` union (`{skip:{...}}`);
   add `QueryImpl.skipX()` mirroring `filter:225-241`/`limit:243-248`,
-  respecting `MAX_QUERY_OPERATORS:22`; `server/query.ts` interface addition.
+  respecting `MAX_QUERY_OPERATORS = 256` (`query_impl.ts:22`,
+  `crates/common/src/query.rs:912`); `server/query.ts` interface addition.
 
 Rust:
 - `crates/common/src/query.rs:899-904` add variant + constructor;

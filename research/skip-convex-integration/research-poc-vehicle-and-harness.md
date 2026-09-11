@@ -1,7 +1,7 @@
 ---
 topic: proof-vehicle
 phase: research
-direction: shared
+direction: 2
 validates_requirements:
   - R2
   - R3
@@ -10,15 +10,13 @@ validates_requirements:
   - R7
   - R8
 related_plans:
-  - 2026-09-10-1509-feat-skip-sync-protocol-client-plan.md
-  - 2026-09-10-1843-feat-skip-paginated-reactive-source-spike-plan.md
-  - 2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md
   - 2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md
 serves:
-  - 1a: A1/A2 aggregates, keying/encoding rules, R6 parallel-reader harness
-  - 1b: take(N) placement, order-key design, key stability rules
-  - 1c: messages/users source tables, Unknown fallback, harness shape
-  - Direction 2: all sections (proof queries, aggregates, harness)
+  - Direction 2: proof queries, aggregates, harness (only citing plan)
+pointers:
+  - 1a readers: PoC vehicle in research-sync-protocol-skip-mapping.md §4
+  - 1b readers: vehicle and scale points in the 1b spike plan + research-1b-page-topology.md
+  - 1c readers: messages/users source tables in the 1c spike plan (fixed selection, R2)
 ---
 
 # PoC vehicle and harness (R4/R6/R7/R8)

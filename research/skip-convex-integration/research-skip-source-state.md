@@ -14,9 +14,11 @@ harnesses must inject. Serves 1a/1b/1c and the Direction 2 read path.
 ## Combined input (atomicity without a runtime change)
 
 Constraint: N external writers = N fork/merge ticks with intermediates
-visible (`core/src/index.ts:476-501`; no public `updateMany` or fork
-handle; `ServiceInstance.update` batches one input collection only).
-Recommended shape — **single namespaced-key collection**: one external
+visible. External writes go through `CollectionWriter.update(values,
+isInit)` (`core/src/index.ts:476-501`, isInit-aware, per-resource);
+`ServiceInstance.update(collection, entries)` (`:768-782`) is the
+inputs-only analogue (no `isInit` param) and equally single-collection.
+Neither exposes `updateMany` or a fork handle. Recommended shape — **single namespaced-key collection**: one external
 resource holding all tables, key `"<component>/<table>/<id>"` (or
 `[table,_id]` tuple), value envelope
 `{ts, deleted, component, table, _id, _creationTime, doc}`. One
@@ -80,8 +82,24 @@ partial-current; freshness watermark never advances on failure.
 the enclosing atomic update. Direction 2 read path: version-gated freshness
 with silent-but-counted native fallback; native result is the oracle.
 
-## Fault injection (planning-owned)
+## Per-spike usage (integration map)
 
+Which sections each spike plan consumes (plans remain authoritative; this
+is the cross-check that the doc is integrated, not aspirational):
+
+- 1a sync-protocol client: combined input shape (one tick per reassembled
+  Transition, R2), no-diff + `isInit` writes (R3), reducer bar (R4),
+  restart-rebuild + `QueryFailed`/`QueryRemoved` rules (R5/R9).
+- 1b paginated source: combined input shape for page-group/swap atomicity
+  (R4), order-key views + `take(N)` placement (R6), disjointness via
+  stable keys, reducer under swap, reconnect stale-window rules (R10).
+- 1c push stream: per-`ts`-group atomic apply (R8), cursor-after-apply
+  checkpointing (R9), in-value revision watermarks + tombstone policy,
+  truncation-before-values, staging-generation promote (R6/R7).
+- Direction 2 read path: version-gated freshness with counted native
+  fallback, native result as oracle, rebuild semantics (R6/R9-R12).
+
+## Fault injection (planning-owned)
 Disconnect-before-checkpoint; cursor expiry/invalid/ahead; table
 replacement + return to `snapshotting`; large txn exceeding soft limits
 (16384 entries / 64MiB / 32768 rows); multi-table txn in one unit (needs an

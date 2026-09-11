@@ -1,3 +1,11 @@
+---
+title: 1b page topology (paginated reactive source)
+type: research-note
+status: active
+direction: 1b
+date: 2026-09-11
+---
+
 # 1b page topology (paginated reactive source)
 
 How index-ordered Convex pages reach Skip as separate regions with atomic

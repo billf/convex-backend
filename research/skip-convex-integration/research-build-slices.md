@@ -10,9 +10,14 @@ scope: "Slice-discipline template predating the four spike plans in docs/plans/.
 
 # Build slices (ordered, testable)
 
-Synthesis only. Turns the "future work" sections of the four existing notes
-plus the three specs above into build order. Each slice states done-criteria;
-no slice modifies an existing research note.
+Synthesis only. Turns the "future work" sections of the four original
+foundation notes (`research-convex-reactivity.md`,
+`research-convex-query-composition.md`, `research-skip-engine.md`,
+`research-skip-externals-adapter.md`) plus the three construction specs
+written immediately before it (`research-skip-client-v2.md`,
+`research-delta-seam.md`, `research-native-operator-spec.md`) into build
+order. Each slice states done-criteria; no slice modifies an existing
+research note.
 
 ## Slices
 
