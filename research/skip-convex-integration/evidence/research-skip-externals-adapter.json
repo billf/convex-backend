@@ -121,7 +121,7 @@
     "stated_purpose": [
       "Skip's externals/polling model for ingesting outside data",
       "skipruntime-ts's public API shape",
-      "detailed teardown of the existing billf/convex/adapter branch (snapshot-based polling with reactive diffing — its concrete limitations set the bar for 'a better integration')"
+      "detailed teardown of the existing billf/convex/adapter branch (snapshot-based polling with reactive diffing \u2014 its concrete limitations set the bar for 'a better integration')"
     ],
     "coverage": {
       "externals_polling_model": {
@@ -152,5 +152,11 @@
     "status": "active",
     "direction": "foundation",
     "date": "2026-09-11"
+  },
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
   }
 }

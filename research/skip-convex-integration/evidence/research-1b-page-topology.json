@@ -115,5 +115,11 @@
     "verdict": "pass"
   },
   "frontmatter_status": "missing",
-  "notes": "Document lacks YAML frontmatter. Needs: title, type: research-note, status: active, direction: 1b, date: 2026-09-11. All verified claims are accurate and map precisely to implementation. Split lifecycle, fingerprint gating, cursor bounding, and metrics enumeration all match source code. Disjointness/ordering constraints are deferred appropriately as Skip-side mapper design decisions per README. Document adequately grounds the 1b spike plan requirements."
+  "notes": "Document lacks YAML frontmatter. Needs: title, type: research-note, status: active, direction: 1b, date: 2026-09-11. All verified claims are accurate and map precisely to implementation. Split lifecycle, fingerprint gating, cursor bounding, and metrics enumeration all match source code. Disjointness/ordering constraints are deferred appropriately as Skip-side mapper design decisions per README. Document adequately grounds the 1b spike plan requirements.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

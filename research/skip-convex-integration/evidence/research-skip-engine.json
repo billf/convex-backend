@@ -105,5 +105,11 @@
     "verdict": "pass"
   },
   "frontmatter_status": "missing",
-  "notes": "Document lacks YAML frontmatter. Needs: title, type: research-note, status: active, direction: foundation, date: 2026-09-11. All verified claims are accurate and up-to-date. All file paths exist. RFC 008 and API definitions match document claims. Examples and interface signatures are precise."
+  "notes": "Document lacks YAML frontmatter. Needs: title, type: research-note, status: active, direction: foundation, date: 2026-09-11. All verified claims are accurate and up-to-date. All file paths exist. RFC 008 and API definitions match document claims. Examples and interface signatures are precise.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

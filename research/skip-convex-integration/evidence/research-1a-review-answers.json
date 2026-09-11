@@ -5,7 +5,7 @@
   "adequacy_verdict": "pass",
   "readme_purpose": "closes the four 1a review questions (QueryRemoved delete rule, chunk eligibility + reassemble-then-write, raw-client cost, R6 limits)",
   "sections_addressed": [
-    "QueryRemoved → delete inside the atomic unit",
+    "QueryRemoved \u2192 delete inside the atomic unit",
     "Chunks: eligible, atomicity via reassemble-then-write-once",
     "Raw-client tractability beyond the spike",
     "What passing R6 does not establish"
@@ -61,7 +61,7 @@
       "status": "pass"
     },
     {
-      "claim": "AuthenticationManager implements cached → fresh → pre-expiry refetch state machine",
+      "claim": "AuthenticationManager implements cached \u2192 fresh \u2192 pre-expiry refetch state machine",
       "source_file": "npm-packages/convex/src/browser/sync/authentication_manager.ts",
       "source_lines": "53-136",
       "verification": "CONFIRMED - AuthState enum defines named states: waitingForServerConfirmationOfCachedToken, initialRefetch, waitingForServerConfirmationOfFreshToken",
@@ -76,5 +76,11 @@
     "question_3_raw_client_cost": "ADDRESSED - Section 3 enumerates all unimplemented features (Connect lifecycle, Authenticate state machine, ModifyQuerySet versioning, mutation correlation, heartbeat, backoff, QuerySet resend, version negotiation, chunk reassembly) and planning instruction to scope PoC or acknowledge re-implementation burden",
     "question_4_r6_limits": "ADDRESSED - Section 4 explicitly lists what R6 does not establish (reconnect/resumption, >5MB paths, multi-session, token refresh, mutation/action lifecycle, unsubscribe, performance) and recommends documenting this explicitly"
   },
-  "evidence_summary": "All 8 spot-checked claims verified against source code. Document precisely closes all four 1a review questions with planning instructions grounded in actual codebase behavior. Adequacy is high; frontmatter is optional enhancement only."
+  "evidence_summary": "All 8 spot-checked claims verified against source code. Document precisely closes all four 1a review questions with planning instructions grounded in actual codebase behavior. Adequacy is high; frontmatter is optional enhancement only.",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

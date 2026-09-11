@@ -88,7 +88,7 @@
       },
       "unknowns_catalogued": {
         "status": "pass",
-        "detail": "Section 'Unknowns left to planning' explicitly lists: auth mode (None/Admin/User JWT), Convex-Client version string, chunk opt-in negotiation, sessionId reuse vs fresh, QueryRemoved→Skip mapping, journal round-trip for non-paginated queries, demo queries/aggregate"
+        "detail": "Section 'Unknowns left to planning' explicitly lists: auth mode (None/Admin/User JWT), Convex-Client version string, chunk opt-in negotiation, sessionId reuse vs fresh, QueryRemoved\u2192Skip mapping, journal round-trip for non-paginated queries, demo queries/aggregate"
       }
     }
   },
@@ -120,5 +120,11 @@
     "open_items": "documented - 7 unknowns listed for planning"
   },
   "overall_verdict": "pass",
-  "reason": "Comprehensive per-message/field/lifecycle checklist covering all ClientMessage/ServerMessage types with detailed field specifications, complete lifecycle documentation from connect→subscribe→transition→reconnect, R1/R2/R5 coverage verified against source, 7 verified claims spot-check accurate, all transport/protocol/liveness details concrete. Adequately serves Direction 1a purpose as grounding material for sync-protocol client design. Only deficiency is missing frontmatter (minor)."
+  "reason": "Comprehensive per-message/field/lifecycle checklist covering all ClientMessage/ServerMessage types with detailed field specifications, complete lifecycle documentation from connect\u2192subscribe\u2192transition\u2192reconnect, R1/R2/R5 coverage verified against source, 7 verified claims spot-check accurate, all transport/protocol/liveness details concrete. Adequately serves Direction 1a purpose as grounding material for sync-protocol client design. Only deficiency is missing frontmatter (minor).",
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

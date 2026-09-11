@@ -136,33 +136,50 @@
       "queries_definition": {
         "covered": true,
         "quality": "good",
-        "sections": ["1.1 TypeScript Client API", "sections with QueryInitializer, Query interfaces"]
+        "sections": [
+          "1.1 TypeScript Client API",
+          "sections with QueryInitializer, Query interfaces"
+        ]
       },
       "queries_execution": {
         "covered": true,
         "quality": "good",
-        "sections": ["1.2 Rust Backend Execution Path", "Query Construction, QueryNode enum, QueryStream trait"]
+        "sections": [
+          "1.2 Rust Backend Execution Path",
+          "Query Construction, QueryNode enum, QueryStream trait"
+        ]
       },
       "queryoperator": {
         "covered": true,
         "quality": "good",
-        "sections": ["3.3 Extension Point: QueryOperator Enum", "4 UDF Types & API Boundaries"]
+        "sections": [
+          "3.3 Extension Point: QueryOperator Enum",
+          "4 UDF Types & API Boundaries"
+        ]
       },
       "querystream": {
         "covered": true,
         "quality": "good",
-        "sections": ["1.2 with trait definition", "implementations in Filter and Limit sections"]
+        "sections": [
+          "1.2 with trait definition",
+          "implementations in Filter and Limit sections"
+        ]
       },
       "v8_isolate_udf_boundary": {
         "covered": true,
         "quality": "basic",
-        "sections": ["2 UDF Execution Model"],
+        "sections": [
+          "2 UDF Execution Model"
+        ],
         "note": "Covered but less detailed than query composition sections. Section 2.1-2.3 provides overview but lacks deep architectural detail on isolate setup, syscall routing, performance implications."
       },
       "skip_composable_primitive_integration_points": {
         "covered": true,
         "quality": "good",
-        "sections": ["4.3 Potential API Boundaries for Skip Integration", "6 Integration Opportunities for Skip"]
+        "sections": [
+          "4.3 Potential API Boundaries for Skip Integration",
+          "6 Integration Opportunities for Skip"
+        ]
       }
     },
     "verdict": "partial",
@@ -177,5 +194,11 @@
       "date (2026-09-11)"
     ],
     "current_state": "No frontmatter present"
+  },
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
   }
 }

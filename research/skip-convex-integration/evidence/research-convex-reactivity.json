@@ -118,5 +118,11 @@
     ],
     "verdict": "partial",
     "reasoning": "Document adequately covers the README's stated purpose and provides sufficient foundation for the plans (1a/1b/1c/Direction 2) to understand convex-backend's reactivity model and identify plug-in points. However, one factual citation error and limited coverage of edge cases prevent a 'pass' verdict. The error is in documentation citation, not in the conceptual understanding."
+  },
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
   }
 }

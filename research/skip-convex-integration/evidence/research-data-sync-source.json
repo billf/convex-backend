@@ -3,5 +3,11 @@
   "adequacy_verdict": "pass",
   "reason": "Document accurately documents the existing Data Sync contract (snapshot/CDC phases, revisions/tombstones/truncations, opaque cursors + retention, selection, status, soft page limits, authz). All major citations verified. Key guarantees documented clearly: phases with activation boundary, transaction boundary no-split, per-document revision ordering, cursor encryption/retention windows, selection defaults, authz checks. Provides sufficient grounding for Direction 1c's R2-R10 requirements; R11+ concern push-stream specifics outside contract scope.",
   "direction": "1c",
-  "readme_edits": null
+  "readme_edits": null,
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }

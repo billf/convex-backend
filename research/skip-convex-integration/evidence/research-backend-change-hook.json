@@ -30,5 +30,11 @@
     "missing_elements": "none identified",
     "next_steps": "doc supports transition to design planning; follow-up docs (research-index-id-metadata.md, research-delta-seam.md, research-native-operator-spec.md) address materialization mechanics"
   },
-  "readme_edits": null
+  "readme_edits": null,
+  "xverification": {
+    "date": "2026-09-12",
+    "mode": "verify-only, report in ../xverif-report.md",
+    "result": "re-read; see xverif-report.md",
+    "phase1_preserved": true
+  }
 }
