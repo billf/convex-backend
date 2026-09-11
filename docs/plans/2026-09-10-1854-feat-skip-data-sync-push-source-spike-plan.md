@@ -42,11 +42,12 @@ The live application supplies Data Sync with its latest locally readable repeata
 
 - **Use an SSE-framed Data Sync stream.** (session-settled: user-selected — chosen over blocking Data Sync requests and extending `/api/sync` because it provides one continuous server-pushed response while reusing the existing document-sync contract.) Governs R1-R5.
 - **Wake on locally readable repeatable progress.** The caught-up stream waits on the backend notification advanced with the snapshot state the next application-level Data Sync page can use; a periodic client or server timer is not a data-delivery mechanism. Governs R3, R4, R17.
+- **Prevent progress bookkeeping from becoming a source event.** The streaming path does not force a new `_data_sync_progress` commit for each empty caught-up recheck; otherwise its own write would wake the stream indefinitely. Governs R3, R4, R17.
 - **Reuse Data Sync correctness and recovery.** Snapshot status, truncations, document timestamps, opaque cursors, retention errors, and table selection remain the source contract rather than being reimplemented from the write log. Governs R2, R6-R11.
-- **Accept at-least-once delivery.** A cursor advances durably for the consumer only after the corresponding Skip update succeeds; reconnect may replay work, which must be idempotent. The spike does not claim exactly-once processing across two systems. Governs R8-R10.
+- **Accept at-least-once delivery.** The consumer considers a cursor applied only after the corresponding Skip update succeeds; reconnect may replay work, which must be idempotent. The spike does not claim exactly-once processing across two systems. Governs R8-R10.
 - **Keep selection fixed for a connection.** The proof registers the `messages` and `users` tables when the stream opens. Changing the selection requires a new connection and resynchronization. Governs R2, R6, R19.
 - **Exercise Skip's incremental engine.** Document changes feed a persistent join and reducer graph rather than being relayed unchanged to the viewer. Governs R12-R16.
-- **Measure asymptotic work and freshness together.** Logical counts establish the scaling result, while timers reveal the cost of persisted-repeatable delivery and recovery. Governs R14-R18.
+- **Measure asymptotic work and freshness together.** Logical counts establish the scaling result, while timers reveal readable-snapshot delivery and recovery costs. Governs R14-R18.
 
 ### Why This Is Effective and Minimally Invasive
 
@@ -75,8 +76,8 @@ flowchart LR
 - R1. An experimental authenticated server-to-server endpoint returns a versioned SSE-framed HTTP response consumable by the Skip service with streaming `fetch`; it retains Data Sync's streaming-export enablement and `deployment:data:view` authorization requirements.
 - R2. The opening request supplies an optional opaque Data Sync cursor and one fixed selection for the connection. The proof selection includes all columns of the Convex tutorial's `messages` and `users` tables and excludes unrelated tables and components.
 - R3. The backend emits available Data Sync pages without a request round trip. After an `upToDate` page, it waits for the repeatable snapshot to advance beyond that page's `snapshotTs`, rechecks Data Sync, and resumes emission without a polling interval.
-- R4. The wait path is race-free and cancellation-safe. Heartbeats may preserve transport liveness but cannot trigger a data read or be counted as source reactivity.
-- R5. Streaming output has a bounded page and byte backlog. A consumer that cannot keep up is disconnected or otherwise forced to resume from its last applied cursor rather than causing unbounded backend memory growth.
+- R4. The wait path is race-free and cancellation-safe. Stream-specific progress accounting does not commit a new `_data_sync_progress` value solely because an empty `upToDate` recheck occurred, so bookkeeping can cause at most a bounded empty recheck rather than a self-sustaining wake loop. Heartbeats may preserve transport liveness but cannot trigger a data read or be counted as source reactivity.
+- R5. Streaming output has a bounded page and byte backlog. A consumer that cannot keep up is disconnected or otherwise forced to resume from its last applied cursor rather than causing unbounded backend memory growth. Emitted pages retain existing Data Sync progress, database-egress, and usage accounting except for the explicit empty-recheck rule in R4.
 
 **Snapshot, atomicity, and recovery**
 
@@ -97,7 +98,7 @@ flowchart LR
 
 - R15. A comparison harness drives deterministic writes, pauses writes at settled checkpoints, and compares the current Skip result with an independent native Convex query over the same logical data. It covers bootstrap, CDC, reconnect before and after apply, duplicate delivery, stream cancellation, table replacement, cursor expiry, and Skip-process restart.
 - R16. The scaling comparison varies total selected rows `N`, changed selected documents per transaction `K`, and affected join fan-out `F`. It reports whether steady-state external payload and Skip input work follow `O(K)` and derived update work follows `O(K + F)`, versus a monolithic reactive query snapshot containing `O(N)` rows; it also reports the unavoidable `O(N)` bootstrap and retained source state.
-- R17. Counts cover native wake-ups, empty and non-empty Data Sync pages, snapshot and CDC pages, document-log rows examined when available, selected revisions and bytes emitted, transactions, truncations, reconnects, replayed or ignored revisions, cursor resets, Skip keys added/changed/removed, dependent nodes updated, reducer additions/removals, current publications, and stale intervals.
+- R17. Counts cover native wake-ups by cause, self-generated bookkeeping wake-ups, empty and non-empty Data Sync pages, snapshot and CDC pages, document-log rows examined when available, selected revisions and bytes emitted, transactions, truncations, reconnects, replayed or ignored revisions, cursor resets, Skip keys added/changed/removed, dependent nodes updated, reducer additions/removals, current publications, and stale intervals.
 - R18. Timers cover mutation acknowledgment to readable repeatable progress, repeatable progress to stream emission, stream receipt to atomic Skip apply, Skip apply to derived publication, end-to-end mutation acknowledgment to publication, snapshot duration, reconnect recovery, and stale duration. The report distinguishes logical Convex timestamps from wall-clock latency and explains empty wake-ups and unrelated-log scan work.
 
 **Isolation from adjacent directions**
@@ -190,6 +191,7 @@ Direction 1c can later be judged against 1a and 1b as a source-granularity trade
 
 - No test in the correctness and recovery matrix publishes a partial snapshot, a transaction-torn result, a lost change, a double-counted replay, or a current result whose cursor was not fully applied.
 - Once caught up, selected changes reach the Skip source through a native backend wake-up and continuous response; neither the client nor the endpoint periodically polls Data Sync for data.
+- An idle caught-up stream reaches a blocked wait state after bounded bookkeeping and empty rechecks; `_data_sync_progress` updates cannot keep it runnable indefinitely.
 - The proof performs a real incremental join and grouped reduction, and its steady-state delivered revisions and Skip input work follow the changed set rather than the full selected state for at least one scaling axis.
 - The report shows bootstrap work, retained Skip source state, affected fan-out, backend scan amplification, and repeatable-timestamp latency alongside the favorable steady-state curve.
 - Counts and timers make every reconnect, replay, resnapshot, truncation rebuild, stale interval, empty wake-up, and correctness mismatch attributable.
@@ -225,6 +227,7 @@ Direction 1c can later be judged against 1a and 1b as a source-granularity trade
 - The existing public Data Sync format exposes postimages and tombstones, not previous revisions. Skip derives removes from its retained value by ID.
 - `SnapshotManager::wait_for_higher_ts` is notified whenever the committer publishes a newer local snapshot, including ordinary commits and persisted maximum-repeatable bumps. `Application::data_sync` constructs every page from `latest_database_snapshot`, whose timestamp becomes the iterator's repeatable floor. Planning must expose a narrow database/application wait method and preserve that alignment without exposing the snapshot manager itself.
 - A repeatable-timestamp wake-up can produce no selected changes because the timestamp may advance for unrelated writes or maintenance. The endpoint may advance its in-memory cursor without emitting a data event, but it must remain cancel-safe and observable.
+- The current application-level Data Sync path forces progress recording for every `upToDate` page. The streaming path needs a narrower progress policy because an empty caught-up page's progress commit advances `SnapshotManager` and can wake the same stream again.
 - The Data Sync cursor is opaque, encrypted, and resumable only within retention. Although the existing page API can reconcile selection changes, this spike always reconnects with its original fixed selection and never interprets or manufactures the cursor.
 - The Convex tutorial already has `messages.user` validated as an ID of `users` and defines native missing-user behavior, making its `messages` and `users` tables a sufficient two-table correctness proof.
 - The Skip examples already demonstrate persistent mappers, joins, reducers, and downstream SSE output; they are implementation references, not substitutes for the Convex source correctness work.
@@ -235,6 +238,7 @@ Direction 1c can later be judged against 1a and 1b as a source-granularity trade
 
 - What experimental route name, request type, stream-version field, and event envelope introduce the least public API commitment?
 - Should every Data Sync page be emitted as one event, or should empty `upToDate` advances remain server-local while periodic status events expose freshness?
+- How should streaming progress remain visible and active without forcing a progress-table write on every empty caught-up recheck?
 - What narrow application/database API should pair reading a page with waiting past its `snapshotTs` while preserving the existing lost-wake protection?
 - Which bounded buffering and cancellation behavior is already provided by the Axum response body, and what explicit slow-consumer limit is still required?
 - What combined Skip input representation applies a timestamp group atomically across the `messages` and `users` collections with the fewest runtime changes?
