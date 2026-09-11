@@ -58,38 +58,29 @@ Each spike plan cites research that directly supports its scope. This section id
 
 ### Plan 1a (Sync-Protocol Client)
 
-**Cites:** research-convex-reactivity.md, research-skip-engine.md, research-skip-externals-adapter.md, research-convex-query-composition.md, research-skip-atomic-write.md, research-sync-wire-ts-checklist.md, research-1a-review-answers.md, plus code references.
+**Cites:** research-convex-reactivity.md, research-skip-engine.md, research-skip-externals-adapter.md, research-convex-query-composition.md, research-skip-atomic-write.md, research-sync-wire-ts-checklist.md, research-1a-review-answers.md, research-sync-protocol-skip-mapping.md, plus code references.
 
 | Gap Doc | Reason | Type | Note |
 |---------|--------|------|------|
-| research-sync-protocol-skip-mapping.md | Comprehensive 1a scope coverage (wire mapping, lifecycle, versions, chunks, bundle-preserving writes); all claims verified (PASS). Directly grounds R1. | Citation-hygiene | Add to Sources / Research |
 | research-spike-comparison.md | Framework for cross-spike metric comparison; lacks per-1a mapping and uncited by 1a design. (PARTIAL) | Real-gap | Consider adding with caveat on per-spike instantiation |
 
 ### Plan 1b (Paginated Reactive Source)
 
-**Cites:** 2026-09-10-1509-feat-skip-sync-protocol-client-plan.md (cross-plan ref), research-convex-reactivity.md, research-skip-engine.md, research-skip-atomic-write.md, plus npm/crates references.
+**Cites:** 2026-09-10-1509-feat-skip-sync-protocol-client-plan.md (cross-plan ref), research-convex-reactivity.md, research-skip-engine.md, research-skip-atomic-write.md, research-1b-page-topology.md, plus npm/crates references.
 
-| Gap Doc | Reason | Type | Note |
-|---------|--------|------|------|
-| research-1b-page-topology.md | All 10 claims verified against source (PASS). Comprehensively covers pagination mechanics, split lifecycle, atomic split-swap, metrics. Directly grounds R1, R4-R6. | Citation-hygiene | Add to Sources / Research |
+No open gaps — hygiene entry resolved.
 
 ### Plan 1c (Data Sync Push Source)
 
-**Cites:** crates files (streaming_export, table_iteration, database), research-convex-reactivity.md, research-skip-engine.md, research-delta-seam.md, research-backend-change-hook.md, plus cross-plan refs.
+**Cites:** crates files (streaming_export, table_iteration, database), research-convex-reactivity.md, research-skip-engine.md, research-delta-seam.md, research-backend-change-hook.md, research-data-sync-source.md, research-push-stream-seam.md, plus cross-plan refs.
 
-| Gap Doc | Reason | Type | Note |
-|---------|--------|------|------|
-| research-data-sync-source.md | Content claims verified; 8 path references missing crates/ prefix need cleanup (PARTIAL). Directly relevant to R2-R11. | Citation-hygiene | Add to Sources / Research; note cleanup needed |
-| research-push-stream-seam.md | All three core concepts verified (readable-timestamp wait, SSE framing, cursor checkpointing); precise code references (PASS). Directly grounds R1, R3-R5. | Citation-hygiene | Add to Sources / Research |
+No open gaps — hygiene entries resolved.
 
 ### Plan Direction 2 (Incremental Materialized Cache)
 
-**Cites:** research-convex-reactivity.md, research-skip-engine.md, research-skip-externals-adapter.md, research-skip-atomic-write.md, research-poc-vehicle-and-harness.md, research-convex-query-composition.md, plus crates/npm references.
+**Cites:** research-convex-reactivity.md, research-skip-engine.md, research-skip-externals-adapter.md, research-skip-atomic-write.md, research-poc-vehicle-and-harness.md, research-convex-query-composition.md, research-index-id-metadata.md, research-native-operator-spec.md, plus crates/npm references.
 
-| Gap Doc | Reason | Type | Note |
-|---------|--------|------|------|
-| research-index-id-metadata.md | 14 core technical claims verified with precise line numbers (PASS). Stable/internal split well-grounded. Directly relevant to R17-R22. | Citation-hygiene | Add to Sources / Research |
-| research-native-operator-spec.md | All file:line references verified accurate; wire example valid (PASS). Relevant to R3, R12-R16. | Citation-hygiene | Add to Sources / Research |
+No open gaps — hygiene entries resolved.
 
 ### Globally Uncited (Not Referenced by Any Plan)
 
