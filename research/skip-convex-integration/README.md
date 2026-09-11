@@ -76,6 +76,16 @@ actually affects. This gap is the central motivation for the integration.
 - [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
   PoC queries, aggregates, keying/encoding rules, R6 harness sketch
   (R4/R6/R7/R8).
+- [`research-backend-change-hook.md`](research-backend-change-hook.md) —
+  committed-change hook comparison recommending `LogReader` tail with
+  ts-grouped atomic apply, seed/rebuild paths, retention budget.
+- [`research-index-id-metadata.md`](research-index-id-metadata.md) —
+  stable-vs-internal index metadata split, lifecycle validation,
+  `v.id` join edges with dangling-reference semantics.
+- [`research-1a-review-answers.md`](research-1a-review-answers.md) —
+  closes the four 1a review questions (QueryRemoved delete rule,
+  chunk eligibility + reassemble-then-write, raw-client cost,
+  R6 limits).
 
 ## Status
 
