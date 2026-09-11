@@ -1,0 +1,95 @@
+{
+  "doc": "research-build-slices.md",
+  "adequacy_verdict": "partial",
+  "reason": "Slice template is sound and testable; all technical references verified (QueryPatched, SkipFilter, fast_forward_index_cache, partitioned subscriptions). 'Three specs above' reference is vague and undefined in document; 'Convex/Skip divergence metric' mentioned but not elaborated elsewhere. Verification section's file-count claims are outdated (historical). Doc appropriately marked as superseded by spike plans.",
+  "direction": "historical",
+  "verified_claims": [
+    {
+      "claim_id": "1.0",
+      "claim": "Four existing notes: research-convex-reactivity, research-convex-query-composition, research-skip-engine, research-skip-externals-adapter",
+      "status": "verified",
+      "reference": "README.md Foundation section explicitly lists these four as foundation docs"
+    },
+    {
+      "claim_id": "2.0",
+      "claim": "Slice 1 (T1-MVP) references 'client-v2' and 'bounded-query contract'",
+      "status": "verified",
+      "reference": "research-skip-client-v2.md lines 1, 40, 49-69 define Track 1 construction spec and bounded-query contract gap resolutions"
+    },
+    {
+      "claim_id": "2.1",
+      "claim": "Slice 1 references 'adapter lifecycle' (bootstrap/reject/resubscribe/shutdown)",
+      "status": "verified",
+      "reference": "research-skip-client-v2.md lines 9-16 describe ConvexExternalService lifecycle and resubscribe backoff"
+    },
+    {
+      "claim_id": "3.0",
+      "claim": "Slice 2 (T1-scale) references partitioned subscriptions with partition-key immutability",
+      "status": "verified",
+      "reference": "research-skip-client-v2.md lines 40-43 describe partitioning and 'immutable partition key' enforcement"
+    },
+    {
+      "claim_id": "4.0",
+      "claim": "Slice 3 (Wire spike) references QueryPatched for delta variant",
+      "status": "verified",
+      "reference": "research-delta-seam.md lines describe QueryPatched as state modification option for Skip deltas"
+    },
+    {
+      "claim_id": "5.0",
+      "claim": "Slice 4 (T2-spike) references SkipFilter end-to-end operator",
+      "status": "verified",
+      "reference": "research-native-operator-spec.md and research-convex-query-composition.md both reference QueryOperator::SkipFilter"
+    },
+    {
+      "claim_id": "5.1",
+      "claim": "Slice 4 references 'operator spec' for SkipFilter",
+      "status": "verified",
+      "reference": "research-native-operator-spec.md is explicit composable operator spec with SkipFilter touch list"
+    },
+    {
+      "claim_id": "6.0",
+      "claim": "Slice 5 references fast_forward_index_cache generalization",
+      "status": "verified",
+      "reference": "crates/database/src/write_log.rs:768 defines pub async fn fast_forward_index_cache(...); also in research-delta-seam.md as Seam 1"
+    }
+  ],
+  "clarity_issues": [
+    {
+      "issue": "Vague reference to 'three specs above'",
+      "detail": "Doc says 'Turns the future work sections of the four existing notes plus the three specs above into build order' but never defines what the three specs are. Inferred from context as likely: research-skip-client-v2.md (Track 1 construction spec), research-native-operator-spec.md, and research-1b-page-topology.md, but this is not explicit in the document.",
+      "severity": "minor",
+      "impact": "Reader cannot easily identify which specs are being synthesized"
+    },
+    {
+      "issue": "Convex/Skip divergence metric mentioned but not elaborated",
+      "detail": "Slice 1 states 'Done: bounded-query contract held, lag metric recorded' and references 'Convex/Skip divergence metric' but this metric is not defined or elaborated in any research document.",
+      "severity": "minor",
+      "impact": "Unclear what specific divergence measurement is expected"
+    },
+    {
+      "issue": "Verify section's file-count claims are outdated",
+      "detail": "Verify section claims 'ls research/skip-convex-integration/ shows 4 pre-existing + 4 new files' but current directory has 24 files. This is appropriate for a historical document but the verification statement is no longer valid.",
+      "severity": "minor",
+      "impact": "Historical artifact; not a functional issue since document is marked as historical"
+    }
+  ],
+  "adequacy_assessment": {
+    "stated_purpose": "Ordered testable build slices with done-criteria. Predates the four spike plans in docs/plans/; kept for the slice-discipline template, not current scope.",
+    "purpose_fulfilled": true,
+    "evidence": [
+      "Doc provides 5 clearly-ordered build slices (T1-MVP, T1-scale, Wire spike, T2-spike, Index-cache generalization)",
+      "Each slice has explicit done-criteria (e.g., 'bounded-query contract held', 'partition-key immutability enforced', 'mixed-version interop demonstrated', 'TS→Rust round-trip verified')",
+      "Done-criteria are testable and measurable",
+      "Serves as template for slice-discipline approach: dependencies, testability, ordering",
+      "README correctly identifies doc as historical and kept for template reference only",
+      "Not cited by any active spike plan (confirmed in overarching README note)",
+      "All technical concepts reference actual research or source files"
+    ]
+  },
+  "recommendations": [
+    {
+      "type": "readme_clarification",
+      "suggestion": "Add note to README that the 'three specs above' reference in research-build-slices.md is vague; infer from spike plans' content rather than doc's synthesis claim"
+    }
+  ]
+}

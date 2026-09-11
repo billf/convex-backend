@@ -96,6 +96,7 @@ Sub-direction 1b (paginated reactive source, no backend changes):
 - [`research-skip-source-state.md`](research-skip-source-state.md) —
   combined Skip input shape, revision watermarks + GC, tombstones,
   ordering, restart-rebuild, fault-injection list (all spikes).
+  **Note:** Intended for all four spikes but none of the spike plans currently cite it; verify integration before relying on this as cross-spike testing contract.
 
 Sub-direction 1c (Data Sync push source, modest backend change):
 
@@ -143,6 +144,7 @@ Direction 2 inputs:
   ordered testable build slices with done-criteria. Predates the four
   spike plans in `docs/plans/`; kept for the slice-discipline template,
   not current scope.
+  **Note:** The 'three specs above' reference is vague; refer to `docs/plans/` for authoritative scope.
 
 ## Status
 

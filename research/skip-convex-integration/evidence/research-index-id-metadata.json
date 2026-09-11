@@ -1,0 +1,35 @@
+{
+  "doc": "research-index-id-metadata.md",
+  "adequacy_verdict": "pass",
+  "reason": "All spot-checked assertions (30+ citations) are accurate. Stable vs internal split is clearly delineated; lifecycle validation covers index state transitions (Backfilling→Backfilled→Enabled); v.id joins explain value-check-only validation, no-fetch enforcement, and dangling-reference semantics. Adequately grounds Direction 2 requirements R17-R22 (system indexes, application indexes as lookup contract; typed ID foreign keys, forward/reverse join semantics).",
+  "direction": "2",
+  "readme_edits": null,
+  "validation_notes": {
+    "files_verified": [
+      "npm-packages/convex/src/server/query.ts (fullTableScan, withIndex, withSearchIndex)",
+      "npm-packages/convex/src/server/database.ts (db.get, normalizeId)",
+      "npm-packages/convex/src/values/validators.ts (v.id wire form)",
+      "crates/common/src/schemas/validator.rs (Validator::Id, foreign_keys)",
+      "crates/common/src/types/index.rs (GenericIndexName, StableIndexName, IndexDiff)",
+      "crates/common/src/bootstrap_model/index/database_index/indexed_fields.rs (by_id, creation_time)",
+      "crates/common/src/bootstrap_model/index/index_config.rs (is_staged, is_enabled, is_backfilled, same_spec)",
+      "crates/common/src/bootstrap_model/index/mod.rs (INDEX_TABLE constant)",
+      "crates/database/src/bootstrap_model/schema/mod.rs (SCHEMAS_TABLE, get_by_state, get_validated_or_active, apply)",
+      "crates/database/src/query/mod.rs (fullTableScan desugars to by_creation_time)",
+      "crates/database/src/bootstrap_model/table.rs (new tables initialized with both indexes as Enabled)",
+      "crates/database/src/transaction.rs (system tables initialization, get with unknown table handling)",
+      "crates/database/src/bootstrap_model/index.rs (enable_index, disable_index, get_index_diff)",
+      "crates/database/src/committer.rs (track_and_write_to_persistence with OrderedDocumentWrites, IndexKeyWrites)",
+      "crates/common/src/schemas/mod.rs (ReferencedTableCannotBeDeleted, v.id enforcement)"
+    ],
+    "accuracy_status": "All concrete assertions verified. Line number ranges accurate (within 1-3 lines for some multi-function sections). All claimed types, methods, and transitions exist and function as described.",
+    "coverage_assessment": {
+      "stable_api_coverage": "Complete. Query contract, point reads, v.id wire form, index names, index state, schema source clearly documented with line citations.",
+      "internal_api_coverage": "Complete. IndexKeyBytes, TabletIndexName translation, and other unstable internals clearly marked as internal.",
+      "lifecycle_validation_coverage": "Complete. Index state machine (Backfilling→Backfilled{staged}→Enabled) with disable/enable transitions fully explained with line references.",
+      "dangling_reference_semantics": "Complete. Covers v.id value-check-only validation, no-fetch enforcement, point-read miss behavior, unknown-table handling, and table-delete blocking.",
+      "direction_2_grounding": "Adequate for R17-R22. System indexes (by_id, by_creation_time) as base views per R17; application indexes and lookup contracts per R17-R19; typed ID relationships and joins per R20-R22.",
+      "boundary_cases": "Mostly covered. Dangling references when documents/tables are deleted handled. Metadata versioning across cache invalidation mentioned but could be more explicit; not a blocker for planning."
+    }
+  }
+}
