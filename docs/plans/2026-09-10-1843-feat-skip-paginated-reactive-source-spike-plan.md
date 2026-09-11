@@ -155,7 +155,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
   - **Covers:** R5, R9, R10, R12.
   - **Given:** The paginated source has a complete loaded window.
   - **When:** Its connection is replaced and the page query set is rebuilt.
-  - **Then:** The viewer retains or marks the last-good value as stale until every required page is complete, and the next current result matches the monolithic baseline.
+  - **Then:** The viewer retains the last-good value and marks it stale until every required page is complete, and the next current result matches the monolithic baseline.
 
 ### Success Criteria
 
