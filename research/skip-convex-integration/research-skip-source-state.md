@@ -1,8 +1,9 @@
 ---
-title: "Skip source-state design"
-purpose: "Specification for Convex data in Skip across all integration spikes"
-coverage: ["combined input shapes", "revision watermarks", "GC", "tombstones", "ordering", "restart-rebuild", "fault injection"]
-spikes: ["1a", "1b", "1c", "Direction 2"]
+title: Skip source-state design
+type: research-note
+status: active
+direction: cross-cutting
+date: 2026-09-11
 ---
 
 # Skip source-state design (all spikes)

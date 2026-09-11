@@ -1,9 +1,9 @@
 ---
-title: Data Sync source contract (Direction 1c/1d)
-direction: 1c/1d
-scope: research
-status: grounded
-verified_date: 2026-09-11
+title: Data Sync source contract
+type: research-note
+status: active
+direction: 1c
+date: 2026-09-11
 ---
 
 # Data Sync source contract (Direction 1c/1d)

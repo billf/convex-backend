@@ -1,13 +1,9 @@
 ---
-topic: proof-vehicle
-phase: research
+title: PoC vehicle and harness
+type: research-note
+status: active
 direction: 2
-validates_requirements:
-  - R2
-  - R3
-  - R4
-  - R6
-  - R7
+date: 2026-09-11
   - R8
 related_plans:
   - 2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md

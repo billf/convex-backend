@@ -1,9 +1,9 @@
 ---
-title: "Index + v.id metadata (Direction 2 R17-R22, R7)"
+title: Index and v.id metadata
+type: research-note
+status: active
+direction: 2
 date: 2026-09-11
-status: "research-validated"
-scope: "Skip/convex-backend integration Direction 2"
-audience: ["design-planning", "skip-integration-working-group"]
 ---
 
 # Index + v.id metadata (Direction 2 R17-R22, R7)

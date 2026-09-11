@@ -1,13 +1,9 @@
 ---
 title: Backend committed-change hook comparison
-description: Analysis of backend seams for Skip cache integration via change hook
-status: validated
-date: 2026-09-11
+type: research-note
+status: active
 direction: 2
-issues: R1 R2 R6
-recommendation: LogReader tail with ts-grouped atomic apply
-validation_scope: |
-  - Code path verification (Committer::go sole writer, ts monotonicity)
+date: 2026-09-11
   - Retention parameters (30s/300s/50MB defaults)
   - Subscription tail pattern integration
   - IndexKeyWrites structure and ordering guarantees
