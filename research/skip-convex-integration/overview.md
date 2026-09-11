@@ -105,6 +105,19 @@ Only 1c literally uses the N/K/F symbols and Big-O notation. Direction 2 uses th
 
 ---
 
+## Correctness Baseline
+
+Every spike's correctness gate compares Skip's output against a separately-executed, ordinary Convex query at a settled checkpoint — never against Skip's own internal consistency. Each plan uses different words for the same structural claim:
+
+- **1a:** "independent Convex reader"
+- **1b:** "independent monolithic indexed Convex query" / "monolithic baseline" — "monolithic" specifically contrasts unpaginated vs. paginated, since 1b's whole point is page-level granularity
+- **1c:** "independent native Convex query"
+- **Direction 2:** "independent native Convex result" / "independent correctness oracle"
+
+The concrete methodology behind this (from `research-skip-source-state.md`): a parallel-reader comparator, writes paused at settled checkpoints anchored on version timestamps, Skip's snapshot compared against the independent native query via normalized deep-equal, with counts and a full timer chain reported alongside the O(K) vs. O(N) curves from Measurement Framework above. The comparator is exercised against the shared fault-injection surface covered in Known Constraints and Unknowns below.
+
+---
+
 ## Next Steps
 
 For another agent extending this overview:
