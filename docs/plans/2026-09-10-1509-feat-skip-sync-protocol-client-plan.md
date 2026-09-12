@@ -61,7 +61,7 @@ convex-backend's reactivity is coarse: an invalidated query is run again and the
 - R5. When a subscribed query enters a failed state, its previously-derived Skip view is retained (frozen at last-good) rather than cleared, and the demo surfaces that the value may be stale. If the query has never previously succeeded, the client instead shows an explicit not-yet-loaded state, distinct from both a frozen stale value and a removed query; it never renders as an empty frozen row set.
 
 **Acceptance bar**
-- R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived aggregate matches an independent Convex reader across bootstrap, a multi-table update, query failure and recovery, unsubscribe, and reconnect with a fresh snapshot. No formal latency or resource-overhead comparison is required.
+- R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived aggregate matches an independent Convex reader across bootstrap, a multi-table update, unsubscribe, and reconnect with a fresh snapshot, and again after recovery from a query failure. No formal latency or resource-overhead comparison is required. This equality bar deliberately excludes the query-failure checkpoint itself: R5 requires the frozen last-good view to remain visibly stale rather than track the independent reader while the query is still failed, so failure is instead verified as retention-of-last-good plus a visible stale indicator (see AE2).
 - R11. The proof records the implemented protocol surface, its code and test footprint, and every production concern it does not exercise, so a passing R6 establishes bounded semantic feasibility rather than an unqualified recommendation to generalize.
 
 **Proof vehicle**
@@ -185,7 +185,7 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 
 - Assumes local checkouts of `~/src/skip` (for skipruntime-ts and the chatroom example) and `~/src/convex-tutorial` remain available and roughly in their current shape.
 - Assumes a running convex-backend deployment to connect to. The auth mode for the demo's sync connection (e.g. an admin key vs. a real user token) has no product-facing consequence for a correctness-only PoC and is left to planning.
-- Skip Runtime's public TypeScript API does not currently expose one atomic write spanning several external collections. Planning must satisfy R2 with one combined input domain or a narrowly scoped atomic multi-collection update capability.
+- Skip Runtime's public TypeScript API does not currently expose one atomic write spanning several external collections. Planning must satisfy R2 with one combined input domain or a narrowly scoped atomic multi-collection update capability. `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` (P — envelope convention) targets resolving this exact gap once, generalizing the shipped `~/src/skip/examples/convex_reactive` pattern; whether this plan adopts P directly rather than designing its own mechanism is left to planning, not decided here.
 - `BaseConvexClient.addOnTransitionHandler` provides a lower-cost way to validate transition grouping before the raw client is built, but it does not validate raw connection, authentication, query-set, chunk, liveness, or reconnect behavior.
 
 ### Outstanding Questions
@@ -193,7 +193,7 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 **Deferred to Planning**
 - Which specific cross-table aggregate the demo computes (e.g. per-room message count vs. another candidate) — any real aggregate spanning more than one query satisfies R4.
 - The demo's auth mode for its sync connection (see Dependencies / Assumptions).
-- Whether one combined Skip input domain or a scoped multi-collection atomic update is the smaller way to satisfy R2.
+- Whether one combined Skip input domain or a scoped multi-collection atomic update is the smaller way to satisfy R2. (See Dependencies/Assumptions: `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` proposes answering this once, shared across 1a/1b/Direction 2 — adoption is a planning decision, not assumed.)
 
 ### Alternatives Considered
 
@@ -218,3 +218,4 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
 - `~/src/skip`, `skipruntime-ts/adapters/convex/src/index.ts` on branch `billf/convex/adapter` — the baseline being improved on.
 - `npm-packages/convex/src/browser/sync/client.ts` — `BaseConvexClient` and `addOnTransitionHandler`, the lower-cost transition-grouping alternative.
 - `research/skip-convex-integration/research-sync-protocol-skip-mapping.md` — 1a wire→Skip mapping: lifecycle, versions, chunks, bundle-preserving writes, PoC vehicle, correctness bar.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — a shared-prerequisites plan proposing to resolve R2's atomic-write gap (P) and R6's comparator (Q) once, for 1a/1b/Direction 2 together; not yet built, and adoption here is a planning decision rather than an assumption of this plan.

@@ -86,7 +86,7 @@ flowchart TB
 
 **Bounded proof vehicle**
 
-- R7. The only accelerated view is a pre-registered, room-scoped recent-message feed whose validated ID fields connect rooms, users, memberships, messages, and likes for joins, membership filtering, grouped like reduction, deterministic ordering, and bounded output.
+- R7. The only accelerated view is a pre-registered, room-scoped recent-message feed whose validated ID fields connect rooms, users, memberships, messages, and likes for joins, membership filtering, grouped like reduction, deterministic ordering, and bounded output. Concretely: view membership is exactly the messages whose room matches the caller-supplied room ID and whose sender has an active membership row for that room at read time; likes are grouped-reduced per message; ordering is (`_creationTime` desc, `_id` desc) as the deterministic tiebreak; output is bounded to the most recent N messages, with N fixed by the harness configuration and no further pagination. The native oracle used for R13 uses this same membership, ordering, and limit definition.
 - R8. The view is declared ahead of time as part of the experimental deployment; schema-driven generation, code-publish generation, and just-in-time construction are excluded from the spike.
 
 **Read and fallback contract**
@@ -105,7 +105,7 @@ flowchart TB
 
 **Index alignment**
 
-- R17. Every application table exposes implicit Skip base-view definitions corresponding to Convex's built-in `by_id` and `by_creation_time` indexes, while the spike materializes those views only for rooms, users, memberships, messages, and likes per R7.
+- R17. Rooms, users, memberships, messages, and likes — the tables used by the pre-registered view per R7 — each expose implicit Skip base-view definitions corresponding to Convex's built-in `by_id` and `by_creation_time` indexes; those five tables are also the only ones the spike materializes. Extending base-view definitions to every application table is out of scope for this spike.
 - R18. Every additional Skip-maintained lookup, range, or ordering is backed by its corresponding enabled Convex application index.
 - R19. View registration and activation validate the required Convex index definitions for the pre-registered view's tables, and any missing, staged, disabled, removed, or incompatible application index makes the accelerated path ineligible until it can be rebuilt against a compatible enabled index.
 
@@ -191,7 +191,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
   - **Then:** Reads use the native fallback until rebuild and catch-up complete, after which the accelerated result matches the native result at the same version.
 - AE6. Index lifecycle gate
   - **Covers:** R14, R17-R19, R22.
-  - **Given:** Every application table exposes implicit `by_id` and `by_creation_time` base-view definitions, the five tables used by the pre-registered view have those views materialized, and the view declares an enabled Convex application index for each additional indexed lookup and ordering.
+  - **Given:** Rooms, users, memberships, messages, and likes expose implicit `by_id` and `by_creation_time` base-view definitions and have those views materialized, and the view declares an enabled Convex application index for each additional indexed lookup and ordering.
   - **When:** One required index is staged, removed, disabled, or changed incompatibly.
   - **Then:** The accelerated view is not activated or served under the stale index contract, normal Convex behavior remains authoritative, and metrics identify the index-compatibility reason.
 - AE7. Dangling typed reference
@@ -206,7 +206,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - The scaling evidence shows that update work is governed by the changed dependency neighborhood for at least one join-and-reduction path, and it states the maintained-state cost alongside the time complexity.
 - Healthy steady-state benchmark traffic uses the accelerated path often enough to produce a scaling curve; a run that silently falls back for all relevant requests does not pass.
 - Fallback, lag, rebuild, and mismatch metrics make every native-path substitution attributable.
-- Every application table exposes the two implicit base-view definitions, only the pre-registered view's five tables allocate their backing state, and the lifecycle test proves that incompatible index changes cannot leave acceleration active.
+- The pre-registered view's five tables (rooms, users, memberships, messages, likes) expose the two implicit base-view definitions and allocate their backing state; the lifecycle test proves that incompatible index changes cannot leave acceleration active.
 - Every forward schema-derived join targets the declared table's `by_id` base materialization, every reverse fan-out uses an enabled application index, and both match native behavior for present and missing referenced documents.
 - The completed spike identifies whether the backend integration is viable, which lifecycle or resource costs limit it, and whether later generalization is justified.
 
@@ -233,7 +233,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - Convex's internal committed-write and write-log machinery is a plausible construction seam, not an existing stable extension API; planning must choose and validate the narrowest safe hook.
 - Convex gives every table `by_id` and `by_creation_time` indexes, which the spike assumes can seed implicit Skip base materializations; named indexed lookups still require enabled application indexes selected explicitly by the query.
 - Convex schema validators expose the target table of each `v.id` field, but they do not enforce target-document existence; the native reference result owns each dangling-reference behavior.
-- Skip Runtime's current public TypeScript update surface does not expose one atomic write spanning multiple external collections. The spike must use one combined input domain or add a narrowly scoped atomic update capability without weakening R2.
+- Skip Runtime's current public TypeScript update surface does not expose one atomic write spanning multiple external collections. The spike must use one combined input domain or add a narrowly scoped atomic update capability without weakening R2. `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` documents this same combined-collection insight and the shipped `~/src/skip/examples/convex_reactive` precedent it generalizes, but that plan's P library is built as an external TypeScript client over Skip's `ExternalService`/`CollectionWriter` surface — this spike is backend-owned and its own plan already rejects an external sidecar (see Alternatives Considered), so P cannot be imported directly. This spike would need its own backend-native implementation of the same pattern; the shared-prerequisites plan's research is a reusable reference, not a drop-in dependency.
 - The native reference implementation can express the same pre-registered feed semantics well enough to act as an independent correctness oracle and performance baseline.
 
 ### Outstanding Questions
@@ -244,7 +244,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - Which existing Convex index metadata and committed index-change representation can drive Skip dependencies without coupling the spike to an unstable internal encoding?
 - Which deployed schema representation should supply `v.id` join metadata to the Skip graph without duplicating Convex's validator semantics?
 - Should the backend-owned engine run in the database process or in another backend-managed lifetime with equivalent consistency semantics?
-- Will one combined Skip input domain or a scoped multi-collection atomic update mechanism satisfy R2 with less risk?
+- Will one combined Skip input domain or a scoped multi-collection atomic update mechanism satisfy R2 with less risk? (See Dependencies/Assumptions: `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` answers the same design question for 1a/1b via an external library, but this spike's backend-owned architecture means the answer here is a native reimplementation of that pattern, not a shared library import.)
 - Which rebuild, checkpoint, or replay strategy best demonstrates R6 without turning the spike into a new persistence system?
 - Which logical-work counters and dataset scale points make the asymptotic comparison reproducible?
 - Should later versions activate the two implicit base views eagerly for every table, or allocate their backing state only when a registered or just-in-time view depends on the table?
@@ -266,3 +266,4 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - [Skip introduction](https://skiplabs.io/docs/introduction) and [Skip externals](https://skiplabs.io/docs/externals) — official conceptual and external-source contracts.
 - `research/skip-convex-integration/research-index-id-metadata.md` — stable vs. internal index metadata split, index lifecycle validation, `v.id` join edges and dangling-reference semantics.
 - `research/skip-convex-integration/research-native-operator-spec.md` — composable `QueryOperator::Skip` interface design, touch list, and wire protocol example.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — a shared-prerequisites plan documenting the same atomic-write insight (R2) and a comparator design (R13) this spike needs; its P/Q deliverables are built as an external TypeScript client and cannot be imported directly by this backend-owned spike, but the underlying pattern and the shared metric catalog (Q5) remain directly reusable references.

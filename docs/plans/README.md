@@ -34,7 +34,10 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 
 **Independence and isolation:**
 - Direction 1 and Direction 2 are intentionally separate. The external source spikes (1a/1b/1c) do not depend on backend-native Skip and can be evaluated independently.
-- Within Direction 1: 1a provides a baseline with full snapshots; 1b and 1c optimize different axes (query topology and document granularity). All three can proceed in parallel without blocking each other.
+- Within Direction 1: 1a provides a baseline with full snapshots; 1b and 1c optimize different axes (query topology and document granularity). All three can proceed in parallel without blocking each other, **except that real implementation of any of 1a/1b/1c depends on the shared prerequisite tier (`docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`) landing first** — that plan's P (envelope convention) and Q (correctness-comparator harness) are the atomic-write and correctness-checking infrastructure all three otherwise independently defer to their own planning.
+
+**Prerequisite tier:**
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` sits beneath 1a/1b/1c/Direction 2. It is a shared build-once dependency for the external-source spikes (1a/1b/1c), not a fifth spike. See that plan's own scope notes on Direction 2, which is backend-native and does not consume the same external-adapter-shaped P/Q artifacts without further design work.
 
 **Shared constraints:**
 - All four plans share the same correctness bar: a Skip-maintained aggregate must match an independent native Convex result at settled checkpoints.
