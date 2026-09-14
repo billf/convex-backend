@@ -79,6 +79,32 @@ This plan owns sub-direction 1a: a client-side-only, real-sync-protocol Skip int
   - 1c — Modest backend changes to emit real row-level change events for external consumers — Enables a future 1a/1b to drop client-side reconciliation entirely; Still to decide whether it's worth building
 - Direction 2 — Native Skip support inside convex-backend (triggers, composable queries/filters/mappers authored in Skip, exported via the convex-backend API) — Can proceed independently of Direction 1; a large distance separates it from Direction 1 by the user's own framing; Still to decide
 
+### Dependency relations
+
+```mermaid
+flowchart LR
+  protocol["Convex sync protocol"] --> client["1a read-only sync client"]
+  client --> atomic["Atomic Transition apply"]
+  atomic --> skipGraph["Skip reducer proof"]
+  skipGraph --> compare["Settled-checkpoint comparator"]
+  compare --> result["Validation gate"]
+  p["P convention"] -. "planned sequencing reuse" .-> atomic
+  q["Q harness"] -. "planned sequencing reuse" .-> compare
+```
+
+### Actors and flows
+
+```mermaid
+flowchart LR
+  backend["Convex backend"] -->|"Transition"| syncClient["Sync client"]
+  syncClient -->|"one update"| skipGraph["Skip graph"]
+  skipGraph --> demo["Chatroom proof"]
+  demo --> reader["Independent native reader"]
+  reader -->|"checkpoint match"| verdict["Correctness result"]
+```
+
+**Cross-document graph maintenance:** When this plan changes, update and revalidate relevant nodes, edges, statuses, and identifier-map rows in [README.md](README.md), [planning-timeline.md](planning-timeline.md), [prerequisites.md](prerequisites.md), [detailed-prerequisites.md](detailed-prerequisites.md), and [IDENTIFIER-MAP.md](IDENTIFIER-MAP.md); then render the affected diagrams and verify their references.
+
 ### Actors
 
 - A1. convex-backend — source of truth; commits mutations and emits `Transition` messages over `/api/sync`.

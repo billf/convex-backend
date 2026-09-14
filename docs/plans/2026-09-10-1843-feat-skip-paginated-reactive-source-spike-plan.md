@@ -100,6 +100,32 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
   - 1c — Backend row-level changefeed: can eventually replace page snapshots with actual document changes; it is not required to evaluate page granularity.
 - Direction 2 — Backend-native Skip materialized cache: can proceed independently and uses committed changes before the query snapshot boundary.
 
+### Dependency relations
+
+```mermaid
+flowchart LR
+  query["Indexed reactive pagination"] --> coordinator["1b page lifecycle coordinator"]
+  coordinator --> swap["Atomic page split swap"]
+  swap --> skipGraph["Skip page regions and reducer"]
+  skipGraph --> compare["Monolithic comparison gate"]
+  p["P convention"] -. "planned sequencing reuse" .-> swap
+  q["Q harness"] -. "planned sequencing reuse" .-> compare
+```
+
+### Actors and flows
+
+```mermaid
+flowchart LR
+  runtime["Convex query runtime"] --> pages["Live page queries"]
+  pages --> coordinator["Page lifecycle coordinator"]
+  coordinator -->|"changed page only"| skipGraph["Skip graph"]
+  skipGraph --> viewer["Ordered feed viewer"]
+  evaluator["Evaluator"] -->|"workload and checkpoints"| coordinator
+  evaluator -->|"metrics"| skipGraph
+```
+
+**Cross-document graph maintenance:** When this plan changes, update and revalidate relevant nodes, edges, statuses, and identifier-map rows in [README.md](README.md), [planning-timeline.md](planning-timeline.md), [prerequisites.md](prerequisites.md), [detailed-prerequisites.md](detailed-prerequisites.md), and [IDENTIFIER-MAP.md](IDENTIFIER-MAP.md); then render the affected diagrams and verify their references.
+
 ### Actors
 
 - A1. Convex query runtime — evaluates cursor-bounded indexed page queries and returns split metadata.
