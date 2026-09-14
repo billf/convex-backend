@@ -46,7 +46,7 @@ The optimization disappears at the Skip boundary if JavaScript concatenates ever
 
 **Page topology**
 
-- R1. The source query uses an enabled Convex index and reactive pagination to expose an ordered recent-message feed as cursor-bounded pages.
+- R1. The source query uses the Shared proof-vehicle contract's `messages.by_room` index and reactive pagination to expose the canonical room-scoped recent-message feed as cursor-bounded pages; supporting membership, user, and like inputs preserve that contract's predicate and projection.
 - R2. The experiment loads a configured, bounded prefix of that feed rather than materializing unbounded history.
 - R3. Each live page has a stable logical identity and reaches Skip as its own snapshot region; the bridge neither concatenates the complete loaded window nor computes row-level diffs.
 - R4. When a page must split, the old page remains active until both replacement ranges have complete results, after which old and new page regions are exchanged in one atomic Skip update.
@@ -54,13 +54,13 @@ The optimization disappears at the Skip boundary if JavaScript concatenates ever
 
 **Skip computation**
 
-- R6. Skip merges live page regions only after asserting that their Convex document-ID sets are disjoint, then orders messages by the indexed order with `_id` as the deterministic tie-breaker.
-- R7. At least one reducer maintains an aggregate over the loaded window with valid add and remove behavior, so the proof exercises Skip's incremental engine rather than only relaying pages.
+- R6. Skip merges live page regions only after asserting that their Convex document-ID sets are disjoint, then produces the Shared proof-vehicle contract's canonical ordering and projection.
+- R7. The per-message `likeCount` reducer maintains valid add and remove behavior over the loaded window, so the proof exercises Skip's incremental engine rather than only relaying pages.
 - R8. A page update dirties only that page's changed keys and their dependent Skip nodes; unchanged pages are not republished to the input graph.
 
 **Correctness and lifecycle**
 
-- R9. At controlled settled checkpoints, with writes quiesced or tagged by a workload revision, the Skip feed and aggregate match an independent monolithic indexed Convex query covering the same loaded prefix across bootstrap, insert, update, delete, page split, load-more, reconnect, and query failure recovery. Both paths must report results for the same revision before correctness is evaluated, including after rebuilds and reconnects.
+- R9. At controlled settled checkpoints, with writes quiesced or tagged by a workload revision, the Skip feed matches an independent monolithic native query implementing the Shared proof-vehicle contract over the same loaded prefix across bootstrap, insert, update, delete, page split, load-more, reconnect, and query failure recovery. Both paths must report results for the same revision before correctness is evaluated, including after rebuilds and reconnects.
 - R10. When any required page fails or its cursor becomes invalid, the source retains the last complete window as stale until it rebuilds a coherent page set; it never labels a partial window current.
 
 **Scaling evidence**
@@ -217,7 +217,7 @@ flowchart LR
 - Sparse post-index filters can scan far more rows than they return. The proof uses an index whose range expresses the feed selection and configures applicable row and byte limits.
 - The existing `PaginatedQueryClient` and React pagination code provide lifecycle references, but their concatenated result is not a valid Skip input for R3.
 - R4's atomic page-swap gap (same combined-write primitive gap as 1a's R2) is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — envelope convention); adoption is a planning decision, not assumed here.
-- The current Convex tutorial has a global messages feed rather than rooms. A room-scoped index may be added only if planning deliberately expands the proof vehicle; it is not required for the scaling claim.
+- The Shared proof-vehicle contract supplies the required room-scoped fixture and `messages.by_room` index; its product semantics are not an optional expansion of this spike.
 
 ### Outstanding Questions
 
