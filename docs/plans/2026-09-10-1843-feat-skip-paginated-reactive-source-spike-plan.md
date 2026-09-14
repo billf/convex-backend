@@ -36,7 +36,7 @@ The optimization disappears at the Skip boundary if JavaScript concatenates ever
 
 ### Key Decisions
 
-- **Use index-ordered page subscriptions.** (session-settled: user-directed — chosen over point-query fan-out and application-defined shards: it reuses Convex's existing reactive pagination while supporting inserts and a changing feed.) Governs R1-R5.
+- **Use index-ordered page subscriptions.** (User-directed, over point-query fan-out and application-defined shards — reuses existing reactive pagination while supporting inserts.) Governs R1-R5.
 - **Preserve page granularity through the Skip boundary.** JavaScript does not flatten the loaded window before Skip. Governs R3, R8, R14.
 - **Publish page replacement atomically.** The old page remains authoritative until all replacements are ready. Governs R4, R5, R9.
 - **Measure the trade, not only the win.** Update work, bootstrap work, and live subscription state are reported together. Governs R11-R14.
@@ -190,7 +190,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 - `numItems` is an initial target, not a hard page bound. The experiment must record actual range sizes and honor `SplitRequired` rather than reason from the target alone.
 - Sparse post-index filters can scan far more rows than they return. The proof uses an index whose range expresses the feed selection and configures applicable row and byte limits.
 - The existing `PaginatedQueryClient` and React pagination code provide lifecycle references, but their concatenated result is not a valid Skip input for R3.
-- Atomic replacement of one page with two requires either a combined tagged Skip input domain or a narrowly scoped multi-region atomic update mechanism. `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` (P — envelope convention) targets resolving this exact gap once, shared with 1a and Direction 2, generalizing the shipped `~/src/skip/examples/convex_reactive` pattern; whether this plan adopts P directly rather than designing its own mechanism is left to planning, not decided here.
+- R4's atomic page-swap gap (same combined-write primitive gap as 1a's R2) is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — envelope convention); adoption is a planning decision, not assumed here.
 - The current Convex tutorial has a global messages feed rather than rooms. A room-scoped index may be added only if planning deliberately expands the proof vehicle; it is not required for the scaling claim.
 
 ### Outstanding Questions
@@ -199,7 +199,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 
 - Which target page sizes, loaded-page counts, and dataset sizes make the two scaling axes reproducible?
 - Should the harness reuse the transition-level `BaseConvexClient` surface directly or implement the minimal interface needed by `PaginatedQueryClient`?
-- Which combined-domain or atomic multi-region representation satisfies R4 with the least Skip Runtime change? (See Dependencies/Assumptions: `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` proposes answering this once, shared across 1a/1b/Direction 2 — adoption is a planning decision, not assumed.)
+- Whether to adopt the shared-prerequisites plan's P (envelope convention) for R4 rather than a bespoke mechanism — see Dependencies/Assumptions.
 - Which internal metrics can count actual page query executions and rows read without changing backend behavior?
 - Which failure injection produces `SplitRequired`, invalid-cursor reset, query failure, and reconnect deterministically?
 - Should the proof display author IDs or use a separately measured, fixed-size user lookup source for names?
@@ -218,4 +218,4 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 - `crates/database/src/query/mod.rs` — cursor-bounded index ranges, query fingerprints, and reactive split-cursor construction.
 - `crates/isolate/src/environment/udf/async_syscall.rs` — actual page growth and `SplitRecommended` or `SplitRequired` selection.
 - `research/skip-convex-integration/research-1b-page-topology.md` — pagination mechanics, per-page Skip regions, atomic split-swap, disjointness/ordering, metrics foundations for 1b.
-- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — a shared-prerequisites plan proposing to resolve R4's atomic-write gap (P) and R9/R13's comparator (Q) once, for 1a/1b/Direction 2 together; not yet built, and adoption here is a planning decision rather than an assumption of this plan.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — R4's atomic-write gap (P) and R9/R13's comparator (Q); not yet built, adoption left to planning.

@@ -40,15 +40,15 @@ The open question is whether Convex can host that incremental capability without
 
 ### Key Decisions
 
-- **Maintain views from committed transaction changes.** (session-settled: user-approved — chosen over invalidation-driven query reruns and an external change-feed sidecar because only the commit-level path preserves the incremental opportunity at a narrow backend boundary.) Governs R1-R4.
-- **Keep Skip state derived and rebuildable.** (session-settled: user-directed — chosen over making the Skip engine authoritative because Convex remains the sole source of truth.) Governs R5, R6.
-- **Start with one eager, pre-registered view.** (session-settled: user-directed — chosen over lazy or read-through construction because the first spike must establish correctness, freshness, and the best achievable scaling bound.) Governs R7, R8.
-- **Support version-gated freshness first.** (session-settled: user-approved — chosen over silently accepting arbitrary staleness because clients need a checkable relationship to Convex commit order.) Governs R9, R10.
-- **Fall back silently and measure every fallback.** (session-settled: user-directed — chosen over failing accelerated reads because the experiment must preserve application availability without hiding accelerator failures.) Governs R11, R12.
-- **Judge asymptotic behavior before absolute speed.** (session-settled: user-directed — chosen over fixed latency and memory thresholds because a simple demonstration of better time and state scaling is the useful first result.) Governs R13-R15.
-- **Keep the application surface ordinary Convex.** (session-settled: user-approved — chosen over exposing Skip-specific APIs in the first version because this spike tests the engine integration, not a final product interface.) Governs R9, R16.
-- **Use Convex indexes as the lookup contract.** (session-settled: user-directed — chosen over letting the materialized view invent independent lookup semantics because Convex index declarations already encode supported access paths and receive transactionally maintained updates.) Governs R14, R17-R19.
-- **Use validated IDs as join hints.** (session-settled: user-directed — chosen over restating every typed document relationship manually because `v.id` already carries the target table needed to join through its implicit `by_id` materialization.) Governs R7, R20-R22.
+- **Maintain views from committed transaction changes.** (Over invalidation-driven reruns or an external change-feed sidecar — only the commit-level path preserves the incremental opportunity at a narrow backend boundary.) Governs R1-R4.
+- **Keep Skip state derived and rebuildable.** (Over making Skip authoritative — Convex stays the sole source of truth.) Governs R5, R6.
+- **Start with one eager, pre-registered view.** (Over lazy/read-through construction — the first spike must establish correctness, freshness, and the best achievable scaling bound.) Governs R7, R8.
+- **Support version-gated freshness first.** (Over silently accepting arbitrary staleness — clients need a checkable relationship to Convex commit order.) Governs R9, R10.
+- **Fall back silently and measure every fallback.** (Over failing accelerated reads — preserves availability without hiding accelerator failures.) Governs R11, R12.
+- **Judge asymptotic behavior before absolute speed.** (Over fixed latency/memory thresholds — a scaling demonstration is the useful first result.) Governs R13-R15.
+- **Keep the application surface ordinary Convex.** (Over exposing Skip-specific APIs — this spike tests engine integration, not a final product interface.) Governs R9, R16.
+- **Use Convex indexes as the lookup contract.** (Over inventing independent lookup semantics — index declarations already encode supported access paths with transactionally maintained updates.) Governs R14, R17-R19.
+- **Use validated IDs as join hints.** (Over restating every typed relationship manually — `v.id` already carries the target table for its implicit `by_id` join.) Governs R7, R20-R22.
 
 ### Why This Can Be Effective and Minimally Invasive
 
@@ -233,7 +233,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - Convex's internal committed-write and write-log machinery is a plausible construction seam, not an existing stable extension API; planning must choose and validate the narrowest safe hook.
 - Convex gives every table `by_id` and `by_creation_time` indexes, which the spike assumes can seed implicit Skip base materializations; named indexed lookups still require enabled application indexes selected explicitly by the query.
 - Convex schema validators expose the target table of each `v.id` field, but they do not enforce target-document existence; the native reference result owns each dangling-reference behavior.
-- Skip Runtime's current public TypeScript update surface does not expose one atomic write spanning multiple external collections. The spike must use one combined input domain or add a narrowly scoped atomic update capability without weakening R2. `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` documents this same combined-collection insight and the shipped `~/src/skip/examples/convex_reactive` precedent it generalizes, but that plan's P library is built as an external TypeScript client over Skip's `ExternalService`/`CollectionWriter` surface — this spike is backend-owned and its own plan already rejects an external sidecar (see Alternatives Considered), so P cannot be imported directly. This spike would need its own backend-native implementation of the same pattern; the shared-prerequisites plan's research is a reusable reference, not a drop-in dependency.
+- R2's atomic multi-collection write gap is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — envelope convention), but P is an external TypeScript client over Skip's `ExternalService`/`CollectionWriter` surface — this spike is backend-owned (see Alternatives Considered) and cannot import it directly, so it needs its own backend-native implementation of the same pattern.
 - The native reference implementation can express the same pre-registered feed semantics well enough to act as an independent correctness oracle and performance baseline.
 
 ### Outstanding Questions
@@ -244,7 +244,7 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - Which existing Convex index metadata and committed index-change representation can drive Skip dependencies without coupling the spike to an unstable internal encoding?
 - Which deployed schema representation should supply `v.id` join metadata to the Skip graph without duplicating Convex's validator semantics?
 - Should the backend-owned engine run in the database process or in another backend-managed lifetime with equivalent consistency semantics?
-- Will one combined Skip input domain or a scoped multi-collection atomic update mechanism satisfy R2 with less risk? (See Dependencies/Assumptions: `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` answers the same design question for 1a/1b via an external library, but this spike's backend-owned architecture means the answer here is a native reimplementation of that pattern, not a shared library import.)
+- Will one combined Skip input domain or a scoped multi-collection atomic update mechanism satisfy R2 with less risk, as a native reimplementation of shared-prerequisites' P pattern (see Dependencies/Assumptions)?
 - Which rebuild, checkpoint, or replay strategy best demonstrates R6 without turning the spike into a new persistence system?
 - Which logical-work counters and dataset scale points make the asymptotic comparison reproducible?
 - Should later versions activate the two implicit base views eagerly for every table, or allocate their backing state only when a registered or just-in-time view depends on the table?
@@ -266,4 +266,4 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
 - [Skip introduction](https://skiplabs.io/docs/introduction) and [Skip externals](https://skiplabs.io/docs/externals) — official conceptual and external-source contracts.
 - `research/skip-convex-integration/research-index-id-metadata.md` — stable vs. internal index metadata split, index lifecycle validation, `v.id` join edges and dangling-reference semantics.
 - `research/skip-convex-integration/research-native-operator-spec.md` — composable `QueryOperator::Skip` interface design, touch list, and wire protocol example.
-- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — a shared-prerequisites plan documenting the same atomic-write insight (R2) and a comparator design (R13) this spike needs; its P/Q deliverables are built as an external TypeScript client and cannot be imported directly by this backend-owned spike, but the underlying pattern and the shared metric catalog (Q5) remain directly reusable references.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — the atomic-write gap (R2/P) and comparator methodology (R13/Q12) this spike needs; P/Q's TypeScript code can't be imported by this backend-owned spike, but Q12's spec and Q5's metric catalog are directly reusable.
