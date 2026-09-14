@@ -52,7 +52,7 @@ The live application supplies Data Sync with its latest locally readable repeata
 - **Require progress quiescence.** The stream must not refresh `_data_sync_progress` for an established empty `upToDate` recheck, because the resulting commit and delayed persisted-repeatable bump can otherwise form a self-sustaining wake cycle. First pages, state changes, real progress, and the existing paged endpoint retain their current accounting. Governs R3, R4, R17.
 - **Reuse Data Sync correctness and recovery.** Snapshot status, truncations, document timestamps, opaque cursors, retention errors, and table selection remain the source contract rather than being reimplemented from the write log. Governs R2, R6-R11.
 - **Accept at-least-once delivery.** The consumer considers a cursor applied only after the corresponding Skip update succeeds; reconnect may replay work, which must be idempotent. The spike does not claim exactly-once processing across two systems. Governs R8-R10.
-- **Keep selection fixed for a connection.** The proof registers the `messages` and `users` tables when the stream opens. Changing the selection requires a new connection and resynchronization. Governs R2, R6, R19.
+- **Keep selection fixed for a connection.** The proof registers the Shared proof-vehicle contract's five tables when the stream opens. Changing the selection requires a new connection and resynchronization. Governs R2, R6, R19.
 - **Exercise Skip's incremental engine.** Document changes feed a persistent join and reducer graph rather than being relayed unchanged to the viewer. Governs R12-R16.
 - **Measure asymptotic work and freshness together.** Logical counts establish the scaling result, while timers reveal readable-snapshot delivery and recovery costs. Governs R14-R18.
 
@@ -67,7 +67,7 @@ The backend change is narrow because Convex already owns the difficult parts: a 
 **Push transport**
 
 - R1. An experimental authenticated server-to-server endpoint returns a versioned SSE-framed HTTP response consumable by the Skip service with streaming `fetch`; it is disabled by default, returns HTTP 404 while disabled, retains Data Sync's streaming-export enablement and `deployment:data:view` authorization requirements, and bounds credential staleness by requiring periodic reconnect and reauthorization.
-- R2. The opening request supplies an optional opaque Data Sync cursor and one fixed selection for the connection. The proof selection includes all columns of the Convex tutorial's `messages` and `users` tables and excludes unrelated tables and components.
+- R2. The opening request supplies an optional opaque Data Sync cursor and one fixed selection for the connection. The proof selection includes all columns of the Shared proof-vehicle contract's `rooms`, `users`, `memberships`, `messages`, and `likes` tables and excludes unrelated tables and components.
 - R3. The backend emits available Data Sync pages without a request round trip. After an `upToDate` page, it waits for the repeatable snapshot to advance beyond that page's `snapshotTs`, rechecks Data Sync, and resumes emission without a polling interval.
 - R4. The wait path is race-free and cancellation-safe. After the first emitted page, an established empty `upToDate` recheck (any later unchanged `upToDate` status, with no truncation or lifecycle transition on that recheck itself — see the emission rule in the High-Level Technical Design) does not refresh `_data_sync_progress`; this narrow stream-only rule must prevent one or more idle streams from scheduling a self-sustaining wake loop across progress-throttle and persisted-repeatable-bump periods. A prior truncation or lifecycle transition earlier in the same connection does not disqualify a later, otherwise-established empty recheck from suppression — only a truncation or transition on the recheck being evaluated does. Native maintenance or unrelated-write notifications may still cause measured empty rechecks. Heartbeats may preserve transport liveness but cannot trigger a data read or be counted as source reactivity.
 - R5. Streaming output has bounded per-stream page and byte backlogs plus a deployment-scoped active-stream limit. A consumer that cannot keep up is disconnected or otherwise forced to resume from its last applied cursor, and excess connections fail before streaming rather than causing unbounded backend memory or scan work. Emitted pages retain existing Data Sync progress, database-egress, and usage accounting except for the explicit empty-recheck rule in R4.
@@ -84,8 +84,8 @@ The backend change is narrow because Convex already owns the difficult parts: a 
 **Incremental Skip proof**
 
 - R12. The source stores selected Convex documents under stable `(component, table, _id)` keys, carries revision and snapshot timestamps as lossless decimal strings at the JavaScript boundary, and represents deletions as removals with sufficient revision metadata for replay safety.
-- R13. The Skip graph joins each message's validated user ID to the selected user row, preserves the tutorial's `"Unknown"` behavior for a missing user, orders a bounded recent-message output deterministically, and incrementally maintains at least one grouped message-count reduction.
-- R14. Inserts, updates, deletes, a user rename, a missing user, and a multi-document transaction propagate through Skip's retained mapper, join, ordering, and reducer state. Republishing all selected rows or recomputing the reduction from scratch on each change does not pass.
+- R13. The Skip graph implements the Shared proof-vehicle contract's active-membership filter, nullable sender join, deterministic 50-message room feed, and grouped per-message `likeCount` reduction.
+- R14. Inserts, updates, deletes, a user rename, membership activation/deactivation, like add/remove, a missing user, and a multi-document transaction propagate through Skip's retained mapper, join, ordering, and reducer state. Republishing all selected rows or recomputing the reduction from scratch on each change does not pass.
 
 **Correctness, freshness, and scaling evidence**
 
@@ -184,12 +184,12 @@ flowchart LR
 
 - AE1. One-message update after catch-up
   - **Covers:** R3, R8, R12-R18.
-  - **Given:** The stream is `upToDate` with `N` selected messages and users retained by Skip.
+  - **Given:** The stream is `upToDate` with `N` selected rows from the Shared proof-vehicle contract retained by Skip.
   - **When:** One mutation changes one message.
   - **Then:** The native notification wakes the stream, one selected revision reaches Skip, the affected joined row and reduction update correctly, and the payload and input counts do not grow with `N`.
 - AE2. Atomic multi-document transaction
   - **Covers:** R8, R11, R14-R15.
-  - **Given:** A transaction changes a user and multiple messages that reference that user.
+  - **Given:** A transaction changes a membership and multiple likes in the same room.
   - **When:** Data Sync emits the transaction among one or more transactions in a page.
   - **Then:** Skip never publishes a state with only part of that transaction, and its settled result matches the native query.
 - AE3. Disconnect before checkpoint
@@ -256,7 +256,7 @@ flowchart LR
 - A repeatable-timestamp wake-up can produce no selected changes because the timestamp may advance for unrelated writes or maintenance. The endpoint may advance its in-memory cursor without emitting a data event, but it must remain cancel-safe and observable.
 - `DataSyncProgressModel::update` writes on a status-variant change, caught-up document-count change, or throttle expiry. A progress commit schedules a persisted-repeatable bump, and that delayed bump can arrive after the throttle expires and trigger another unchanged write. The stream therefore preserves ordinary progress recording for its first page and meaningful pages but skips it for established empty `upToDate` rechecks; the existing paged endpoint and progress model remain unchanged.
 - The Data Sync cursor is opaque, encrypted, and resumable only within retention. Although the existing page API can reconcile selection changes, this spike always reconnects with its original fixed selection and never interprets or manufactures the cursor.
-- The Convex tutorial already has `messages.user` validated as an ID of `users` and defines native missing-user behavior, making its `messages` and `users` tables a sufficient two-table correctness proof.
+- The Shared proof-vehicle contract defines the five-table schema, required indexes, missing-user behavior, and native oracle; the tutorial is only a fixture base, not the product contract.
 - The Skip examples already demonstrate persistent mappers, joins, reducers, and downstream SSE output; they are implementation references, not substitutes for the Convex source correctness work.
 - **(Added 2026-09-12, reconciled with the shared-prerequisites plan; corrected 2026-09-12 after round-3 review.)** Skip Runtime's public TypeScript API has no multi-collection batch-write primitive (`CollectionWriter.update`/`ServiceInstance.update` are single-collection-only, confirmed by direct source read and exhaustive grep against `skipruntime-ts` at HEAD `7973dce6`) — this is the same gap KTD8's one-`callbacks.update`-call design works around by merging tables into one tagged collection. `~/src/skip/examples/convex_reactive` already ships and proves that specific workaround (the one-atomic-call primitive itself). The shared-prerequisites plan (`docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`, itself `artifact_readiness: requirements-only` and not yet committed to this repository) proposes extracting this proven primitive into a reusable library, P, additionally scoped to match this plan's stricter generation-fencing/replay-ledger bar (its P9). This narrows, but does not close, the capability question KTD7-KTD9 depend on: the one-atomic-call primitive KTD8 needs is proven and shipped in `convex_reactive`, but the generation-fencing/replay-ledger bookkeeping around it (KTD7, KTD9) is a design this plan originated — it is not yet built or proven anywhere, whether as P or as this plan's own code. U4 is planned to import P once P exists and satisfies U4's own test scenarios (see U4 Dependencies and the Goal Capsule's stop condition for the fallback if it does not); U6 is planned to build on the shared correctness-comparator and fault-injection harness, Q, on the same conditional basis (see U6 Dependencies). Both P and Q are external to this repository and this plan's own execution profile — see How This Work Fits Together for the reconciliation and the cross-plan sequencing this implies, and Deferred / Open Questions for what remains genuinely unresolved.
 
@@ -277,7 +277,7 @@ flowchart LR
 - `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — source of the P envelope library (KTD7-KTD9's dependency, U4) and the Q comparator/fault-injection harness (U6's dependency); its Problem Frame's direct source verification of `skipruntime-ts/core/src/index.ts` resolves this plan's own KTD7-KTD8 capability question (see Deferred / Open Questions).
 - `research/skip-convex-integration/research-data-sync-source.md` — Data Sync contract reused by the push stream (snapshot/CDC, revisions/tombstones/truncations, cursors, retention, selection, status, authz).
 - `research/skip-convex-integration/research-push-stream-seam.md` — push-stream seam design: readable-timestamp wait with lost-wake protection, bounded SSE framing, cursor-after-apply checkpointing.
-- `convex-tutorial: convex/chat.ts`, `convex/schema.ts`, and `convex/chat.test.ts` — proof query, message-to-user relation, missing-user behavior, and two selected source tables.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — the shared five-table proof vehicle, canonical feed, oracle projection, and required indexes used by all four spikes.
 - `skip: examples/chatroom/reactive_service/src/chatroom.service.ts` and `examples/convex_reactive/skip/service.ts` — Skip join/reducer and Convex-adapter examples to reuse selectively.
 - [Skip external services](https://skiplabs.io/docs/externals) — `ExternalService` is the supported custom reactive-source extension point; `PolledExternalService` is a separate polling helper and is not used here.
 - [Skip introduction](https://skiplabs.io/docs/introduction) — retained collections, mappers, and reducers are the basis of the incremental-work claim.
@@ -336,7 +336,7 @@ skip/
 
 - KTD6. **Use a stream-specific lossless timestamp representation.** Version-1 `page` events preserve the existing Data Sync page fields but encode every revision `ts` and status `snapshotTs` as canonical decimal strings. The page cursor remains inside the event payload rather than the SSE `id`, and existing `/api/v1/data/sync` JSON numbers remain unchanged.
 - KTD7. **Model ingestion as a generation-fenced state machine, via the shared envelope library P.** Cold snapshot pages build a private candidate; a first consistent page publishes it once. A replacement clones last-good state, clears only truncated tables, and promotes a complete candidate. Ordinary CDC applies timestamp groups in order, and a page-local replay ledger keeps the cursor behind until the final group succeeds. Connection generations reject late events from an older response. (Reconciled 2026-09-12: U4 imports and configures P — `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`, P9 — rather than hand-building this state machine; U4 validates P's generation-fencing and replay-ledger behavior against this description and this plan's own test scenarios, it does not re-derive them.)
-- KTD8. **Put documents and source-control metadata in one Skip collection, via P.** Use tagged keys for `(component, table, _id)` plus a reserved control namespace. One `callbacks.update` call can therefore apply both tables and freshness state atomically for a Convex transaction. Snapshot promotion uses one replacement update; mapper stages split this collection into users, messages, and control state without a Skip runtime change. (Reconciled 2026-09-12: this is P's envelope convention and split-mapper helper, P1-P3; the underlying one-atomic-call primitive is proven and shipped in `~/src/skip/examples/convex_reactive`, not an unverified capability — see Dependencies/Assumptions.)
+- KTD8. **Put documents and source-control metadata in one Skip collection, via P.** Use tagged keys for `(component, table, _id)` plus a reserved control namespace. One `callbacks.update` call can therefore apply every affected table and freshness state atomically for a Convex transaction. Snapshot promotion uses one replacement update; mapper stages split this collection into rooms, users, memberships, messages, likes, and control state without a Skip runtime change. (Reconciled 2026-09-12: this is P's envelope convention and split-mapper helper, P1-P3; the underlying one-atomic-call primitive is proven and shipped in `~/src/skip/examples/convex_reactive`, not an unverified capability — see Dependencies/Assumptions.)
 - KTD9. **Retain replay watermarks only as long as their checkpoint risk exists, via P.** Live rows carry their latest revision, while deleted-key watermarks and the pending-page ledger remain generation-scoped until the containing page cursor is recorded. A process that loses that state discards its cursor and starts cold; a table truncation clears the affected candidate rows and watermarks, not unaffected tables. (Reconciled 2026-09-12: this is P's watermark/tombstone convention, P4-P5, scoped to this plan's bar per P9.)
 
 **Evidence**
@@ -568,7 +568,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - `skip: skipruntime-ts/adapters/convex/README.md` — document the experimental server credential, fixed selection, lifecycle, restart behavior, and the dependency on P.
   - `skip: skipruntime-ts/adapters/convex/testdata/data_sync_stream/v1/` — vendor the version-1 wire-format fixtures and canonical manifest for standalone adapter tests (KTD6's envelope framing, distinct from P's own test fixtures).
 - **Approach:**
-  1. Validate parameters, read the narrowly scoped credential from the environment, and open a POST streaming fetch for the pre-registered root `messages` and `users` selection without logging request authorization.
+  1. Validate parameters, read the narrowly scoped credential from the environment, and open a POST streaming fetch for the pre-registered `rooms`, `users`, `memberships`, `messages`, and `likes` selection without logging request authorization.
   2. Parse the stream incrementally under KTD6 and serialize delivery through the existing adapter promise-chain and generation-fence patterns.
   3. Import P and configure it for this plan's `(component, table, _id)` keying and per-revision-timestamp-group atomic apply (KTD7-KTD9); validate P's generation-fencing, replay-ledger, and watermark/tombstone behavior against this unit's test scenarios rather than re-deriving that state machine from scratch.
   4. Emit one namespaced collection update per CDC timestamp group and one replacement update per snapshot promotion via P's envelope/split-mapper helpers. Keep source lifecycle metadata under reserved keys in the same update.
@@ -580,7 +580,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - Adjacent timestamps above `2^53` remain distinct and correctly ordered.
   - Covers F1. A cold multi-page snapshot produces no partial update and one activation update at its first consistent page.
   - A first `stale` snapshot publishes usable stale state, and the later final group atomically changes control state to current.
-  - Covers AE2. One timestamp group changing users and messages produces one observable Skip update across both tables.
+  - Covers AE2. One timestamp group changing memberships and likes produces one observable Skip update across every affected table.
   - Failure before the first group, between groups, and after the final update but before cursor assignment replays without lost or double-counted changes.
   - An upsert followed by a tombstone in an uncheckpointed page cannot be resurrected by replay; tombstone metadata is released after checkpoint.
   - Covers AE3. Disconnect before page checkpoint, including during a cold snapshot, retains matching candidate state, resumes from the prior cursor, and ignores already-applied groups.
@@ -597,21 +597,22 @@ After the mandatory first page of a response, an established empty `upToDate` pa
 - **Requirements:** R2, R13-R16, R18-R20.
 - **Dependencies:** None.
 - **Files:**
-  - `convex-tutorial: convex/chat.ts` — add deterministic message update/delete, user rename/delete, one multi-table transaction, a bounded proof-result query, and an all-selected-rows baseline query.
-  - `convex-tutorial: convex/chat.test.ts` — cover mutation effects, transaction outputs, missing-user behavior, ordering, counts, and baseline completeness.
+  - `convex-tutorial: convex/schema.ts` and `convex/chat.ts` — add the shared rooms, memberships, and likes fixture fields; deterministic mutations; a bounded canonical-result query; and an all-selected-rows baseline query.
+  - `convex-tutorial: convex/chat.test.ts` — cover mutation effects, transaction outputs, missing-user behavior, membership filtering, ordering, like counts, and baseline completeness.
 - **Approach:**
   1. Keep `getMessages` behavior intact and add the smallest functions needed to drive each acceptance example.
   2. Return mutation acknowledgment data that lets the harness start wall-clock timing without inferring internal Convex timestamps.
-  3. Make the bounded proof query return the latest 50 joined messages plus grouped counts, and keep the all-selected-rows query deliberately monolithic for KTD11.
+  3. Make the bounded proof query return the Shared proof-vehicle contract's exact latest-50 room feed and keep the all-selected-rows query deliberately monolithic for KTD11.
 - **Patterns to follow:** Existing `query`, `mutation`, `schema.doc`, `ctx.db.patch`, `ctx.db.delete`, and `convex-test` patterns. Read `convex/_generated/ai/guidelines.md` before implementation as required by the tutorial repository.
 - **Execution note:** Preserve application-facing tutorial behavior; harness-only functions should be clearly named and documented as proof support.
 - **Test scenarios:**
   - Updating and deleting a message changes the bounded native proof result deterministically.
-  - Renaming a user updates every joined message name; deleting the user preserves messages with the `"Unknown"` fallback.
-  - One multi-table mutation changes a user and several referencing messages in one Convex transaction and returns deterministic identifiers.
+  - Renaming a user updates every joined message name; deleting the user preserves messages with a `null` sender.
+  - Activating or deactivating a membership includes or excludes that sender's messages from the room feed, and adding or deleting a like updates only the message's `likeCount`.
+  - One multi-table mutation changes a membership and multiple likes in one Convex transaction and returns deterministic identifiers.
   - More than 50 messages select the latest 50 by descending `_creationTime` and `_id`, then normalize both native and Skip results to chronological display order before comparison.
-  - Grouped counts reflect insert, reassignment of a message to another user, delete, and missing users.
-  - The all-selected-rows baseline contains every selected message and user and grows with `N`.
+  - `likeCount` reflects add, remove, delete, and missing liked-user cases.
+  - The all-selected-rows baseline contains every selected room, user, membership, message, and like and grows with `N`.
 - **Verification:** Tutorial tests establish an independent expected result for every harness mutation and distinguish the bounded correctness oracle from the full snapshot baseline.
 
 ### U6. Build the retained graph and comparison harness
@@ -633,7 +634,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - `skip: examples/convex_data_sync_push/bench/verify_protocol_fixtures.ts` — compare the backend's canonical KTD6 wire-format fixture corpus with U4's vendored copy before live integration (distinct from Q's own fixtures; this stays this unit's concern).
   - `skip: examples/convex_data_sync_push/RESULTS.md` — record parameters, curves, failures, limits, and hardening recommendation.
 - **Approach:**
-  1. Split KTD8's namespaced input by table using P's split-mapper helper, join each message to its user with the native `"Unknown"` fallback, key messages in descending `_creationTime` plus `_id` order using P's order-key helper before `take(50)`, and reduce per-user message contributions with exact inverse removal.
+  1. Split KTD8's namespaced input by table using P's split-mapper helper, enforce the shared contract's active-membership predicate, join each message to its user with nullable-sender parity, key messages in descending `_creationTime` plus `_id` order using P's order-key helper before `take(50)`, and maintain each message's `likeCount` with exact inverse removal.
   2. At every settled checkpoint (detected via Q's settled-checkpoint predicate), dual-read the Skip outputs and U5's bounded native proof query through Q's dual-reader wiring and normalized comparator. Treat any mismatch or unexpected stale/current state as a failed run, not a performance sample.
   3. Compare push-source delivery with U5's all-selected-rows query snapshot. Vary one of `N`, `K`, and `F` at a time using at least three geometric points spanning an order of magnitude, and repeat insert, update, delete, rename, reconnect, replacement, expiry, and restart cases using Q's fault-injection fixture (Q6) for the reconnect/replacement/expiry/restart cases.
   4. Combine backend event diagnostics, Skip counters, and harness wall-clock timestamps into JSONL records via Q's counter/timer recorder (Q5), populated with this plan's own catalog (KTD10), before generating the human-readable result. Include an idle run with no selected writes across several progress-throttle and persisted-repeatable-bump periods; report native maintenance and unrelated-write rechecks without treating them as client polling.
