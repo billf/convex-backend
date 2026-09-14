@@ -37,7 +37,7 @@ future bounding must fail loudly (silent `take` in Convex would read as mass
 deletion downstream). Whether tutorial UDF additions count as prohibited
 "backend change" is unstated — planning to confirm, presumed allowed.
 
-## Aggregates (answers R4 candidate choice)
+## Aggregates (answers `sync-protocol-client-cross-query-reducer` (1a R4) candidate choice)
 
 Tutorial has no rooms, so plan AE1/AE2 "per-room count" is not directly
 mappable — do not add a rooms table without a planning decision. Ship both:
@@ -50,7 +50,7 @@ mappable — do not add a rooms table without a planning decision. Ship both:
   [{...message, name: users.getArray(message.user)[0]?.name ?? "Unknown"}]`
   (pattern: chatroom `JoinUniqueLikers`), `Resource.take(N)` in Skip (pattern:
   chatroom `MessagesResource`, N = 25 or 50). A2 alone as pure map does not
-  satisfy R4's reducer bar — A1 carries it.
+  satisfy `sync-protocol-client-cross-query-reducer` (1a R4)'s reducer bar — A1 carries it.
 
 Patterns reused from
 `skip/examples/chatroom/reactive_service/src/chatroom.service.ts`:
@@ -71,7 +71,7 @@ cross-collection joins, `take` in `instantiate`, two-external `createGraph`.
 - Stability: regenerated synthetic keys defeat `native_eq` and look like
   mass delete+insert under `isInit:true`.
 
-## R6 harness (the biggest gap)
+## `sync-protocol-client-settled-checkpoint-comparator` (1a R6) harness (the biggest gap)
 
 No harness exists. Feasible shape: parallel-reader comparator — (a) PoC Skip
 service exposing the aggregate over SSE (`POST /v1/streams/:resource` +

@@ -51,7 +51,7 @@ No backend changes; no claim that pages are row deltas.
   fork-handle FFI, per-page `isInit` preserved, needs Skip-side design;
   **C** per-page ticks + downstream merge — converges torn, fails R4/R6/R9,
   record as rejected. Planning chooses A vs B (plan Dependencies).
-- Disjointness (R6) lives in a Skip-side mapper downstream of `merge`
+- Disjointness (`paginated-reactive-source-disjoint-page-merge` (1b R6)) lives in a Skip-side mapper downstream of `merge`
   (`merge` unions same-key values, cannot enforce it): assert singleton
   `_id` (plain-`_id` keys) or `_id`-set overlap (tagged keys); throw or
   quarantine on violation, never silent dedup.
