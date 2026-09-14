@@ -14,7 +14,7 @@ plan. Each answer is a planning instruction, not a redesign.
 ## 1. QueryRemoved → delete inside the atomic unit
 
 `QueryRemoved{query_id}` carries no value
-(`sync_types/src/types/mod.rs:320-323`, `json.rs:517-520,549-551`). The
+(`sync_types/src/types/mod.rs:320-322`, `json.rs:517-520,549-550`). The
 server sends it only as the echo of the client's own unsubscribe
 (`sync/src/worker.rs:970-981`) — never spontaneously. Stock clients delete
 the local entry silently (`browser/sync/remote_query_set.ts:75-77`,
@@ -64,7 +64,7 @@ ModifyQuerySet versioning + restart-vs-resume with journals
 (`local_state.ts:88-153,289-364`), mutation/action correlation + resend
 (`request_manager.ts:168-230`), heartbeat/liveness (server 5s/120s,
 `subs/mod.rs:94-97`; TS 60s inactivity, Rust 5s/30s), backoff with
-synced-past-reconnect reset (`web_socket_manager.ts:114-149,470-475`),
+synced-past-reconnect reset (`web_socket_manager.ts:870-883,470-475`),
 full QuerySet resend on open (`client.ts:421-444`), version negotiation
 (header vs URL path), and chunk reassembly above. Planning instruction:
 scope the PoC socket to the minimal subset it implements (Connect + static

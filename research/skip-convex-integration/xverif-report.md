@@ -116,13 +116,12 @@ unverifiable detail) / **contradictory** (docs disagree) / **unverifiable**
 ## 6. Traceability (D) and index/handoff (F)
 
 - Orphans confirmed intentional: `client-v2` (transport superseded, sections
-  still referenced by mapping doc), `build-slices` (historical),
-  `spike-comparison` + `source-state` (uncited by plans; usage maps added
+  still referenced by mapping doc; retagged `superseded-fallback`), `build-slices` (historical),
+  `spike-comparison` + `source-state` (uncited by the four spike plans, cited only by the shared-prerequisites `1159` plan; usage maps added
   to both docs this cycle).
-- Plans' Sources entries resolve except: 1a omits `research-sync-protocol-
-  skip-mapping.md` (its most direct grounding — citation-hygiene gap,
-  plans-side); Dir-2 omits `research-index-id-metadata.md` and
-  `research-native-operator-spec.md` (same class).
+- Plans' Sources entries resolve (landed): 1a cites `research-sync-protocol-
+  skip-mapping.md` (`1509:220`); Dir-2 cites `research-index-id-metadata.md` and
+  `research-native-operator-spec.md` (`1702:267-268`); 1b cites page-topology (`1843:220`); 1c cites data-sync-source + push-seam (`1854:264-265`). No open hygiene gaps.
 - README index: zero `Note` flags; poc-vehicle correctly under Direction 2
   with pointers; `shared inputs` heading accurate for atomic-write.
 - Handoff SHAs/branch claims and overview direction summaries match current

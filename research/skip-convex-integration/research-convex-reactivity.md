@@ -162,9 +162,9 @@ pub struct IndexKeyWrites {
 - **No partial recomputation**: When invalidated, the query function runs from start to finish again, reading from the database fresh.
 
 **Evidence**: 
-- `crates/database/src/database.rs:2084-2097`: `subscribe_and_wait_for_subscription_invalidation()` waits for the subscription to become invalid, then control returns to the caller (the application), implying the application must re-execute the query.
-- `crates/database/src/query/mod.rs:139-200`: Query execution is a fresh traversal of indexes; there is no incremental computation logic.
+- `crates/database/src/database.rs:2090-2099`: `subscribe_and_wait_for_invalidation()` waits for the subscription to become invalid, then control returns to the caller (the application), implying the application must re-execute the query.
 
+- `crates/database/src/query/mod.rs:139-200`: `DeveloperQuery`/`TableFilter`/`ResolvedQuery` struct definitions (not execution); query execution itself is a fresh traversal of indexes with no incremental computation logic.
 #### The Subscription Mechanism is Not Incremental Computation
 The subscription system is really:
 1. **Staleness Detection**: "Does this query result need re-validation?"
@@ -218,7 +218,7 @@ pub struct IndexWorker<RT: Runtime> {
   - On invalidation, applies incremental updates to results instead of full re-execution
   - Leverages Skip or similar to track data dependencies within the query
 
-**Key interface** (database.rs:2084-2097):
+**Key interface** (database.rs:2090-2099):
 ```rust
 pub async fn subscribe(&self, token: Token) -> anyhow::Result<Subscription> {
     self.subscriptions.subscribe(token, false)
@@ -226,8 +226,8 @@ pub async fn subscribe(&self, token: Token) -> anyhow::Result<Subscription> {
 
 pub async fn subscribe_and_wait_for_invalidation(
     &self,
-    current_ts: Token,
-) -> Timestamp {
+    token: Token,
+) -> anyhow::Result<Option<Timestamp>> {
     let subscription = self.subscriptions.subscribe(token, true)?;
     let invalid_ts = subscription.wait_for_invalidation().await;
     // ← Here is where an incremental engine could update results

@@ -1,7 +1,7 @@
 ---
 title: Skip-as-client v2 (Track 1 construction spec)
 type: research-note
-status: active
+status: superseded-fallback
 direction: 1
 date: 2026-09-11
 ---
@@ -24,7 +24,7 @@ there. Resolves its five "better integration" gaps with a buildable choice.
   `assertSkipJson` rejecting `bigint`/`bytes` (`:109-131`).
 - Transport: full-snapshot `onUpdate` → one `callbacks.update` batch per
   re-evaluation. O(n) diff per snapshot. Restart = fresh `isInitial:true`.
-- Serving: `server/src/rest.ts` control (`POST /v1/streams/:resource`) +
+- Serving: `skipruntime-ts/server/src/rest.ts` control (`POST /v1/streams/:resource`) +
   streaming (`GET /v1/streams/:uuid`, SSE `init`/`update` + watermark). No auth
   in either port — gateway required.
 
@@ -35,7 +35,7 @@ there. Resolves its five "better integration" gaps with a buildable choice.
    `npm-packages/convex/src/browser/sync/protocol.ts`) carries whole
    `QueryUpdated.value`, no delta variant; a Rust client at the same layer
    sees the same shape. A WS `/api/sync` peer (`deployment_url` → `api/sync`,
-   `crates/convex/src/client/mod.rs:416-427`) buys protocol control
+   `crates/convex/src/client/mod.rs:416-426`) buys protocol control
    (base-version checks, `TransitionChunk` reassembly per
    `web_socket_manager.ts:300-347`) but not deltas. Recommend: keep
    `onUpdate` for v2; add WS peer only if chunk/ownership profiling demands it.
