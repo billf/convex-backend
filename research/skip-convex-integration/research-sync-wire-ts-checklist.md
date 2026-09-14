@@ -1,12 +1,12 @@
 ---
-title: Sync wire TS checklist (R1/`sync-protocol-client-atomic-transition-apply` (1a R2)/R5)
+title: Sync wire TS checklist (`sync-protocol-client-direct-readonly-sync-client` (1a R1)/`sync-protocol-client-atomic-transition-apply` (1a R2)/`sync-protocol-client-last-good-failure-state` (1a R5))
 type: research-note
 status: active
 direction: 1a
 date: 2026-09-11
 ---
 
-# Sync wire TS checklist (R1/`sync-protocol-client-atomic-transition-apply` (1a R2)/R5)
+# Sync wire TS checklist (`sync-protocol-client-direct-readonly-sync-client` (1a R1)/`sync-protocol-client-atomic-transition-apply` (1a R2)/`sync-protocol-client-last-good-failure-state` (1a R5))
 
 What an in-process TypeScript client must implement to speak `/api/sync`
 directly. No `ConvexClient`, no backend changes. All paths under
@@ -61,7 +61,7 @@ Wire JSON (`sync_types/src/types/json.rs`, mirror
 - `StateModification`: `QueryUpdated{query_id, value (full new result),
   logLines, journal}` | `QueryFailed{…, errorMessage, errorData?}` |
   `QueryRemoved{query_id}` (`mod.rs:305-323`, `json.rs:479-586`).
-- `QueryFailed` freeze (R5): stock clients overwrite with failure
+- `QueryFailed` freeze (`sync-protocol-client-last-good-failure-state` (1a R5)): stock clients overwrite with failure
   (`remote_query_set.ts:58-74`, `base_client/mod.rs:341-359`); the PoC must
   instead retain last-good rows and surface staleness, resuming `isInit:true`
   writes on recovery.
