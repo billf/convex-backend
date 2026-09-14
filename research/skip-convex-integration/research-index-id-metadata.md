@@ -27,10 +27,10 @@ lifecycle validation and dangling-reference behavior.
   `StableIndexName::{Physical,Virtual,Missing}`, `IndexDiff` shape,
   `by_id/by_creation_time()` (`common/src/types/index.rs:105-304`).
 - `IndexedFields::by_id() = []`, `creation_time() = [_creationTime]`
-  (`bootstrap_model/index/indexed_fields.rs:38-46`); system appends `_id`.
+  (`crates/common/src/bootstrap_model/index/database_index/indexed_fields.rs:38-46`); system appends `_id`.
 - Index state: `Backfilling{staged} | Backfilled{staged} | Enabled`
-  (`index_state.rs:19-27`); `is_staged/is_enabled/is_backfilled/same_spec`
-  (`index_config.rs:65-148`); `_index` table (`bootstrap_model/index/mod.rs:32`).
+  (`crates/common/src/bootstrap_model/index/database_index/index_state.rs:19-27`); `is_staged/is_enabled/is_backfilled/same_spec`
+  (`crates/common/src/bootstrap_model/index/index_config.rs:65-148`); `_index` table (`crates/database/src/bootstrap_model/index.rs:32`).
 - Live schema source: Active row of `_schemas`
   (`bootstrap_model/schema/mod.rs:48-67,194-204,295-322`); `get_by_state`,
   `get_validated_or_active`, `apply()`; `transaction.rs:849-868`
@@ -50,10 +50,10 @@ Full scan desugars to `by_creation_time` (`database/src/query/mod.rs:303-322`;
 `_index` uses `by_id` instead). New tables get both as `Enabled`-when-empty
 (`bootstrap_model/table.rs:565-577`); system tables likewise
 (`transaction.rs:976-986`); system indexes are immutable
-(`bootstrap_model/index.rs:111,174-177`, `index_registry.rs:365`).
+(`bootstrap_model/index.rs:111,174-177`, `crates/indexing/src/index_registry.rs:365`).
 Named `withIndex` must resolve to enabled metadata
 (`query/mod.rs:316-322`, `bootstrap_model/index.rs:703-746`,
-`transaction_index.rs:610-621`, `index_registry.rs:655-698`); read deps on
+`transaction_index.rs:610-621`, `crates/indexing/src/index_registry.rs:655-698`); read deps on
 `_index.by_id` keep invalidation exact (`:623-643`, `:908-931`).
 
 ## Staged/disabled lifecycle
@@ -66,7 +66,7 @@ Named `withIndex` must resolve to enabled metadata
 descriptors + staged flags + `IndexedFields` equality/order. Activation
 (live): `stable_index_name != Missing` + `require_enabled_*` success;
 backfilling vs staged errors distinguish retry vs disabled
-(`indexes_ready:1136-1165`). Ongoing: depend on `_index`
+(`crates/database/src/bootstrap_model/index.rs:1136-1165` `indexes_ready`). Ongoing: depend on `_index`
 (`take_indexes_dependency`) or poll diffs; Replaced/dropped/disabled →
 rebuild/pause/fail-closed.
 
@@ -77,7 +77,7 @@ map table number → name, compare (`validator.rs:117-145`); enforcement
 (`schemas/mod.rs:355-401,648-671`) never fetches. Dangling IDs pass.
 Native point read = singleton `by_id` range; miss → `None`
 (`transaction.rs:603-627,1098-1160`); unknown table → `None`
-(`user_facing.rs:78-112`, `transaction.rs:619-622`). So: forward join miss =
+(`crates/database/src/bootstrap_model/user_facing.rs:78-112`, `transaction.rs:619-622`). So: forward join miss =
 `null`/absent (mirror `db.get`), reverse join = empty set, no cascade; table
 delete blocked only by schema (`ReferencedTableCannotBeDeleted`,
 `schemas/mod.rs:80-112,414-432`).

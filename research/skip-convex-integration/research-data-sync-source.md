@@ -74,8 +74,9 @@ Opaque encrypted cursor (`crates/streaming_export/src/lib.rs:178-208`,
 persist Cursor+Page atomically
 (`crates/table_iteration/src/data_sync.rs:20-26`).
 
-Retention: index 4m, documents 14d (self-host 2d)
-(`crates/common/src/knobs.rs:636-659`). Cursor ahead of latest → 400;
+Retention: index 4m, documents 14d
+(`crates/common/src/knobs.rs:636-659`). Cursor ahead of latest → 400
+(`crates/table_iteration/src/data_sync.rs:455-461`);
 out-of-retention → 400 `DataSyncCursorExpired`, restart without cursor
 (`crates/local_backend/src/streaming_export.rs:530-544`). Progress rows
 keyed by `sync_id`, active window 3d
@@ -118,7 +119,7 @@ Admin/system identity + `ensure_streaming_export_enabled` +
 `crates/local_backend/src/streaming_export.rs:395-398,451-454,553-556`).
 Routes: `POST /data/sync`, `GET /data/list_active_syncs`,
 `GET /data/sync/{syncId}`
-(`crates/local_backend/src/streaming_export.rs:264-308,375-443,519-528`);
+(`crates/local_backend/src/streaming_export.rs:264-308,375-470,519-528`);
 Deploy/Team/OAuth tokens; usage + egress accounted per page
 (`crates/local_backend/src/streaming_export.rs:672-686`). Poll contract
 today: follow `nextCursor`, pace on `status`, back off at `upToDate`

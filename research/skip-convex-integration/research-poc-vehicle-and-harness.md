@@ -67,7 +67,7 @@ cross-collection joins, `take` in `instantiate`, two-external `createGraph`.
 - Encoding: current schema is JSON-safe (strings + numeric `_creationTime`);
   no `int64`/`bytes` encoders needed. Keep `_id`/`_creationTime` in Skip values
   (dropping them breaks keying/ordering); `assertSkipJson`
-  (`adapters/convex/src/index.ts:108-131`) remains the boundary guard.
+  (`adapters/convex/src/index.ts:109-131`) remains the boundary guard.
 - Stability: regenerated synthetic keys defeat `native_eq` and look like
   mass delete+insert under `isInit:true`.
 

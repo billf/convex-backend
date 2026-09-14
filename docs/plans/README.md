@@ -45,7 +45,7 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 - All plans measure both the favorable scaling case and the costs (bootstrap, retained state, scan amplification, freshness) that accompany it.
 
 **Evidence hierarchy:**
-- Phase 1 research (20 docs, 14 pass / 6 partial) grounded the feasibility and architectural choices.
+- Phase 1 research (20 docs, 12 pass / 8 partial) grounded the feasibility and architectural choices.
 - These four spikes each own a narrow technical question: can we bound the implementation correctly, measure the scaling shape, and decide whether to generalize?
 - A passing spike establishes bounded semantic feasibility; it does not make a generalization decision by itself.
 

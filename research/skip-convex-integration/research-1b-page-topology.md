@@ -14,11 +14,11 @@ No backend changes; no claim that pages are row deltas.
 
 ## Pagination mechanics (verified)
 
-- Contract: `pagination.ts:28-57` (`page`, `isDone`, `continueCursor`,
+- Contract: `server/pagination.ts:28-57` (`page`, `isDone`, `continueCursor`,
   `splitCursor?`, `pageStatus?: SplitRecommended|SplitRequired|null`);
   `numItems` is initial target only (`:68-78`); `cursor:null` = start;
   `endCursor` bounds `(cursor,endCursor]` for gapless adjacency (`:86-98`).
-  `paginate()` returns all items in range after first call (`query.ts:212-229`).
+  `paginate()` returns all items in range after first call (`server/query.ts:212-229`).
 - Split lifecycle (`paginated_query_client.ts:359-476`): detect on
   `splitCursor + (Recommended|Required|len > 2×initial)`; subscribe to
   `(cursor,split] + (split,continue]` with fresh keys, record
@@ -26,8 +26,8 @@ No backend changes; no claim that pages are row deltas.
   (`:369-383 → :532-544` splice + unsubscribe old). Old page stays in
   `pageKeys` until completion — the lifecycle R4 mirrors through Skip.
 - `SplitRequired` = hard limit hit, page possibly incomplete — never publish
-  as complete (R5; React truncates at `:343-348`). `Recommended` = soft
-  3/4 rows/bytes or oversize (`async_syscall.rs:1685-1801`). `InvalidCursor`
+  as complete (R5; React truncates at `use_paginated_query.ts:343-348`). `Recommended` = soft
+  3/4 rows/bytes or oversize (`crates/isolate/src/environment/udf/async_syscall.rs:1689-1797`). `InvalidCursor`
   (fingerprint mismatch) → full reset with new `id`, not in-place handling.
 - Backend split construction: `query/mod.rs:233-387` (Reactive-only
   split_cursor, fingerprint-gated end_cursor), `index_range.rs:65-329`

@@ -42,7 +42,7 @@ Each `DatabaseIndexWrite` carries `document_id`, old/new `IndexKeyBytes`,
 and post-image `new_document` (`common/src/document_index_keys.rs:75-86`);
 deletes are tombstone key + `new_document: None`; inserts have `old: None`.
 Text writes carry no body; vector writes are absent from the log.
-Only enabled indexes emit (`index_registry.rs:224-248,292-344`).
+Only enabled indexes emit (`crates/indexing/src/index_registry.rs:224-248,292-344`).
 `WriteSource` (`:206-274`) distinguishes UDF/system writes.
 
 Ordering: `append` asserts `max_ts < ts` (`:331-357`); per-index sets are
@@ -72,7 +72,7 @@ Lag past the window means rebuild, not resume: seed from
 - `Token`/read-set overlap (`token.rs:17-20`, `reads.rs:88-92,193-306`):
   invalidation signals, lossy for payload (keys + post-image only).
 - `PendingWrites`: pre-commit, in-memory only, false conflicts.
-- `SnapshotManager` diff: 10s window (`knobs.rs:407-410`), gaps from empty
+- `SnapshotManager` diff: 10s transaction-begin window (`knobs.rs:407-410` `MAX_TRANSACTION_WINDOW_SECONDS`, not a snapshot-diff retention), gaps from empty
   bumps, diff = scan.
 - `subscribe` / `subscribe_and_wait_for_invalidation`
   (`database.rs:2086-2099`, `subscription.rs:492-660`): signal-only

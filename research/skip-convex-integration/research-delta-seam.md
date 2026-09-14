@@ -29,8 +29,8 @@ miss is just a re-query, never on the commit path.
    (`EagerCollection` with `map`/`reduce`/`merge` deps). Failure = cache miss
    → re-query. No correctness risk to commit ordering.
 2. Subscription invalidation feed. Feed externalized
-   `Token{read_set,ts}` (`database/src/token.rs:17-20`) + `LogReader::
-   refresh_token` / `writes_overlap_by_index` (`reads.rs:233-306`) into Skip
+   `Token{read_set,ts}` (`database/src/token.rs:17-20`) + `writes_overlap_by_index`
+   (`reads.rs:233-306`; `refresh_token` lives in `write_log.rs:608,663` / `database.rs:2542`, not `reads.rs`) into Skip
    as input frontiers. Optionally back `SubscriptionTrait::extend_validity`
    (`application/src/api.rs:614-668`) with a Skip-consulting
    `SubscriptionClient`. Keep `processed_ts` + retention semantics in

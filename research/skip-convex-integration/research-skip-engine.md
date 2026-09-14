@@ -227,7 +227,7 @@ For a reducer-based sum:
 /Users/bill/src/skip/
 ├── skiplang/                           # Skip Language & Compiler
 │   ├── compiler/
-│   │   ├── src/                        # ~3GB of .sk compiler source
+│   │   ├── src/                        # ~2.9MB of .sk compiler source
 │   │   │   ├── compile.sk              # Entry point
 │   │   │   ├── IR.sk                   # Intermediate representation
 │   │   │   ├── lower.sk                # Lower to machine code
@@ -431,7 +431,7 @@ If Skip is integrated into convex-backend, it could enable:
 - `/Users/bill/src/skip/skipruntime-ts/examples/groups.ts` — More complex reactive resource example
 
 ### Server & HTTP Layer
-- `/Users/bill/src/skip/skipruntime-ts/server/src/server.ts` — `runService()` implementation; HTTP API definition (POST /v1/snapshot, PATCH /v1/inputs, GET /v1/streams for subscriptions)
+- `/Users/bill/src/skip/skipruntime-ts/server/src/server.ts` — `runService()` implementation; HTTP API definition (POST /v1/snapshot/:resource, PATCH /v1/inputs/:collection, POST /v1/streams/:resource to create + GET /v1/streams/:uuid to read)
 
 ### Design & Architecture
 - `/Users/bill/src/skip/rfc/008-reactive-services.org` — Full reactive services architecture RFC

@@ -61,6 +61,6 @@ fingerprint-stable.
 ## Acceptance
 
 - Single recommended option with rejection reasons recorded.
-- File:line checklist above; wire example round-trips TS→Rust.
+- File:line checklist above; wire example is a proposed shape (the `Skip` variant exists in neither `query_impl.ts:24` nor `query.rs:899` yet) — round-trips TS→Rust once both enums are extended.
 - `cargo build -p convex-common -p convex-database` + query syscalls green;
   exhaustive-match errors treated as the touch-point oracle.

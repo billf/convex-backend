@@ -23,7 +23,7 @@ around here.
 
 Endpoint: WebSocket to `<deployment>/api/sync`, JSON messages both ways.
 No browser-specific handshake (grounding: Rust
-`crates/convex/src/sync/web_socket_manager.rs:96-115` opens the same socket
+`crates/convex/src/sync/web_socket_manager.rs:96-115` (`SyncProtocol::open`; tungstenite import at `:38`, `connect_async` at `:315`) opens the same socket
 via `tokio_tungstenite`; TS mirrors it).
 
 Client → server (`sync_types/src/types/mod.rs:171-206`):
@@ -74,7 +74,7 @@ on reconnect the client re-establishes subscriptions and takes fresh values.
 | `QueryFailed` | `callbacks.error` + teardown/re-subscribe | Surface, drop last value, re-subscribe → fresh initial (recovery, not replay). |
 | `QueryRemoved` | `unsubscribe` completion | Drop last value + watermark. |
 | Row identity | `getKey(row): string` | Non-empty, stable across snapshots; duplicates throw; non-string keys throw. |
-| Row values | `Entry<Json,Json>` | Must pass `assertSkipJson` (`index.ts:109-131`): `bigint`/`ArrayBuffer` rejected at boundary with encoder hint. |
+| Row values | `Entry<Json,Json>` | Must pass `assertSkipJson` (`skipruntime-ts/adapters/convex/src/index.ts:109-131`): `bigint`/`ArrayBuffer` rejected at boundary with encoder hint. |
 | Auth token | Service-held credential | PoC: unauthenticated or admin key per tutorial deployment; production shape (per-tenant JWT, gateway) is out of scope for 1a correctness-only bar. |
 
 Ordering/dedup: serialize deliveries per instance (promise chain); drop

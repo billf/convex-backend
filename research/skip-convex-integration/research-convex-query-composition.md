@@ -29,7 +29,7 @@ All filtering, mapping, and transformation is done in user-authored JavaScript/T
 Users build queries via the `QueryInitializer` interface:
 
 ```typescript
-// From query.ts:29-68
+// From query.ts:29-68 (QueryInitializer excerpt; full interface spans query.ts:14-283)
 export interface QueryInitializer<TableInfo extends GenericTableInfo> extends Query<TableInfo> {
   fullTableScan(): Query<TableInfo>;
   withIndex<IndexName extends IndexNames<TableInfo>>(
@@ -314,7 +314,7 @@ fn start_query(&mut self, query: Query, version: Option<Version>) -> anyhow::Res
 
 This is where the `DeveloperQuery` is constructed (via `crates/database/src/query/mod.rs:295-469`), building the QueryNode pipeline.
 
-### 2.3 Query Consumption (isolate/src/environment/udf/query_impl.ts)
+### 2.3 Query Consumption (npm-packages/convex/src/server/impl/query_impl.ts)
 
 JS code calls `.next()` on a query, which maps to `"1.0/queryStreamNext"` syscall:
 
