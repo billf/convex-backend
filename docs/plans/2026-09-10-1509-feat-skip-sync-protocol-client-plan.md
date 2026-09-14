@@ -55,18 +55,18 @@ convex-backend's reactivity is coarse: an invalidated query is run again and the
 - R3. The client presents each updated query's complete current row set to Skip with snapshot semantics, and Skip derives row additions, updates, and removals through its `isInit: true` reconciliation path rather than a bridge-computed diff.
 
 **Skip-side computation**
-- R4. At least one derived value is computed inside Skip via its reducer mechanism from data spanning more than one Convex query/table, so the demo evidences genuine incremental computation rather than a 1:1 relay of Convex data.
+- R4. Skip computes the Shared proof-vehicle contract's room-scoped feed and per-message `likeCount` reducer from data spanning more than one Convex query/table, so the demo evidences genuine incremental computation rather than a 1:1 relay of Convex data.
 
 **Failure handling**
 - R5. When a subscribed query enters a failed state, its previously-derived Skip view is retained (frozen at last-good) rather than cleared, and the demo surfaces that the value may be stale. If the query has never previously succeeded, the client instead shows an explicit not-yet-loaded state, distinct from both a frozen stale value and a removed query; it never renders as an empty frozen row set.
 
 **Acceptance bar**
-- R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived aggregate matches an independent Convex reader across bootstrap, a multi-table update, unsubscribe, and reconnect with a fresh snapshot, and again after recovery from a query failure. No formal latency or resource-overhead comparison is required. This equality bar deliberately excludes the query-failure checkpoint itself: R5 requires the frozen last-good view to remain visibly stale rather than track the independent reader while the query is still failed, so failure is instead verified as retention-of-last-good plus a visible stale indicator (see AE2).
+- R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived Shared proof-vehicle result matches an independent Convex reader across bootstrap, a multi-table update, unsubscribe, and reconnect with a fresh snapshot, and again after recovery from a query failure. No formal latency or resource-overhead comparison is required. This equality bar deliberately excludes the query-failure checkpoint itself: R5 requires the frozen last-good view to remain visibly stale rather than track the independent reader while the query is still failed, so failure is instead verified as retention-of-last-good plus a visible stale indicator (see AE2).
 - R11. The proof records the implemented protocol surface, its code and test footprint, and every production concern it does not exercise, so a passing R6 establishes bounded semantic feasibility rather than an unqualified recommendation to generalize.
 
 **Proof vehicle**
-- R7. The demonstration combines a Skip chatroom example from `~/src/skip/examples/*` with the Convex tutorial app (`~/src/convex-tutorial`).
-- R8. The Convex side of the demo subscribes to plain per-table queries, not the tutorial's existing joined, `.take(50)`-limited query, so the cross-table join and the incremental count happen inside Skip rather than inside the Convex query.
+- R7. The demonstration implements the Shared proof-vehicle contract in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`, using the Convex tutorial only as a fixture base and the Skip chatroom example only as an implementation reference.
+- R8. The Convex side of the demo subscribes to plain per-table queries for the contract's five tables, not a pre-joined or pre-reduced query, so membership filtering, the user join, ordering, and the incremental `likeCount` happen inside Skip.
 
 <!-- ce-section: work-relationships -->
 ### How This Work Fits Together
@@ -109,16 +109,16 @@ flowchart LR
 
 - A1. convex-backend — source of truth; commits mutations and emits `Transition` messages over `/api/sync`.
 - A2. Skip sync client — the new component this plan builds; owns the WebSocket and applies transitions to Skip.
-- A3. Skip runtime — computes the derived aggregate via its incremental engine.
-- A4. Demo viewer — sees the aggregate update in the chatroom UI.
+- A3. Skip runtime — computes the canonical feed via its incremental engine.
+- A4. Demo viewer — sees the canonical feed update in the chatroom UI.
 
 ### Key Flows
 
-- F1. Live cross-table aggregate update
+- F1. Live cross-table feed update
   - **Trigger:** A user action changes two or more of the demo's subscribed query results in one Convex transaction.
   - **Actors:** A1, A2, A3, A4
-  - **Steps:** A1 advances the synchronized state and sends one `Transition` covering the changed query results. A2 reassembles it if necessary and applies its snapshot writes to Skip atomically. A3 incrementally updates the affected derived state. A4 sees the updated aggregate.
-  - **Outcome:** The aggregate reflects a state where both tables have advanced together; it never displays an intermediate state where only one has.
+  - **Steps:** A1 advances the synchronized state and sends one `Transition` covering the changed query results. A2 reassembles it if necessary and applies its snapshot writes to Skip atomically. A3 incrementally updates the affected canonical feed. A4 sees the updated result.
+  - **Outcome:** The feed reflects a state where every affected table has advanced together; it never displays an intermediate partial transaction.
   - **Covers:** R2, R3, R4.
 - F2. Query failure and recovery
   - **Trigger:** A subscribed query transitions to a failed state (e.g. a transient backend error).
@@ -136,9 +136,9 @@ flowchart LR
 ### Acceptance Examples
 
 - AE1. **Covers:** R2, R4, R6.
-  - **Given:** A chatroom demo subscribed to per-table queries, with a per-room message count computed in Skip via its reducer mechanism.
-  - **When:** A single Convex mutation inserts a message and updates the room's activity field in one transaction.
-  - **Then:** The Skip-derived count updates once, correctly, and matches an independent Convex reader at that checkpoint; no intermediate render shows the message inserted without the count having incremented, or vice versa.
+  - **Given:** A chatroom demo subscribed to the Shared proof-vehicle contract's per-table inputs.
+  - **When:** One Convex transaction changes a sender's membership and adds a like.
+  - **Then:** The canonical feed changes once, correctly, and matches an independent Convex reader at that checkpoint; no intermediate render shows only one side of the transaction.
 - AE2. **Covers:** R5, R6.
   - **Given:** The demo is running and displaying a live per-room count.
   - **When:** The subscribed query underlying that count enters a failed state.
@@ -170,9 +170,9 @@ flowchart LR
   - **Then:** The client shows an explicit not-yet-loaded state, distinct from a frozen stale value (AE2) and from a removed query (AE4).
 - AE8. Row removal on a live query
   - **Covers:** R2, R4.
-  - **Given:** A chatroom demo with a per-room message count computed via Skip's reducer, already showing a nonzero count for a room.
-  - **When:** A Convex mutation deletes one of that room's messages while the query remains subscribed and live.
-  - **Then:** The Skip-derived count decrements correctly, verifying the reducer's remove path independent of unsubscribe (AE4) or failure freezing (AE2).
+  - **Given:** A chatroom demo showing a message with a nonzero `likeCount` in the canonical room feed.
+  - **When:** A Convex mutation deletes one of that message's likes while the query remains subscribed and live.
+  - **Then:** The Skip-derived `likeCount` decrements correctly, verifying the reducer's remove path independent of unsubscribe (AE4) or failure freezing (AE2).
 - AE9. Liveness tolerance
   - **Covers:** R1.
   - **Given:** The demo is connected and displaying a correct aggregate with no pending writes.
@@ -217,7 +217,7 @@ flowchart LR
 ### Outstanding Questions
 
 **Deferred to Planning**
-- Which specific cross-table aggregate the demo computes (e.g. per-room message count vs. another candidate) — any real aggregate spanning more than one query satisfies R4.
+- The shared proof vehicle fixes the canonical feed and its `likeCount` reducer; planning may choose only transport-specific input topology, not another aggregate or result shape.
 - The demo's auth mode for its sync connection (see Dependencies / Assumptions).
 - Whether to adopt the shared-prerequisites plan's P (envelope convention) for R2 rather than a bespoke mechanism — see Dependencies/Assumptions.
 

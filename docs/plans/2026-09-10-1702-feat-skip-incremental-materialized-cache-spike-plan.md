@@ -86,14 +86,14 @@ flowchart TB
 
 **Bounded proof vehicle**
 
-- R7. The only accelerated view is a pre-registered, room-scoped recent-message feed whose validated ID fields connect rooms, users, memberships, messages, and likes for joins, membership filtering, grouped like reduction, deterministic ordering, and bounded output. Concretely: view membership is exactly the messages whose room matches the caller-supplied room ID and whose sender has an active membership row for that room at read time; likes are grouped-reduced per message; ordering is (`_creationTime` desc, `_id` desc) as the deterministic tiebreak; output is bounded to the most recent N messages, with N fixed by the harness configuration and no further pagination. The native oracle used for R13 uses this same membership, ordering, and limit definition.
+- R7. The only accelerated view is the pre-registered room-scoped feed defined by the Shared proof-vehicle contract in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`: its five validated-ID tables, active-membership predicate, nullable sender projection, grouped like count, deterministic ordering, fixed 50-message bound, and no-pagination rule are all mandatory. The native oracle used for R13 uses that exact contract.
 - R8. The view is declared ahead of time as part of the experimental deployment; schema-driven generation, code-publish generation, and just-in-time construction are excluded from the spike.
 
 **Read and fallback contract**
 
-- R9. The ordinary Convex client connection handshake carries an experimental acceleration option while application query arguments and result values remain ordinary Convex values.
-- R10. The first supported consistency mode waits until the view has reached at least the caller's required Convex commit version, while the client rejects every reserved but unsupported mode.
-- R11. An unavailable, unhealthy, lagging, or known-incorrect accelerated view silently falls back to the equivalent native Convex query.
+- R9. The ordinary Convex client connection handshake carries an experimental acceleration option while application query arguments and result values remain ordinary Convex values. For an accelerated connection, the required version is the connection's existing causal sync watermark: the maximum Convex commit version it has observed from committed writes or received sync transitions.
+- R10. The first supported consistency mode waits until the view has reached at least the connection's required Convex commit version. The required version advances with that causal sync watermark; the client rejects every reserved but unsupported mode.
+- R11. An unavailable, unhealthy, or known-incorrect accelerated view silently falls back to the equivalent native Convex query. A healthy view behind the required version waits only until it catches up, the read is cancelled or reaches its request deadline, or the view becomes unhealthy; the latter two cases silently fall back with their reason recorded.
 - R12. Metrics expose accelerated and fallback request counts, the fallback rate and reason, view progress versus required version, rebuild state, and detected result mismatches.
 
 **Evaluation**
@@ -175,11 +175,11 @@ flowchart LR
 - F2. Incremental transaction and reactive read
   - **Trigger:** One committed transaction changes source rows used by the feed.
   - **Actors:** A1, A2, A3, A4
-  - **Steps:** A2 applies the transaction atomically, updates only affected dependencies, and advances the published view version. A3 serves the result when that version satisfies A4's requirement.
+  - **Steps:** A2 applies the transaction atomically, updates only affected dependencies, and advances the published view version. A3 waits while the read remains active until that version satisfies A4's causal sync watermark, then serves the result.
   - **Outcome:** The client observes an ordinary Convex result from a transaction-consistent incremental view.
   - **Covers:** R1-R4, R9, R10.
 - F3. Fallback and recovery
-  - **Trigger:** The view is unavailable, behind the required version, rebuilding, or known to disagree with the native result.
+  - **Trigger:** The view is unavailable, rebuilding, known to disagree with the native result, becomes unhealthy while a read waits, or remains behind the required version until that read is cancelled or reaches its deadline.
   - **Actors:** A2, A3, A4, A5
   - **Steps:** A3 runs the native query and returns its result without an application-visible acceleration error. A2 continues recovery, and A5 can attribute the fallback through metrics.
   - **Outcome:** Availability and correctness are preserved while accelerator failure remains observable.
@@ -195,11 +195,11 @@ flowchart LR
 - AE2. Version-gated read
   - **Covers:** R9, R10.
   - **Given:** The client requires version V2 while the materialized view has published only V1.
-  - **When:** The view reaches V2 before the read is abandoned.
+  - **When:** The view reaches V2 before the read is cancelled or reaches its request deadline.
   - **Then:** The client receives the V2-or-newer accelerated result and no older snapshot.
 - AE3. Silent but observable fallback
   - **Covers:** R11, R12, R16.
-  - **Given:** The Skip subsystem is rebuilding or cannot reach the required version.
+  - **Given:** The Skip subsystem is rebuilding, is unhealthy, or cannot reach the required version before the read is cancelled or reaches its request deadline.
   - **When:** The client requests the feed with acceleration enabled.
   - **Then:** The application receives the native Convex result, while metrics count the fallback and identify its reason.
 - AE4. Scaling demonstration
@@ -215,6 +215,7 @@ flowchart LR
   - **Given:** The cache has served a correct view and then loses its process-local state.
   - **When:** It restarts while Convex continues accepting writes.
   - **Then:** Reads use the native fallback until rebuild and catch-up complete, after which the accelerated result matches the native result at the same version.
+  - **And:** The recovery test commits one change immediately before the consistent-snapshot cursor is captured and another immediately after it, before the change-consumption catch-up fence completes. It verifies that neither change is omitted when acceleration becomes eligible.
 - AE6. Index lifecycle gate
   - **Covers:** R14, R17-R19, R22.
   - **Given:** Rooms, users, memberships, messages, and likes expose implicit `by_id` and `by_creation_time` base-view definitions and have those views materialized, and the view declares an enabled Convex application index for each additional indexed lookup and ordering.

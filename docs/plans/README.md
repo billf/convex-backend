@@ -38,6 +38,7 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 
 **Shared P/Q tier:**
 - `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` proposes a reusable envelope/atomic-write convention (P) and comparator/fault harness (Q). It is a planned shared dependency for 1a/1b, optional reuse for 1c, and a design reference for Direction 2. Direction 2 consumes `shared-prereqs-q-language-neutral-methodology-spec` as a specification, while retaining its backend-native atomicity and comparator implementations.
+- That shared plan also defines the one five-table room-feed proof vehicle used by 1a, 1b, 1c, and Direction 2, so the transport experiments differ without changing the product or oracle they evaluate.
 
 **Shared constraints:**
 - All four plans share the same correctness bar: a Skip-maintained aggregate must match an independent native Convex result at settled checkpoints.
