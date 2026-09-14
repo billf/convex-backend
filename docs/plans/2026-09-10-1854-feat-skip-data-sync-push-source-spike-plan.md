@@ -118,6 +118,33 @@ That plan's own Problem Frame also directly resolves this plan's Deferred / Open
 
 **Sequencing:** U4 imports P rather than hand-building KTD7-KTD9's staging map, last-good map, and pending-page ledger; P's own design (its P9) is scoped to match this plan's exact requirements precisely because this plan is P's most advanced concrete consumer, so U4 validates P against those requirements rather than inventing a parallel implementation. Symmetrically, U6 builds on Q rather than a from-scratch `bench/compare.ts`/`verify_protocol_fixtures.ts` — Q's own design (its Q11) generalizes this plan's already-designed harness and JSONL schema (KTD10) as its reference implementation, so U6 supplies the wiring and this plan's specific fault scenarios (R15) rather than reimplementing the comparator and fault-injection core. Both P and Q are owned and built by the shared-prerequisites plan, external to this plan's own execution profile; U4 and U6's Dependencies lines below reflect this.
 
+### Dependency relations
+
+```mermaid
+flowchart LR
+  dataSync["Data Sync contract"] --> endpoint["1c bounded push endpoint"]
+  endpoint --> service["Push service with retained state"]
+  service --> skipGraph["Skip retained graph"]
+  skipGraph --> harness["Comparison and validation gate"]
+  p["P convention"] -. "optional reuse" .-> service
+  q["Q harness"] -. "optional reuse" .-> harness
+  fallback["Documented bespoke fallback"] -. "when P/Q are not usable" .-> harness
+```
+
+### Actors and flows
+
+```mermaid
+flowchart LR
+  source["Data Sync subsystem"] --> endpoint["Push-stream endpoint"]
+  endpoint -->|"revision groups"| client["Skip source client"]
+  client --> skipGraph["Incremental graph"]
+  skipGraph --> publication["Derived publication"]
+  evaluator["Evaluator"] -->|"writes and faults"| source
+  evaluator -->|"checkpoint comparison"| publication
+```
+
+**Cross-document graph maintenance:** When this plan changes, update and revalidate relevant nodes, edges, statuses, and identifier-map rows in [README.md](README.md), [planning-timeline.md](planning-timeline.md), [prerequisites.md](prerequisites.md), [detailed-prerequisites.md](detailed-prerequisites.md), and [IDENTIFIER-MAP.md](IDENTIFIER-MAP.md); then render the affected diagrams and verify their references.
+
 ### Actors
 
 - A1. Convex Data Sync subsystem — selects tables, builds consistent snapshots, advances CDC cursors, and emits document revisions, tombstones, and truncations.

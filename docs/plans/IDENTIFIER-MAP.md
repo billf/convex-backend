@@ -34,9 +34,10 @@ never has to open the source document just to know what "1c's KTD7" is.
 
 ## How to use this file
 
-- **Citing an identifier that already has a row below:** cite it either way
-  (`1a's R2` or `paginated-reactive-source-bounded-prefix-load`), but prefer
-  the descriptive anchor in new prose — it survives renumbering.
+- **Citing an identifier that already has a row below:** use its descriptive
+  anchor in cross-document prose (for example,
+  `paginated-reactive-source-bounded-prefix-load`), not a local number such as
+  `1a's R2`. The source document may continue to use its local numbers.
 - **Defining a new identifier that is only ever going to be used inside its
   own document:** keep numbering it (`R12`, `F4`, ...). It does not need a
   row here. Descriptive anchors don't need an index entry; numbered ones do,

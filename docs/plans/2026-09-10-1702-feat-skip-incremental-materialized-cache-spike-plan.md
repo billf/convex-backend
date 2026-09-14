@@ -130,6 +130,32 @@ This plan owns Direction 2's first backend-native feasibility spike. The breakdo
   - Native Skip APIs, specialized UDFs, and Skip-authored query composition can build on a successful engine integration but still require separate product design.
   - Effectful triggers require a delivery boundary outside deterministic Skip mappers and reducers and remain an independent work unit.
 
+### Dependency relations
+
+```mermaid
+flowchart LR
+  commits["Committed Convex row changes"] --> host["Direction 2 native Skip host"]
+  host --> apply["Backend-native atomic apply"]
+  apply --> view["Versioned materialized view"]
+  view --> gate["Required-version read gate"]
+  gate --> compare["Independent native comparison"]
+  q12["shared-prereqs-q-language-neutral-methodology-spec"] -. "specification consumption" .-> compare
+  p["P convention"] -. "design reference only" .-> apply
+```
+
+### Actors and flows
+
+```mermaid
+flowchart LR
+  transaction["Convex transaction system"] --> host["Materialized-cache subsystem"]
+  host -->|"version and health"| readPath["Reactive read path"]
+  client["Convex client"] -->|"required version"| readPath
+  readPath --> result["Accelerated or native result"]
+  evaluator["Operator or evaluator"] -->|"mismatch and scaling evidence"| host
+```
+
+**Cross-document graph maintenance:** When this plan changes, update and revalidate relevant nodes, edges, statuses, and identifier-map rows in [README.md](README.md), [planning-timeline.md](planning-timeline.md), [prerequisites.md](prerequisites.md), [detailed-prerequisites.md](detailed-prerequisites.md), and [IDENTIFIER-MAP.md](IDENTIFIER-MAP.md); then render the affected diagrams and verify their references.
+
 ### Actors
 
 - A1. Convex transaction system — commits authoritative writes and provides the ordered changes used to maintain the view.
