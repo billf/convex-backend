@@ -33,11 +33,11 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 ### How These Work Together
 
 **Independence and isolation:**
-- Direction 1 and Direction 2 are intentionally separate. The external source spikes (1a/1b/1c) do not depend on backend-native Skip and can be evaluated independently.
-- Within Direction 1: 1a provides a baseline with full snapshots; 1b and 1c optimize different axes (query topology and document granularity). All three can proceed in parallel without blocking each other, **except that real implementation of any of 1a/1b/1c depends on the shared prerequisite tier (`docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`) landing first** — that plan's P (envelope convention) and Q (correctness-comparator harness) are the atomic-write and correctness-checking infrastructure all three otherwise independently defer to their own planning.
+- Direction 1 and Direction 2 are intentionally separate. Direction 1 evaluates Skip as an external incremental consumer across full-query, page, and document-revision granularity; Direction 2 evaluates a backend-owned materialized-view engine with its own atomicity, comparator, and deployment boundary.
+- Within Direction 1, 1a provides a full-snapshot baseline, 1b changes query topology, and 1c exports document revisions. 1a and 1b carry the shared plan's current P/Q sequencing proposal, but that is not evidence they are technically impossible to implement independently. 1c is implementation-ready and can start without P/Q; its push-service and retained-graph comparison units need usable P/Q only to complete shared integration validation unless their documented bespoke fallbacks are scoped instead.
 
-**Prerequisite tier:**
-- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` sits beneath 1a/1b/1c/Direction 2. It is a shared build-once dependency for the external-source spikes (1a/1b/1c), not a fifth spike. See that plan's own scope notes on Direction 2, which is backend-native and does not consume the same external-adapter-shaped P/Q artifacts without further design work.
+**Shared P/Q tier:**
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` proposes a reusable envelope/atomic-write convention (P) and comparator/fault harness (Q). It is a planned shared dependency for 1a/1b, optional reuse for 1c, and a design reference for Direction 2. Direction 2 consumes `shared-prereqs-q-language-neutral-methodology-spec` as a specification, while retaining its backend-native atomicity and comparator implementations.
 
 **Shared constraints:**
 - All four plans share the same correctness bar: a Skip-maintained aggregate must match an independent native Convex result at settled checkpoints.
@@ -48,6 +48,13 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 - Phase 1 research (20 docs, 12 pass / 8 partial) grounded the feasibility and architectural choices.
 - These four spikes each own a narrow technical question: can we bound the implementation correctly, measure the scaling shape, and decide whether to generalize?
 - A passing spike establishes bounded semantic feasibility; it does not make a generalization decision by itself.
+
+### Documentation map
+
+- [Planning timeline](planning-timeline.md) defines the common maturity taxonomy and maps planning through validation.
+- [Prerequisite map](prerequisites.md) distinguishes planned sequencing gates, optional reuse, specification consumption, and design references.
+- [Detailed prerequisites](detailed-prerequisites.md) names P/Q outputs and each downstream consumption mode.
+- [Identifier map](IDENTIFIER-MAP.md) owns the descriptive anchors used by cross-plan graphs and prose.
 
 ---
 
@@ -122,3 +129,4 @@ As spikes progress:
 - Update the `status` field to reflect completion, unblocking, or deferral.
 - Add subsections under each plan summarizing planning decisions or discoveries if they affect cross-plan dependencies.
 - If a plan branches into multiple sub-initiatives, document the new breakdown here with updated plan file references.
+- **Cross-document graph maintenance:** When a dated plan changes, update and revalidate the relevant nodes, edges, maturity status, and identifier-map rows in this README, [planning-timeline.md](planning-timeline.md), [prerequisites.md](prerequisites.md), [detailed-prerequisites.md](detailed-prerequisites.md), and [IDENTIFIER-MAP.md](IDENTIFIER-MAP.md). Render the affected Mermaid diagrams and verify every cross-plan reference resolves before treating the documentation update as complete.
