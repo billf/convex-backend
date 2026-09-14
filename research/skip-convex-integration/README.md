@@ -116,6 +116,30 @@ Shared inputs (Direction 1 + Direction 2):
   (`CollectionWriter.update`; `ServiceInstance.update` is inputs-only),
   missing batch primitive, no-diff rule, reducer bar (`sync-protocol-client-atomic-transition-apply` (1a R2)/`sync-protocol-client-snapshot-reconciliation` (1a R3)/`sync-protocol-client-cross-query-reducer` (1a R4)).
 
+### Shared investigations (cross-cutting, unified-vehicle era)
+
+- [`research-1b-pagination-boundary.md`](research-1b-pagination-boundary.md) —
+  three layers reconciling the canonical take-50 product with 1b's internal
+  pagination: fixed output, native oracle, acquisition topology.
+- [`research-logical-checkpoint-contract.md`](research-logical-checkpoint-contract.md) —
+  four-gate language-neutral checkpoint definition for Q12 with per-direction
+  bindings (settled writes / revision tags / cursor progression / causal watermark).
+- [`research-publication-state-semantics.md`](research-publication-state-semantics.md) —
+  shared never-partial-as-current vocabulary mapped over 1a/1b/1c/Direction 2
+  lifecycles, plus fault→state matrix for Q6.
+- [`research-semantic-test-vectors.md`](research-semantic-test-vectors.md) —
+  versioned fixture vectors (V1–V6) with expected canonical results, AE
+  coverage matrix, and manifest-parity versioning.
+- [`research-core-metric-profile.md`](research-core-metric-profile.md) —
+  required/optional/N-A metric profile per direction with page-, cursor-, and
+  index-gating extensions plus the Q5 name-collision map.
+- [`research-atomic-source-batch.md`](research-atomic-source-batch.md) —
+  abstract batch contract (ordering/versioning/tombstones/replay/publication)
+  with per-direction mapping and P-coverage gaps.
+- [`research-static-vs-dynamic-indexes.md`](research-static-vs-dynamic-indexes.md) —
+  static declared index set for all directions vs dynamic eligibility/rebuild
+  behavior tested only by Direction 2, plus anti-confusion table.
+
 ### Direction 2 — backend-native Skip cache
 
 - [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
