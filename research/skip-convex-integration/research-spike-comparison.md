@@ -31,7 +31,7 @@ authoritative for their own gates; this doc only aligns measurement.
 
 ## Shared counter catalog
 
-Union of 1b-R12 / 1c-R17 / Direction-2 R4+R12: delivered rows/bytes; Skip
+Union of 1b-R12 / 1c-R17 / Direction-2 `incremental-materialized-cache-scaling-instrumentation` (D2 R4)+`incremental-materialized-cache-fallback-metrics` (D2 R12): delivered rows/bytes; Skip
 keys reconciled (added/changed/removed); dependent nodes updated; reducer
 add/remove; splits/rebuilds (page splits, id-change rebuilds,
 resnapshots); wake-ups by cause (native vs self-bookkeeping, heartbeats
@@ -62,7 +62,7 @@ unrelated-log scan work are counted, never presented as delivery.
 Which catalog entries each spike's harness must record (plan requirement
 refs in parentheses):
 
-- 1a (correctness-only): settled-checkpoint equality (R6); torn-intermediate
+- 1a (correctness-only): settled-checkpoint equality (`sync-protocol-client-settled-checkpoint-comparator` (1a R6)); torn-intermediate
   absence via reducer correctness; protocol footprint + untested-concerns
   log (R11). No counters/timers required — unordered here by decision.
 - 1b (R12): received page results; live + changed pages; query-set
@@ -75,7 +75,7 @@ refs in parentheses):
   replayed/ignored revisions; cursor resets; Skip keys added/changed/
   removed; nodes updated; reducer add/remove; publications; stale
   intervals. Full timer chain with logical-vs-wall separation.
-- Direction 2 (R4/R12): logical work per maintained stage; accelerated vs
+- Direction 2 (`incremental-materialized-cache-scaling-instrumentation` (D2 R4)/`incremental-materialized-cache-fallback-metrics` (D2 R12)): logical work per maintained stage; accelerated vs
   fallback counts, fallback rate + reason; view progress vs required
   version; rebuild state; mismatches. Version-gated freshness timers
   (R9/R10).

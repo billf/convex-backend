@@ -48,7 +48,7 @@ partNumber/totalParts/transitionId, enforce in-order append, `join("") →
 parse → assert Transition`; interleaved non-chunk clears the buffer
 (`:457-462`). Rust rejects chunks outright (`base_client/mod.rs:720-724`),
 proving the gating. Planning instruction: the Skip write happens once per
-**reassembled** Transition — R2's atomic unit is post-reassembly, never one
+**reassembled** Transition — `sync-protocol-client-atomic-transition-apply` (1a R2)'s atomic unit is post-reassembly, never one
 write per chunk. Demo-scale transactions never exercise this path; record it
 as untested-at-scale.
 
@@ -72,14 +72,14 @@ ModifyQuerySet + Transition read path + Ping, auth mode pinned) or
 acknowledge re-implementing a sizable fraction of `browser/sync/*` +
 `convex/src/sync/*`.
 
-## 4. What passing R6 does not establish
+## 4. What passing `sync-protocol-client-settled-checkpoint-comparator` (1a R6) does not establish
 
-R6 (Skip aggregate matches Convex at the same version) plus explicit
+`sync-protocol-client-settled-checkpoint-comparator` (1a R6) (Skip aggregate matches Convex at the same version) plus explicit
 non-requirements leaves generalizability to judgment: reconnect/resumption
 (full resend + re-snapshot, no durable replay), >5MB chunk path, multi-session
 and token refresh/expiry (whole-set invalidation, `worker.rs:954-966`),
 mutation/action lifecycle (PoC is subscribe-only), unsubscribe/resubscribe
 (`QueryRemoved` never fires statically), and all performance behavior of
-per-transition `isInit:true` full writes. Keep R6 as the PoC gate; append a
+per-transition `isInit:true` full writes. Keep `sync-protocol-client-settled-checkpoint-comparator` (1a R6) as the PoC gate; append a
 "what passing R6 does not establish" note listing exactly these, so the
 worth-generalizing call stays explicit.

@@ -73,11 +73,11 @@ Sub-direction 1a (direct sync-protocol client, no backend changes):
   bundle-preserving no-diff writes, PoC vehicle, correctness bar).
 - [`research-sync-wire-ts-checklist.md`](research-sync-wire-ts-checklist.md) —
   per-message/field/lifecycle checklist for the in-process TS
-  `/api/sync` client (R1/R2/R5) plus unknowns.
+  `/api/sync` client (R1/`sync-protocol-client-atomic-transition-apply` (1a R2)/R5) plus unknowns.
 - [`research-1a-review-answers.md`](research-1a-review-answers.md) —
   closes the four 1a review questions (QueryRemoved delete rule,
   chunk eligibility + reassemble-then-write, raw-client cost,
-  R6 limits).
+  `sync-protocol-client-settled-checkpoint-comparator` (1a R6) limits).
 - [`research-skip-client-v2.md`](research-skip-client-v2.md) —
   Track 1 construction spec resolving the externals-adapter gaps
   (bounded-query contract, scope/auth, failure matrix).
@@ -114,7 +114,7 @@ Shared inputs (Direction 1 + Direction 2):
 - [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
   `isInit`/`native_eq` reconciliation, per-resource fork/merge finding
   (`CollectionWriter.update`; `ServiceInstance.update` is inputs-only),
-  missing batch primitive, no-diff rule, reducer bar (R2/R3/R4).
+  missing batch primitive, no-diff rule, reducer bar (`sync-protocol-client-atomic-transition-apply` (1a R2)/R3/`sync-protocol-client-cross-query-reducer` (1a R4)).
 
 ### Direction 2 — backend-native Skip cache
 
