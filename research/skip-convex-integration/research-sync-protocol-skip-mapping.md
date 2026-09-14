@@ -95,18 +95,20 @@ for the PoC. Demand-driven query set (resource demand → ModifyQuerySet
 Add/Remove) is not a separate third approach; it is part of this recommended
 design's baseline (§2 row 1).
 
-## 4. PoC vehicle (chatrooms × tutorial)
+## 4. PoC vehicle (shared five-table room feed)
 
-- Convex side (`~/src/convex-tutorial/convex/`): `schema.ts` (`messages{user,
-  body}` + `by_user`, `users{name}` + `by_name`); `chat.ts:getMessages`
-  returns latest 50 reversed + joined `name`. Writes via `sendMessage` /
-  `getOrCreateUser` from the app, not through Skip.
+- Contract (`docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`,
+  Shared proof-vehicle contract): `rooms`/`users`/`memberships`/`messages`/
+  `likes` + `by_room_user`/`by_room`/`by_message`; room-scoped feed with
+  active-membership predicate, `(_creationTime desc, _id desc)` order,
+  exactly 50; `{sender: nullable, likeCount}` projection; tutorial as
+  fixture base only.
 - Skip side (pattern from `skip/examples/chatroom/reactive_service/src/
-  chatroom.service.ts`): external messages collection → `map`/`reduce`
+  chatroom.service.ts`): external per-table collections → membership filter,
+  nullable-sender join, deterministic order, per-message `likeCount`
   derivations → subscribable resource. 1a aggregate proving the incremental
-  engine: per-user (tutorial has no rooms) message count via
-  `Reducer{initial:0, add:+1, remove:-1}` O(1), plus the joined
-  latest-N view. A relay emitting snapshots without a reducer does not
+  engine: `likeCount` with exact inverse removal over the room feed, plus
+  the feed itself. A relay emitting snapshots without a reducer does not
   satisfy the 1a bar.
 - Correctness bar only (per 1a decisions): end-to-end works, Skip-served
   results equal Convex query results, aggregate updates incrementally on new
@@ -130,8 +132,8 @@ mass deletion).
   forwarded, native runtime reconciliation relied on, stable keys, `[key,[]]`
   deletes, `isInitial` on bootstrap/recovery, watermark recorded.
 - Demand-driven query set (subscribe on instantiate, remove on release).
-- Tutorial messages flowing into Skip with a real `add`/`remove` aggregate
-  and SSE-readable resource matching Convex data.
+- Contract rows flowing into Skip with a real `add`/`remove` likeCount
+  aggregate and SSE-readable resource matching the contract oracle.
 - Non-goals respected: no polling emulation, no 1b query-shaping dependency,
   no 1c backend changes, no Direction-2 native execution, no publish
   packaging.

@@ -52,7 +52,7 @@ GC: retain while the generation lives (same `O(N)` as the source itself);
 wholesale discard on resnapshot/generation swap (table replacement, cursor
 expiry, restart). Tombstone watermarks for deleted keys are the only leak —
 sweep them once the cursor advances past the retention horizon (documents
-14d / self-host 2d; index 4m) or on generation promote. Never retain
+14d; index 4m) or on generation promote. Never retain
 tombstones indefinitely without a policy; record `replayed/ignored` counts.
 
 ## Tombstones, ordering, restart
