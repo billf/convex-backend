@@ -90,15 +90,15 @@ is the cross-check that the doc is integrated, not aspirational):
 
 - 1a sync-protocol client: combined input shape (one tick per reassembled
   Transition, `sync-protocol-client-atomic-transition-apply` (1a R2)), no-diff + `isInit` writes (R3), reducer bar (`sync-protocol-client-cross-query-reducer` (1a R4)),
-  restart-rebuild + `QueryFailed`/`QueryRemoved` rules (R5/R9).
+  restart-rebuild + `QueryFailed`/`QueryRemoved` rules (`sync-protocol-client-last-good-failure-state` (1a R5)/`sync-protocol-client-unsubscribe-removal` (1a R9)).
 - 1b paginated source: combined input shape for page-group/swap atomicity
-  (R4), order-key views + `take(N)` placement (R6), disjointness via
-  stable keys, reducer under swap, reconnect stale-window rules (R10).
+  (`paginated-reactive-source-atomic-page-split` (1b R4)), order-key views + `take(N)` placement (`paginated-reactive-source-disjoint-page-merge` (1b R6)), disjointness via
+  stable keys, reducer under swap, reconnect stale-window rules (`paginated-reactive-source-stale-window-rebuild` (1b R10)).
 - 1c push stream: per-`ts`-group atomic apply (`data-sync-push-atomic-revision-group-apply` (1c R8)), cursor-after-apply
-  checkpointing (R9), in-value revision watermarks + tombstone policy,
-  truncation-before-values, staging-generation promote (R6/R7).
+  checkpointing (`data-sync-push-generation-scoped-replay-idempotency` (1c R9)), in-value revision watermarks + tombstone policy,
+  truncation-before-values, staging-generation promote (`data-sync-push-staging-generation-activation` (1c R6)/`data-sync-push-atomic-table-replacement` (1c R7)).
 - Direction 2 read path: version-gated freshness with counted native
-  fallback, native result as oracle, rebuild semantics (R6/R9-R12).
+  fallback, native result as oracle, rebuild semantics (`incremental-materialized-cache-consistent-bootstrap-recovery` (D2 R6)/`incremental-materialized-cache-accelerated-handshake` (D2 R9)/`incremental-materialized-cache-required-version-consistency` (D2 R10)/`incremental-materialized-cache-native-fallback` (D2 R11)/`incremental-materialized-cache-fallback-metrics` (D2 R12)).
 
 ## Fault injection (planning-owned)
 Disconnect-before-checkpoint; cursor expiry/invalid/ahead; table

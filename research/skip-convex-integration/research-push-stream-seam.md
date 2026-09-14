@@ -6,7 +6,7 @@ direction: 1c
 date: 2026-09-11
 ---
 
-# Push-stream seam (Direction 1c/1d R3-R5)
+# Push-stream seam (Direction 1c `data-sync-push-progress-driven-page-emission` (1c R3)-`data-sync-push-bounded-stream-backpressure` (1c R5))
 
 How the caught-up stream waits without polling, frames output with bounded
 backpressure, and checkpoints cursors idempotently. Builds on the Data Sync
@@ -30,7 +30,7 @@ Wakers: `push` wakes waiters when `ts > latest` (`snapshot_manager.rs:741-755`, 
 `Database::wait_for_readable_ts` (+ application wrapper pairing page read
 with wait-past-`snapshotTs`), never the snapshot manager itself.
 
-Drain loop (R3/R4): `loop { page = data_sync(latest_snapshot);
+Drain loop (`data-sync-push-progress-driven-page-emission` (1c R3)/`data-sync-push-quiescent-empty-recheck` (1c R4)): `loop { page = data_sync(latest_snapshot);
 emit while pages available; if UpToDate(ts) { wait_past(ts).await } }`.
 `wait_past(ts)` = `wait_for_higher_ts(ts)` (`:599,614` semantics). Race-free
 by check-then-register; cancel-safe via `select!` vs disconnect/shutdown
@@ -43,7 +43,7 @@ Any commit (even unrelated tables/maintenance) wakes all waiters; each empty
 wake costs one `ts_page` scan (`data_sync.rs:611-760`: open repeatable
 snapshot, scan `(synced_ts..=latest]`, classify captured vs skipped,
 atomic timestamp cut) with zero emissions. Endpoint may advance its
-in-memory cursor silently but must count it (R17/R18: native wake-ups vs
+in-memory cursor silently but must count it (`data-sync-push-wake-and-work-counters` (1c R17)/`data-sync-push-freshness-latency-timers` (1c R18): native wake-ups vs
 non-empty pages, rows examined vs emitted). `BY_ID_FRESHNESS` 30s governs
 dimension choice (`knobs.rs:276-277`); caught-up CDC always takes `ts_page`.
 
@@ -54,20 +54,20 @@ No SSE endpoint exists; closest precedents: `Body::from_stream`
 `http_actions.rs:274-303`) for `content-type: text/event-stream` with
 `data:` events + `:` heartbeat comments; `stream_http_response`
 (`http_actions.rs:210-256`) bridges via channel — but unbounded, explicitly
-wrong for R5. Use bounded `channel(N)` (page-count + byte budget, actual
+wrong for `data-sync-push-bounded-stream-backpressure` (1c R5). Use bounded `channel(N)` (page-count + byte budget, actual
 sizes from soft-limit overruns) with try-send → disconnect/shed, never grow.
 Detect disconnect like `forward_http_action_stream`
 (`http_routing.rs:291-309`: race stream vs sender-closed); chunked SSE (no
 `Content-Length`) so disconnect propagates (cf. `http_actions.rs:293-302`).
 Liveness shape from `logs.rs:38-71` (select entries vs timeout vs shutdown).
 Keep empty `upToDate` advances server-local; SSE comments are transport
-liveness only, never reactivity (R4). Reuse `DataSyncResponse` JSON per
+liveness only, never reactivity (`data-sync-push-quiescent-empty-recheck` (1c R4)). Reuse `DataSyncResponse` JSON per
 event; route name, stream-version field, and status-event cadence stay
 planning decisions.
 
 ## Cursor checkpoint + idempotency
 
-Rule (`data-sync-push-atomic-revision-group-apply` (1c R8)/R9): group page entries by `ts` (every entry carries it), apply
+Rule (`data-sync-push-atomic-revision-group-apply` (1c R8)/`data-sync-push-generation-scoped-replay-idempotency` (1c R9)): group page entries by `ts` (every entry carries it), apply
 each transaction atomically to Skip, persist the page cursor only after all
 its Skip updates succeed. `data_sync.rs:20-48` guarantees no-split
 transactions and per-document increasing `ts`, so disconnect-before-
@@ -76,18 +76,18 @@ revision watermarks and drops `replayed_ts <= retained_ts`. Tombstones carry
 `_id` only — Skip derives removes from retained values (needs a watermark
 retention policy; planning question). Truncations apply before values in the
 same page; `snapshotting` pages never activate (first `Stale`/`UpToDate` is
-the boundary; staging generation + atomic promote, R6/R7).
+the boundary; staging generation + atomic promote, `data-sync-push-staging-generation-activation` (1c R6)/`data-sync-push-atomic-table-replacement` (1c R7)).
 
 ## Failure mapping
 
 Mid-stream expiry/validation errors terminate with a typed error event, never
-a partial page as current (R11): reuse `cursor_expired_error` mapping
+a partial page as current (`data-sync-push-terminal-error-freshness-safety` (1c R11)): reuse `cursor_expired_error` mapping
 (`local_backend:530-544`), 400s for undecryptable cursor / bad selection
 (`streaming_export.rs:558-573`) / cursor-ahead
 (`table_iteration/data_sync.rs:455-461`), authz unchanged, usage/progress accounting
 throttled (not per heartbeat). Restart losing Skip state → fresh snapshot;
 expired/invalid cursor → fresh snapshot; retain last-good only if it exists,
-mark stale, count the reason (R10).
+mark stale, count the reason (`data-sync-push-reconnect-and-cold-recovery` (1c R10)).
 
 ## Acceptance
 

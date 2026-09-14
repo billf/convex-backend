@@ -9,7 +9,7 @@ date: 2026-09-11
 # 1b page topology (paginated reactive source)
 
 How index-ordered Convex pages reach Skip as separate regions with atomic
-split-swap, without flattening. Supports the 1b spike plan (R1-R15, F1-F3).
+split-swap, without flattening. Supports the 1b spike plan (`paginated-reactive-source-indexed-reactive-pagination` (1b R1) through `paginated-reactive-source-transition-grouped-client-scope` (1b R15), `paginated-reactive-source-steady-state-page-update` (1b F1) through `paginated-reactive-source-comparison-run` (1b F3)).
 No backend changes; no claim that pages are row deltas.
 
 ## Pagination mechanics (verified)
@@ -24,9 +24,9 @@ No backend changes; no claim that pages are row deltas.
   `(cursor,split] + (split,continue]` with fresh keys, record
   `ongoingSplits`; complete only when both have results
   (`:369-383 → :532-544` splice + unsubscribe old). Old page stays in
-  `pageKeys` until completion — the lifecycle R4 mirrors through Skip.
+  `pageKeys` until completion — the lifecycle `paginated-reactive-source-atomic-page-split` (1b R4) mirrors through Skip.
 - `SplitRequired` = hard limit hit, page possibly incomplete — never publish
-  as complete (R5; React truncates at `use_paginated_query.ts:343-348`). `Recommended` = soft
+  as complete (`paginated-reactive-source-incomplete-split-result` (1b R5); React truncates at `use_paginated_query.ts:343-348`). `Recommended` = soft
   3/4 rows/bytes or oversize (`crates/isolate/src/environment/udf/async_syscall.rs:1689-1797`). `InvalidCursor`
   (fingerprint mismatch) → full reset with new `id`, not in-place handling.
 - Backend split construction: `query/mod.rs:233-387` (Reactive-only
@@ -34,7 +34,7 @@ No backend changes; no claim that pages are row deltas.
   (cursor-bounded unfetched interval, middle `split_cursor = intermediate
   [len/2]`, bounded pages ignore limits for correctness).
 - Grouping: `onBaseTransition` fans changed tokens into one
-  `ExtendedTransition` with `paginatedQueries` (`:244-273`) — satisfies R15
+  `ExtendedTransition` with `paginatedQueries` (`:244-273`) — satisfies `paginated-reactive-source-transition-grouped-client-scope` (1b R15)
   without the 1a raw socket.
 
 ## Skip mapping (no flattening)
@@ -42,14 +42,14 @@ No backend changes; no claim that pages are row deltas.
 - One external resource per page → N Skip input dirs; each page update is
   `update(entries, isInit:true)` reconciled natively via `native_eq`
   (`EagerDir.sk`) with one tick per `writeInCollection` (`Runtime.sk`).
-  No JS concat of the loaded window, no row diffing (R3).
+  No JS concat of the loaded window, no row diffing (`paginated-reactive-source-stable-page-snapshot-region` (1b R3)).
 - No public multi-region batch exists (`core/src/index.ts:476-501,768-782`;
   `CollectionWriter` fork/merge private): two calls = two ticks. Options:
   **A** tagged combined domain — one collection, page-tagged entries, one
   tick, but per-page `isInit` lost (patch + explicit deletes, window-wide
   enumeration); **B** scoped multi-region primitive — new `updateMany` or
   fork-handle FFI, per-page `isInit` preserved, needs Skip-side design;
-  **C** per-page ticks + downstream merge — converges torn, fails R4/R6/R9,
+  **C** per-page ticks + downstream merge — converges torn, fails `paginated-reactive-source-atomic-page-split` (1b R4)/`paginated-reactive-source-disjoint-page-merge` (1b R6)/`paginated-reactive-source-settled-monolithic-correctness` (1b R9),
   record as rejected. Planning chooses A vs B (plan Dependencies).
 - Disjointness (`paginated-reactive-source-disjoint-page-merge` (1b R6)) lives in a Skip-side mapper downstream of `merge`
   (`merge` unions same-key values, cannot enforce it): assert singleton
@@ -62,7 +62,7 @@ No backend changes; no claim that pages are row deltas.
   reactive and insufficient. Keep `_id` + `_creationTime` in values;
   key by `row._id.toString()`; guard with `assertSkipJson`.
 
-## Metrics without backend changes (R11-R13)
+## Metrics without backend changes (`paginated-reactive-source-scaling-page-size-work` (1b R11)-`paginated-reactive-source-monolithic-query-comparison` (1b R13))
 
 No per-page rows-read exposed to JS. Harness-side counts: received results,
 live `pageKeys.length`, changed tokens per transition, query-set
@@ -74,7 +74,7 @@ add/remove, `ongoingSplits`, splits/rebuilds (`id` changes), delivered
 warnings, `TxMetricsJson` only via existing metrics syscall (not per page).
 Report affected-`page.length` + Skip reconciled keys, never assumed
 `numItems`. Fail runs that republish everything, omit splits, or report
-time-only (R14).
+time-only (`paginated-reactive-source-no-full-republish-scaling` (1b R14)).
 
 ## Reducer + failure posture
 
@@ -82,7 +82,7 @@ Loaded-window aggregate (e.g. per-user count `add:+1/remove:-1`) over merged
 pages; split-swap generates removes + adds — atomic swap keeps it exact,
 torn writes double-count transiently. `remove` may return `null` for full
 recompute. On page failure/invalid cursor/reconnect: retain last-complete
-window as stale, never label partial current (R10); load-more appends map to
+window as stale, never label partial current (`paginated-reactive-source-stale-window-rebuild` (1b R10)); load-more appends map to
 added regions.
 
 ## Left to planning (sharpened)
@@ -91,6 +91,6 @@ Primitive choice (A vs B with rollback + `isInit` invariant); key/tag schema
 (`_id` vs `[pageId,rowId]` vs `[creationTime,_id]`); per-option write mode;
 disjointness mapper spec + failure action; order/window spec + `take`
 placement; reducer definitions + torn-write probes; metrics/baseline for
-R11-R13; harness reuse (`BaseConvexClient` vs `PaginatedQueryClient`
+`paginated-reactive-source-scaling-page-size-work` (1b R11)-`paginated-reactive-source-monolithic-query-comparison` (1b R13); harness reuse (`BaseConvexClient` vs `PaginatedQueryClient`
 interface); deterministic injection of splits/cursor/failure/reconnect;
 user-lookup source held constant; page/load/dataset scale points.

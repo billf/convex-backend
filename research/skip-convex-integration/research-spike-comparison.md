@@ -31,7 +31,7 @@ authoritative for their own gates; this doc only aligns measurement.
 
 ## Shared counter catalog
 
-Union of 1b-R12 / 1c-R17 / Direction-2 `incremental-materialized-cache-scaling-instrumentation` (D2 R4)+`incremental-materialized-cache-fallback-metrics` (D2 R12): delivered rows/bytes; Skip
+Union of 1b-`paginated-reactive-source-page-work-instrumentation` (1b R12) / 1c-`data-sync-push-wake-and-work-counters` (1c R17) / Direction-2 `incremental-materialized-cache-scaling-instrumentation` (D2 R4)+`incremental-materialized-cache-fallback-metrics` (D2 R12): delivered rows/bytes; Skip
 keys reconciled (added/changed/removed); dependent nodes updated; reducer
 add/remove; splits/rebuilds (page splits, id-change rebuilds,
 resnapshots); wake-ups by cause (native vs self-bookkeeping, heartbeats
@@ -64,12 +64,12 @@ refs in parentheses):
 
 - 1a (correctness-only): settled-checkpoint equality (`sync-protocol-client-settled-checkpoint-comparator` (1a R6)); torn-intermediate
   absence via reducer correctness; protocol footprint + untested-concerns
-  log (R11). No counters/timers required — unordered here by decision.
-- 1b (R12): received page results; live + changed pages; query-set
+  log (`sync-protocol-client-bounded-feasibility-record` (1a R11)). No counters/timers required — unordered here by decision.
+- 1b (`paginated-reactive-source-page-work-instrumentation` (1b R12)): received page results; live + changed pages; query-set
   Add/Remove; rows + bytes delivered; Skip keys reconciled; dependent nodes
   updated; reducer add/remove; splits + rebuilds (`id` changes); end-to-end
-  publication timers. Fail time-only or all-rows-republished runs (R14).
-- 1c (R17/R18): native wake-ups by cause; empty vs non-empty pages;
+  publication timers. Fail time-only or all-rows-republished runs (`paginated-reactive-source-no-full-republish-scaling` (1b R14)).
+- 1c (`data-sync-push-wake-and-work-counters` (1c R17)/`data-sync-push-freshness-latency-timers` (1c R18)): native wake-ups by cause; empty vs non-empty pages;
   snapshot vs CDC pages; document-log rows examined (if available);
   revisions + bytes emitted; transactions; truncations; reconnects;
   replayed/ignored revisions; cursor resets; Skip keys added/changed/
@@ -78,7 +78,7 @@ refs in parentheses):
 - Direction 2 (`incremental-materialized-cache-scaling-instrumentation` (D2 R4)/`incremental-materialized-cache-fallback-metrics` (D2 R12)): logical work per maintained stage; accelerated vs
   fallback counts, fallback rate + reason; view progress vs required
   version; rebuild state; mismatches. Version-gated freshness timers
-  (R9/R10).
+  (`incremental-materialized-cache-accelerated-handshake` (D2 R9)/`incremental-materialized-cache-required-version-consistency` (D2 R10)).
 
 ## Comparator normalization
 

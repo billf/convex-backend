@@ -4,7 +4,7 @@ type: research-note
 status: active
 direction: 2
 date: 2026-09-11
-  - R8
+  - `sync-protocol-client-per-table-query-proof-input` (1a R8)
 related_plans:
   - 2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md
 serves:
@@ -12,13 +12,13 @@ serves:
 pointers:
   - 1a readers: PoC vehicle in research-sync-protocol-skip-mapping.md §4
   - 1b readers: vehicle and scale points in the 1b spike plan + research-1b-page-topology.md
-  - 1c readers: messages/users source tables in the 1c spike plan (fixed selection, R2)
+  - 1c readers: messages/users source tables in the 1c spike plan (fixed selection, `data-sync-push-fixed-selection-cursor` (1c R2))
 ---
 
-# PoC vehicle and harness (R4/R6/R7/R8)
+# PoC vehicle and harness (`sync-protocol-client-cross-query-reducer` (1a R4)/`sync-protocol-client-settled-checkpoint-comparator` (1a R6)/`sync-protocol-client-chatroom-tutorial-proof` (1a R7)/`sync-protocol-client-per-table-query-proof-input` (1a R8))
 
 Freezes the demo shape: which queries, which aggregates, how keys work, and
-how R6 correctness is checked. Plan Outstanding Questions that are answered
+how `sync-protocol-client-settled-checkpoint-comparator` (1a R6) correctness is checked. Plan Outstanding Questions that are answered
 here are marked; the rest stay with planning.
 
 ## Convex tutorial today
@@ -28,7 +28,7 @@ body: string}` + `by_user`, `users{name}` + `by_name`. Every doc also carries
 `_id` + `_creationTime` on the wire. `chat.ts`: `sendMessage` (insert) and
 `getOrCreateUser` (lookup-or-insert) stay as the write path — writes never go
 through Skip. `getMessages` (latest-50 + user-name join + reverse) is
-**forbidden by R8**; the join and limit move into Skip.
+**forbidden by `sync-protocol-client-per-table-query-proof-input` (1a R8)**; the join and limit move into Skip.
 
 Zero plain per-table queries exist. Required additions (app-layer, not
 backend): `listMessages` (`collect()` of `messages`) and `listUsers`
@@ -39,7 +39,7 @@ deletion downstream). Whether tutorial UDF additions count as prohibited
 
 ## Aggregates (answers `sync-protocol-client-cross-query-reducer` (1a R4) candidate choice)
 
-Tutorial has no rooms, so plan AE1/AE2 "per-room count" is not directly
+Tutorial has no rooms, so plan `sync-protocol-client-atomic-cross-table-update` (1a AE1)/`sync-protocol-client-stale-last-good-on-failure` (1a AE2) "per-room count" is not directly
 mappable — do not add a rooms table without a planning decision. Ship both:
 
 - A1 (proves the engine): per-user message count. `Mapper: message →
@@ -81,11 +81,11 @@ anchor point-in-time on `Transition.end_version.ts`, snapshot the Skip
 resource per Transition, compute the expected aggregate locally (count + join
 with `"Unknown"` fallback, explicit sort), deep-equal after normalization.
 
-- Atomicity probe (F1/AE1): needs a multi-table mutation (current
+- Atomicity probe (`sync-protocol-client-live-cross-table-aggregate` (1a F1)/`sync-protocol-client-atomic-cross-table-update` (1a AE1)): needs a multi-table mutation (current
   `sendMessage` touches only `messages`; e.g. message + user-touch in one
   transaction) so one Transition carries both `QueryUpdated`s. Assert no
   intermediate render shows one table advanced without the other.
-- Failure probe (F2/AE2/R5): force `QueryFailed`, assert frozen last-good +
+- Failure probe (`sync-protocol-client-query-failure-recovery` (1a F2)/`sync-protocol-client-stale-last-good-on-failure` (1a AE2)/`sync-protocol-client-last-good-failure-state` (1a R5)): force `QueryFailed`, assert frozen last-good +
   visible stale indicator, then recovery to matching on fresh `isInit:true`.
 - Frozen values must be surfaced as possibly-stale, never as current.
 

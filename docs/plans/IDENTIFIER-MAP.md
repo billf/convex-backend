@@ -58,8 +58,7 @@ never has to open the source document just to know what "1c's KTD7" is.
   already flags in its own Assumptions section (line ~225).
 
 Plan-slug key (verified against each file's own `topic:` frontmatter and
-`docs/plans/README.md`'s explicit 1a/1b/1c/Direction 2 labeling — corrected
-2026-09-14, see the note at the end of this file):
+`docs/plans/README.md`'s explicit 1a/1b/1c/Direction 2 labeling):
 `shared-prereqs` = `2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`;
 `sync-protocol-client` (1a) = `2026-09-10-1509-feat-skip-sync-protocol-client-plan.md`;
 `incremental-materialized-cache` (Direction 2) = `2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md`;
@@ -109,6 +108,22 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 |---|---|---|
 | R2 | `paginated-reactive-source-bounded-prefix-load` | Loads a configured, bounded prefix of the feed rather than materializing unbounded history. |
 | R6 | `paginated-reactive-source-disjoint-page-merge` | Merges live page regions only after asserting disjoint Convex document-ID sets, then orders by indexed order with `_id` tiebreak. |
+| R1 | `paginated-reactive-source-indexed-reactive-pagination` | Uses an enabled Convex index and reactive pagination to expose an ordered recent-message feed as cursor-bounded pages. |
+| R3 | `paginated-reactive-source-stable-page-snapshot-region` | Gives each live page a stable identity and sends it to Skip as its own snapshot region without concatenating the loaded window or diffing rows in the bridge. |
+| R4 | `paginated-reactive-source-atomic-page-split` | Keeps the old page active until both replacement ranges are complete, then exchanges old and new regions in one atomic Skip update. |
+| R5 | `paginated-reactive-source-incomplete-split-result` | Treats a `SplitRequired` result as incomplete and never publishes it as a complete page range. |
+| R7 | `paginated-reactive-source-loaded-window-reducer` | Maintains an aggregate over the loaded window with valid add and remove behavior. |
+| R8 | `paginated-reactive-source-page-local-incremental-update` | Dirties only changed keys in the updated page and their dependent Skip nodes; unchanged pages are not republished. |
+| R9 | `paginated-reactive-source-settled-monolithic-correctness` | Matches the paginated Skip feed and aggregate to an independent monolithic indexed query across lifecycle, split, reconnect, and failure-recovery scenarios. |
+| R10 | `paginated-reactive-source-stale-window-rebuild` | Retains the last complete window as stale when a page fails or its cursor is invalid until a coherent page set is rebuilt. |
+| R11 | `paginated-reactive-source-scaling-page-size-work` | Varies loaded rows and target page size while recording actual page sizes, affected pages, and observed update-work terms. |
+| R12 | `paginated-reactive-source-page-work-instrumentation` | Counts and times page delivery, query-set changes, row and byte work, Skip dependency work, splits, rebuilds, and publication. |
+| R13 | `paginated-reactive-source-monolithic-query-comparison` | Compares the paginated source with a monolithic indexed query for the same logical window, including steady-state and bootstrap/subscription trade-offs. |
+| R14 | `paginated-reactive-source-no-full-republish-scaling` | Rejects runs that republish all loaded rows, omit page-split workloads, or report only elapsed time without logical-work counts. |
+| R15 | `paginated-reactive-source-transition-grouped-client-scope` | Requires transition-grouped query updates in the client harness, but no raw 1a WebSocket client, backend protocol change, or backend-native Skip execution. |
+| F1 | `paginated-reactive-source-steady-state-page-update` | A changed live page reaches Skip as a page-local snapshot, updates affected derived state, and leaves unchanged pages untouched. |
+| F2 | `paginated-reactive-source-atomic-page-split` | A split loads complete replacement ranges, atomically swaps page regions, and then updates the merged feed. |
+| F3 | `paginated-reactive-source-comparison-run` | A comparison run varies page topology and workload, records logical work, and verifies paginated and monolithic results at settled checkpoints. |
 
 ## `incremental-materialized-cache` (Direction 2)
 
@@ -120,6 +135,21 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | R13 | `incremental-materialized-cache-independent-correctness-check` | Correctness checked against an independent native Convex result across bootstrap/inserts/updates/deletes/multi-table/restart/lag/recovery. Cited by `shared-prereqs` as the spec-consumer target for Q12. |
 | R15 | `incremental-materialized-cache-scaling-report` | Scaling report varies total data size and affected dependency fan-out, showing whether Skip update work and maintained state follow the expected complexity terms. Cited by `shared-prereqs` as needing Q12's counter/timer names. |
 | AE7 | `incremental-materialized-cache-dangling-typed-reference` | "Dangling typed reference" acceptance example — the accelerated feed must match native missing-reference behavior. Cited by `shared-prereqs` alongside R13 as the Q12 spec-consumer target. |
+| R1 | `incremental-materialized-cache-committed-row-change-input` | Consumes ordered row changes only after Convex commits; polling, post-rerun snapshots, and client-side diffs are invalid inputs. |
+| R2 | `incremental-materialized-cache-transaction-atomic-visibility` | Makes all source changes from one Convex transaction visible atomically at one commit version. |
+| R3 | `incremental-materialized-cache-incremental-maintained-operators` | Incrementally maintains joins, filters, grouped reductions, and ordering without equivalent recomputation for unrelated rows. |
+| R6 | `incremental-materialized-cache-consistent-bootstrap-recovery` | Rebuilds from a consistent Convex state without publishing incomplete or transaction-torn accelerated results. |
+| R7 | `incremental-materialized-cache-preregistered-room-message-feed` | Limits acceleration to a pre-registered room-scoped recent-message feed with validated-ID joins, membership filtering, like reduction, deterministic order, and bounded output. |
+| R10 | `incremental-materialized-cache-required-version-consistency` | Waits until the view reaches the caller’s required commit version and rejects reserved unsupported consistency modes. |
+| R11 | `incremental-materialized-cache-native-fallback` | Silently falls back to the equivalent native query when the accelerated view is unavailable, unhealthy, lagging, or known incorrect. |
+| R14 | `incremental-materialized-cache-idiomatic-convex-baseline` | Compares against the strongest applicable idiomatic Convex baseline, including indexes, exact counters, aggregates, and denormalization. |
+| R16 | `incremental-materialized-cache-native-surface-unchanged` | Keeps writes, UDFs, reactive behavior, result shapes, and client behavior unchanged when acceleration is disabled or bypassed. |
+| R17 | `incremental-materialized-cache-implicit-base-index-views` | Materializes only the five proof tables with implicit Skip views corresponding to Convex’s built-in ID and creation-time indexes. |
+| R18 | `incremental-materialized-cache-indexed-maintained-lookups` | Backs every additional Skip lookup, range, or ordering with its corresponding enabled Convex application index. |
+| R19 | `incremental-materialized-cache-index-eligibility-validation` | Makes acceleration ineligible when required application indexes are missing, staged, disabled, removed, or incompatible. |
+| R20 | `incremental-materialized-cache-validated-id-join-edges` | Derives pre-registered view join edges from validated `v.id("targetTable")` fields to target `by_id` materializations. |
+| R21 | `incremental-materialized-cache-missing-target-join-semantics` | Preserves native behavior for missing referenced documents and does not treat `v.id` as referential integrity. |
+| R22 | `incremental-materialized-cache-reverse-join-index` | Requires an enabled application index on the referencing ID field for reverse joins within the pre-registered view. |
 
 ## `data-sync-push` (1c)
 
@@ -140,6 +170,18 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | U4 | `data-sync-push-u-implement-push-service` | "Implement the Skip Data Sync push service" — imports P (or falls back to hand-building KTD7-KTD9 per the Goal Capsule's stop condition). |
 | U5 | `data-sync-push-u-deterministic-tutorial-mutations` | "Add deterministic tutorial mutations and native oracles." |
 | U6 | `data-sync-push-u-retained-graph-comparison-harness` | "Build the retained graph and comparison harness" — builds on Q (or falls back to a bespoke comparator/fault-injection core). |
+| R2 | `data-sync-push-fixed-selection-cursor` | Opens with an optional opaque cursor and one fixed selection containing the tutorial’s `messages` and `users` columns. |
+| R3 | `data-sync-push-progress-driven-page-emission` | Emits available pages without request round trips and wakes from repeatable progress beyond the prior page’s snapshot timestamp. |
+| R4 | `data-sync-push-quiescent-empty-recheck` | Makes the wait path race-free and suppresses progress refresh for established unchanged empty `upToDate` rechecks. |
+| R5 | `data-sync-push-bounded-stream-backpressure` | Bounds per-stream backlog and active streams, forcing slow consumers to resume from an applied cursor without unbounded memory or scan work. |
+| R6 | `data-sync-push-staging-generation-activation` | Builds cold state in staging and publishes only a complete candidate at the first stale or current boundary. |
+| R7 | `data-sync-push-atomic-table-replacement` | Applies truncations before values and atomically promotes a rebuilt replacement candidate while the prior view remains stale. |
+| R9 | `data-sync-push-generation-scoped-replay-idempotency` | Records cursors only after successful timestamp groups and uses generation-scoped ledgers and watermarks for idempotent replay. |
+| R10 | `data-sync-push-reconnect-and-cold-recovery` | Resumes reconnects from the last applied cursor while process loss or invalid cursors trigger fresh snapshots with stale last-good state when available. |
+| R11 | `data-sync-push-terminal-error-freshness-safety` | Uses ordinary pre-event errors or terminal error events after headers, without advancing freshness or publishing partial candidates on failure. |
+| R16 | `data-sync-push-scaling-by-n-k-f` | Varies selected size N, changed documents K, and join fan-out F to compare delta work with monolithic O(N) snapshots and retained O(N) state. |
+| R17 | `data-sync-push-wake-and-work-counters` | Counts wake outcomes, suppressed refreshes, rechecks, pages, revisions, bytes, replay, cursor resets, Skip dependency work, publications, and stale intervals. |
+| R18 | `data-sync-push-freshness-latency-timers` | Times readable progress, stream emission, atomic apply, derived publication, end-to-end freshness, snapshots, recovery, and stale duration. |
 
 ## `sync-protocol-client` (1a)
 
@@ -149,22 +191,14 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | R4 | `sync-protocol-client-cross-query-reducer` | At least one derived value computed inside Skip's reducer from data spanning more than one Convex query/table (evidences genuine incremental computation). |
 | R6 | `sync-protocol-client-settled-checkpoint-comparator` | At each controlled checkpoint the Skip-derived aggregate matches an independent Convex reader across bootstrap, multi-table update, unsubscribe, reconnect, and recovery. Cited by `shared-prereqs` as becoming "adopt Q's comparator and settled-checkpoint detector." |
 | AE7 | `sync-protocol-client-first-attempt-failure` | "First-attempt failure" acceptance example. |
-
-**Resolved 2026-09-14: not a broken citation — this map's own plan-slug key
-was wrong.** A prior version of this file attached the wrong (1a)/(1b)/
-(Direction 2) alias to each file: it labeled `2026-09-10-1509-...` (actually
-1a) as "(Direction 2)", `2026-09-10-1702-...` (actually Direction 2) as
-"(1b)", and `2026-09-10-1843-...` (actually 1b) as "(1a)" — verified against
-each file's own `topic:` frontmatter and `docs/plans/README.md`'s explicit
-labeling. `shared-prereqs`'s citations of "Direction 2's R4/R12/R15/R13/AE7"
-(lines ~93, ~183, ~274) were checked against the file *mislabeled*
-"(Direction 2)" (`2026-09-10-1509-...`, which only goes to R11) instead of
-the real Direction 2 file (`2026-09-10-1702-...`), which does define R12
-("Metrics expose accelerated and fallback request counts..."), R13
-("Correctness is checked against an independent native Convex result..."),
-R15 ("The scaling report varies total data size and affected dependency
-fan-out...") and AE7 ("Dangling typed reference") — confirmed by direct grep.
-`shared-prereqs`'s citations were correct all along; this file's labels were
-fixed instead (see the corrected plan-slug key and the three corrected
-section headers above), and real rows for R12/R13/R15/AE7 live under
-`incremental-materialized-cache` (Direction 2) above.
+| R1 | `sync-protocol-client-direct-readonly-sync-client` | Implements the proof’s read-only `/api/sync` subset without JS `ConvexClient` or backend changes. |
+| R3 | `sync-protocol-client-snapshot-reconciliation` | Sends each updated query’s complete row set to Skip for `isInit: true` reconciliation rather than bridge-side diffing. |
+| R5 | `sync-protocol-client-last-good-failure-state` | Freezes a previously successful failed query with a stale indicator, or shows explicit not-yet-loaded state before first success. |
+| R7 | `sync-protocol-client-chatroom-tutorial-proof` | Combines a Skip chatroom example with the Convex tutorial app as the demonstration vehicle. |
+| R8 | `sync-protocol-client-per-table-query-proof-input` | Uses plain per-table subscriptions so Skip, not Convex, performs the cross-table join and incremental count. |
+| R9 | `sync-protocol-client-unsubscribe-removal` | Removes `QueryRemoved` query rows inside the enclosing atomic update instead of retaining them as last-good state. |
+| R11 | `sync-protocol-client-bounded-feasibility-record` | Records the implemented protocol surface, code/tests, and unexercised production concerns to bound the proof’s conclusion. |
+| F1 | `sync-protocol-client-live-cross-table-aggregate` | Reassembles and atomically applies a transition, then updates and displays the cross-table aggregate without an intermediate state. |
+| F2 | `sync-protocol-client-query-failure-recovery` | Retains a failed query’s last-good rows and stale value until recovery resumes fresh reconciliation. |
+| AE1 | `sync-protocol-client-atomic-cross-table-update` | A transaction changing a message and room activity updates the Skip reducer once and matches the independent reader without an intermediate render. |
+| AE2 | `sync-protocol-client-stale-last-good-on-failure` | A failed subscribed query leaves its displayed count at last-good with a stale indicator until recovery. |

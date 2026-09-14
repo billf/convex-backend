@@ -10,7 +10,7 @@ date: 2026-09-11
 verified_against_codebase: convex-backend crates/database/src
 ---
 
-# Backend committed-change hook (Direction 2 R1/R2/R6)
+# Backend committed-change hook (Direction 2 `incremental-materialized-cache-committed-row-change-input` (D2 R1)/`incremental-materialized-cache-transaction-atomic-visibility` (D2 R2)/`incremental-materialized-cache-consistent-bootstrap-recovery` (D2 R6))
 
 Which internal seam feeds a backend-owned Skip cache with ordered,
 atomic, rebuildable row changes. Compares five candidates; recommends one.

@@ -26,7 +26,7 @@ Transition's atomic unit — write the query's empty row set with `isInit:true`
 (or drop the collection) in the same batch, never as a separate write and
 never ignored. Ignoring orphans rows that keep feeding the cross-table
 reducer (e.g. ghost room after room-switch). Distinct from `QueryFailed`
-(R5 freeze-at-last-good): Removed = deliberate client action → delete;
+(`sync-protocol-client-last-good-failure-state` (1a R5) freeze-at-last-good): Removed = deliberate client action → delete;
 Failed = server error → freeze + stale indicator. PoC-scope note: static
 per-table subscriptions never unsubscribe, so this never fires in the demo —
 state the rule anyway in one sentence.
@@ -81,5 +81,5 @@ and token refresh/expiry (whole-set invalidation, `worker.rs:954-966`),
 mutation/action lifecycle (PoC is subscribe-only), unsubscribe/resubscribe
 (`QueryRemoved` never fires statically), and all performance behavior of
 per-transition `isInit:true` full writes. Keep `sync-protocol-client-settled-checkpoint-comparator` (1a R6) as the PoC gate; append a
-"what passing R6 does not establish" note listing exactly these, so the
+"what passing `sync-protocol-client-settled-checkpoint-comparator` (1a R6) does not establish" note listing exactly these, so the
 worth-generalizing call stays explicit.

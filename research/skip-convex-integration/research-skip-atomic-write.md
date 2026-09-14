@@ -6,7 +6,7 @@ direction: cross-cutting
 date: 2026-09-11
 ---
 
-# Skip atomic write (`sync-protocol-client-atomic-transition-apply` (1a R2)/R3/`sync-protocol-client-cross-query-reducer` (1a R4))
+# Skip atomic write (`sync-protocol-client-atomic-transition-apply` (1a R2)/`sync-protocol-client-snapshot-reconciliation` (1a R3)/`sync-protocol-client-cross-query-reducer` (1a R4))
 
 How each Transition becomes one atomic `isInit:true` write per query with no
 hand-rolled diffing, and where the multi-query batch primitive is still
