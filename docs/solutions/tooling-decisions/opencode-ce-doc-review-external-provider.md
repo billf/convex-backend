@@ -19,7 +19,7 @@ tags:
 
 `ce-doc-review` can use OpenCode for an external cross-model judgment pass. Its command-line interface has integration details that are easy to get wrong: a failed call can be an attachment-parsing failure, an incorrect requested model route, or contention in OpenCode's local state rather than a substantive reviewer result.
 
-Use this route only after the user has explicitly authorized egress of the review material. The requested Muse route below was verified in the 2026-09-13 session, but the response event alone does not independently attest the model that served the request. The bundled adapter had not yet incorporated this corrected argument shape when this learning was written.
+Use this route only after the user has explicitly authorized egress of the review material. The requested Muse route below was verified in the 2026-09-13 session, but the response event alone does not independently attest the model that served the request. Version 3.25 of the bundled adapter regressed this argument order by appending the prompt after the options and attachment; use the direct shape below until that adapter is repaired.
 
 ## Guidance
 
