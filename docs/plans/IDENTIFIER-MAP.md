@@ -77,7 +77,7 @@ Every P identifier is cross-document by design, so all are listed.
 | P3 | `shared-prereqs-p-single-fork-per-atomic-unit` | Enforces one `writer.update` call per atomic unit (Transition / revision-timestamp group / page-group swap) — never split per-table calls for data that must land atomically. |
 | P4 | `shared-prereqs-p-revision-watermark-idempotency` | In-value revision-watermark idempotency (`apply iff entry.ts > retained_ts`); explicitly not Skip's own subscription/session-tick watermark. |
 | P5 | `shared-prereqs-p-tombstone-gc-policy` | Tombstone/GC convention: retain while the generation lives, discard wholesale on resnapshot, sweep once past the retention horizon. |
-| P6 | `shared-prereqs-p-poc-vehicle-demo` | Split/join/order helpers demonstrated against the frozen PoC vehicle (A1 reducer, A2 join). |
+| P6 | `shared-prereqs-p-poc-vehicle-demo` | Split/join/order helpers demonstrated against the shared five-table room feed, including active membership, nullable sender, and `likeCount` add/remove behavior. |
 | P7 | `shared-prereqs-p-standalone-test-suite` | The library's own test suite covers split/merge/order/watermark/tombstone with no dependency on any spike's transport or on Q. |
 | P8 | `shared-prereqs-p-no-runtime-change-required` | States no Skip runtime/FFI change is required; a batch primitive's absence is recorded as an out-of-scope future option. |
 | P9 | `shared-prereqs-p-generation-fencing-extension` | **Optional** 1c-compatibility extension on the P1-P8 baseline: staging generation, atomic promotion, per-page pending ledger, generation-scoped watermarks, matching 1c's KTD7/KTD9 bar. Revised 2026-09-14 from mandatory baseline scope to optional — see `shared-prereqs`'s Outstanding Questions "P9 scope" entry. |
@@ -90,13 +90,13 @@ Every Q identifier is cross-document by design, so all are listed.
 |---|---|---|
 | Q1 | `shared-prereqs-q-settled-checkpoint-detector` | One reusable "is settled" predicate anchored on version timestamps. |
 | Q2 | `shared-prereqs-q-dual-reader-wiring` | Compares a Skip-derived SSE snapshot against an independent native Convex reader, no shared code path; loopback-only, PoC/test-fixture data. |
-| Q3 | `shared-prereqs-q-normalized-comparator` | Canonical-sort deep-equal comparator with the tutorial's "Unknown"-fallback parity rule; reports structured mismatches, not a bare boolean. |
-| Q4 | `shared-prereqs-q-poc-vehicle-driver` | Driven against the frozen PoC vehicle's A1/A2 aggregates. |
+| Q3 | `shared-prereqs-q-normalized-comparator` | Canonical-sort deep-equal comparator with nullable-sender and `likeCount` parity; reports structured mismatches, not a bare boolean. |
+| Q4 | `shared-prereqs-q-poc-vehicle-driver` | Driven against the shared five-table room-feed proof vehicle and exact native oracle. |
 | Q5 | `shared-prereqs-q-counter-timer-catalog` | Pluggable recorder implementing the shared counter/timer catalog from `research-spike-comparison.md`; a superset — 1a only populates Q1-Q3. |
 | Q6 | `shared-prereqs-q-fault-injection-fixture` | Composable fault fixture covering the faults common to 3+ plans (disconnect-before-checkpoint, cursor expiry, table replacement, oversized transaction, etc). |
 | Q7 | `shared-prereqs-q-fault-assertion-helper` | Each injector exposes a source-agnostic detect/recover/count assertion helper. |
 | Q8 | `shared-prereqs-q-self-test-seeded-mismatches` | Harness's own suite proves the comparator catches a wrong Skip snapshot, via deliberately seeded mismatches. |
-| Q9 | `shared-prereqs-q-runnable-reference-source` | Ships runnable end-to-end against the PoC vehicle with its own minimal reference source, before any of 1a/1b/1c/Direction 2 exists to consume it. |
+| Q9 | `shared-prereqs-q-runnable-reference-source` | Ships runnable end-to-end against the shared proof vehicle with its own minimal reference source, before any of 1a/1b/1c/Direction 2 exists to consume it. |
 | Q10 | `shared-prereqs-q-report-format` | Report format (counts/timers/mismatch log) directly consumable by any spike's Success Criteria without redefining metric names. |
 | Q11 | `shared-prereqs-q-schema-matches-1c-jsonl` | Recorder field names/units match 1c's already-designed JSONL output (`data-sync-push-ktd-diagnostic-jsonl-schema`, KTD10) — Q generalizes 1c's U6 design rather than the reverse. |
 | Q12 | `shared-prereqs-q-language-neutral-methodology-spec` | Settled-checkpoint definition, normalization rules, counter/timer names stated language-neutrally, so a non-TS consumer (Direction 2) can implement natively against the spec instead of the code. |
