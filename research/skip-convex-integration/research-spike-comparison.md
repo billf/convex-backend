@@ -85,9 +85,10 @@ refs in parentheses):
 Anchor on `Transition.endVersion.ts` / DataSync `UpToDate(ts)` / required
 version; snapshot the Skip resource per unit; gate staging (`snapshotting`)
 vs current (`stale`/`upToDate`) so no partial candidate publishes. Sort
-explicitly (Convex `order(desc).take(50).reverse()` vs Skip key order differ;
-use `[creationTime,_id]` order key + `_id` tiebreak, never sort-at-read
-only). Apply the tutorial `"Unknown"` fallback on both sides. Place `take(N)`
+explicitly (canonical `(_creationTime desc, _id desc)` + take-exactly-50 vs
+Skip key order differ; use `[creationTime,_id]` order key + `_id` tiebreak,
+never sort-at-read only). Apply nullable-sender parity (missing user → `null`
+on both sides) and exact `likeCount` comparison. Place `take(50)`
 in Skip / bounded prefix only — never source-side `take` (reads as mass
 deletion). Assert disjoint `_id` sets (never silent dedup); keep stable keys
 (regenerated keys defeat `native_eq`); guard with `assertSkipJson`; separate
