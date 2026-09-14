@@ -1,12 +1,12 @@
 ---
-title: Sync wire TS checklist (R1/R2/R5)
+title: Sync wire TS checklist (R1/`sync-protocol-client-atomic-transition-apply` (1a R2)/R5)
 type: research-note
 status: active
 direction: 1a
 date: 2026-09-11
 ---
 
-# Sync wire TS checklist (R1/R2/R5)
+# Sync wire TS checklist (R1/`sync-protocol-client-atomic-transition-apply` (1a R2)/R5)
 
 What an in-process TypeScript client must implement to speak `/api/sync`
 directly. No `ConvexClient`, no backend changes. All paths under
@@ -56,7 +56,7 @@ Wire JSON (`sync_types/src/types/json.rs`, mirror
   clientClockSkew?, serverTs? }`: validate `startVersion` equals local
   version (`base_client/mod.rs:320-326`, `remote_query_set.ts:30-40`), apply
   **all** modifications then set version to `endVersion` as one step
-  (`:327-367`, `:41-87`). This is the R2 atomic unit — whole
+  (`:327-367`, `:41-87`). This is the `sync-protocol-client-atomic-transition-apply` (1a R2) atomic unit — whole
   `modifications` array goes to Skip as one batch, never per-query writes.
 - `StateModification`: `QueryUpdated{query_id, value (full new result),
   logLines, journal}` | `QueryFailed{…, errorMessage, errorData?}` |

@@ -67,7 +67,7 @@ planning decisions.
 
 ## Cursor checkpoint + idempotency
 
-Rule (R8/R9): group page entries by `ts` (every entry carries it), apply
+Rule (`data-sync-push-atomic-revision-group-apply` (1c R8)/R9): group page entries by `ts` (every entry carries it), apply
 each transaction atomically to Skip, persist the page cursor only after all
 its Skip updates succeed. `data_sync.rs:20-48` guarantees no-split
 transactions and per-document increasing `ts`, so disconnect-before-

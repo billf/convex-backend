@@ -89,12 +89,12 @@ Which sections each spike plan consumes (plans remain authoritative; this
 is the cross-check that the doc is integrated, not aspirational):
 
 - 1a sync-protocol client: combined input shape (one tick per reassembled
-  Transition, R2), no-diff + `isInit` writes (R3), reducer bar (R4),
+  Transition, `sync-protocol-client-atomic-transition-apply` (1a R2)), no-diff + `isInit` writes (R3), reducer bar (`sync-protocol-client-cross-query-reducer` (1a R4)),
   restart-rebuild + `QueryFailed`/`QueryRemoved` rules (R5/R9).
 - 1b paginated source: combined input shape for page-group/swap atomicity
   (R4), order-key views + `take(N)` placement (R6), disjointness via
   stable keys, reducer under swap, reconnect stale-window rules (R10).
-- 1c push stream: per-`ts`-group atomic apply (R8), cursor-after-apply
+- 1c push stream: per-`ts`-group atomic apply (`data-sync-push-atomic-revision-group-apply` (1c R8)), cursor-after-apply
   checkpointing (R9), in-value revision watermarks + tombstone policy,
   truncation-before-values, staging-generation promote (R6/R7).
 - Direction 2 read path: version-gated freshness with counted native

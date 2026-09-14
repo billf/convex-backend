@@ -6,7 +6,7 @@ direction: cross-cutting
 date: 2026-09-11
 ---
 
-# Skip atomic write (R2/R3/R4)
+# Skip atomic write (`sync-protocol-client-atomic-transition-apply` (1a R2)/R3/`sync-protocol-client-cross-query-reducer` (1a R4))
 
 How each Transition becomes one atomic `isInit:true` write per query with no
 hand-rolled diffing, and where the multi-query batch primitive is still
@@ -48,7 +48,7 @@ private, and `ServiceInstance.update` (`:768-782`) only batches single input
 collections — there is **no public batch-N-external-writers-in-one-fork API**
 today.
 
-Options for R2: (a) new runtime/FFI `updateMany([(dir,values,isInit)])` or
+Options for `sync-protocol-client-atomic-transition-apply` (1a R2): (a) new runtime/FFI `updateMany([(dir,values,isInit)])` or
 exposed fork handle (needs Skip-side design); (b) single merged external
 resource (loses per-query `isInit` granularity); (c) per-query ticks +
 downstream `merge(...).mapReduce()` (eventual consistency, not atomic).
@@ -65,7 +65,7 @@ subsumes the JS map. Rejected batches roll back the fork with main untouched;
 the writer must not advance any JS-side pending state until `update`
 resolves (adapter's `current`-advances-only-on-accept discipline, `:307-333`).
 
-## Reducer bar for R4
+## Reducer bar for `sync-protocol-client-cross-query-reducer` (1a R4)
 
 Cross-table aggregate via `merge(q1,q2).map(M).reduce(R)` or fused
 `mapReduce` (`Runtime.sk:593-666`, `index.ts:368-443`); native
