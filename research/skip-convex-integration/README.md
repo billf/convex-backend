@@ -73,7 +73,7 @@ Sub-direction 1a (direct sync-protocol client, no backend changes):
   bundle-preserving no-diff writes, PoC vehicle, correctness bar).
 - [`research-sync-wire-ts-checklist.md`](research-sync-wire-ts-checklist.md) —
   per-message/field/lifecycle checklist for the in-process TS
-  `/api/sync` client (R1/`sync-protocol-client-atomic-transition-apply` (1a R2)/R5) plus unknowns.
+  `/api/sync` client (`sync-protocol-client-direct-readonly-sync-client` (1a R1)/`sync-protocol-client-atomic-transition-apply` (1a R2)/`sync-protocol-client-last-good-failure-state` (1a R5)) plus unknowns.
 - [`research-1a-review-answers.md`](research-1a-review-answers.md) —
   closes the four 1a review questions (QueryRemoved delete rule,
   chunk eligibility + reassemble-then-write, raw-client cost,
@@ -114,13 +114,13 @@ Shared inputs (Direction 1 + Direction 2):
 - [`research-skip-atomic-write.md`](research-skip-atomic-write.md) —
   `isInit`/`native_eq` reconciliation, per-resource fork/merge finding
   (`CollectionWriter.update`; `ServiceInstance.update` is inputs-only),
-  missing batch primitive, no-diff rule, reducer bar (`sync-protocol-client-atomic-transition-apply` (1a R2)/R3/`sync-protocol-client-cross-query-reducer` (1a R4)).
+  missing batch primitive, no-diff rule, reducer bar (`sync-protocol-client-atomic-transition-apply` (1a R2)/`sync-protocol-client-snapshot-reconciliation` (1a R3)/`sync-protocol-client-cross-query-reducer` (1a R4)).
 
 ### Direction 2 — backend-native Skip cache
 
 - [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
-  PoC queries, aggregates, keying/encoding rules, R6 harness sketch
-  (Direction 2 R4/R6/R7/R8; 1a/1b/1c readers see pointers in frontmatter).
+  PoC queries, aggregates, keying/encoding rules, `sync-protocol-client-settled-checkpoint-comparator` (1a R6) harness sketch
+  (1a-plan `sync-protocol-client-cross-query-reducer` (1a R4)/`sync-protocol-client-settled-checkpoint-comparator` (1a R6)/`sync-protocol-client-chatroom-tutorial-proof` (1a R7)/`sync-protocol-client-per-table-query-proof-input` (1a R8) as used by the shared vehicle; 1a/1b/1c readers see pointers in frontmatter).
 - [`research-backend-change-hook.md`](research-backend-change-hook.md) —
   committed-change hook comparison recommending `LogReader` tail with
   ts-grouped atomic apply, seed/rebuild paths, retention budget.

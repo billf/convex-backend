@@ -96,7 +96,7 @@ unverifiable detail) / **contradictory** (docs disagree) / **unverifiable**
 ## 4. Contradictory (exactly one)
 
 - Mapping doc §2 row says `QueryFailed` → "drop last value, re-subscribe";
-  the 1a plan (R5), 1a-review-answers, and wire-checklist all say
+  the 1a plan (`sync-protocol-client-last-good-failure-state` (1a R5)), 1a-review-answers, and wire-checklist all say
   freeze-at-last-good + stale indicator. Mapping predates the freeze
   decision and is stale on this row; review-answers is authoritative.
 

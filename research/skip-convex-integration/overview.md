@@ -76,8 +76,8 @@ The 8 PARTIAL docs and why (status as of the absolute-confidence fix pass — pi
 - `research-skip-externals-adapter.md` — branch-scoped to `billf/convex/adapter` (header added); paths/routes corrected (`examples/` top-level, `/v1/streams`, 387 lines).
 - `research-spike-comparison.md` — the N/K/F framework itself is sound, per-spike mappings added (`:60-82`); cited only by the shared-prerequisites plan (`1159`), zero citations from the four target spike plans (see Measurement Framework below).
 - `research-skip-source-state.md` — dual citation retained (`CollectionWriter.update:476-501` primary + `ServiceInstance.update:768-782`); cited only by the shared-prerequisites plan, no spike plan cites it.
-- `research-poc-vehicle-and-harness.md` — harness design is underspecified for implementation planning, its metrics framework is incomplete, and its proof example is missing tables Direction 2's R7 requires; only Direction 2 actually cites it despite a "shared" framing (pin fixed: `109-131`).
-- `research-native-operator-spec.md` — `MAX_QUERY_OPERATORS` fixed to 256; wire example hedged as proposed shape (`Skip` in neither enum yet); lacks incremental-maintenance detail for R3; doesn't address Direction 2's R12-R16.
+- `research-poc-vehicle-and-harness.md` — harness design is underspecified for implementation planning, its metrics framework is incomplete, and its proof example is missing tables Direction 2's `incremental-materialized-cache-preregistered-room-message-feed` (D2 R7) requires; only Direction 2 actually cites it despite a "shared" framing (pin fixed: `109-131`).
+- `research-native-operator-spec.md` — `MAX_QUERY_OPERATORS` fixed to 256; wire example hedged as proposed shape (`Skip` in neither enum yet); lacks incremental-maintenance detail for `incremental-materialized-cache-incremental-maintained-operators` (D2 R3); doesn't address Direction 2's `incremental-materialized-cache-fallback-metrics` (D2 R12) through `incremental-materialized-cache-native-surface-unchanged` (D2 R16).
 - `research-build-slices.md` — historical doc superseded by the spike plans (specs named explicitly in-doc); outdated file-count claims remain.
 
 **Planning and spikes:** A higher-capability planning pass (Codex, serialized small steps) produces the four spike plans in `docs/plans/`, each narrowly scoped to one technical question. Each spike owns its own metrics, correctness harness, and scaling evidence. The spikes do not entangle; you can evaluate them independently and decide later which directions warrant implementation.
@@ -96,7 +96,7 @@ In practice, the four spikes use this framework unevenly — same shape, differe
 |---|---|---|---|---|
 | 1a | none | none | none | No — correctness-only |
 | 1b | total loaded rows / dataset size | target page size / affected-page counts | none (no join in this vehicle) | No |
-| 1c | "total selected rows N" | "changed selected documents per transaction K" | "affected join fan-out F" | Yes — O(K), O(K+F), O(N) in R16 |
+| 1c | "total selected rows N" | "changed selected documents per transaction K" | "affected join fan-out F" | Yes — O(K), O(K+F), O(N) in `data-sync-push-scaling-by-n-k-f` (1c R16) |
 | Direction 2 | total data size / total unrelated data size | implicit (single-row update held fixed) | affected dependency fan-out/neighborhood | No, same conceptual shape as 1c |
 
 Only 1c literally uses the N/K/F symbols and Big-O notation. Direction 2 uses the same conceptual axes without symbols. 1b uses two axes only, since its proof vehicle has no cross-table join at the input boundary. 1a has zero scaling requirements by explicit Key Decision — its Key Decisions state that success is bounded semantic correctness, not performance, and that quantifying latency or resource overhead was chosen against.
@@ -126,9 +126,9 @@ The concrete methodology behind this (from `research-skip-source-state.md`): a p
 
 **Per-plan outstanding questions** (each plan's own Outstanding Questions section is the source of truth — these are signposts, not the full text):
 - **1a** (~3 questions): which cross-table aggregate the demo computes; the demo's auth mode; single-domain vs. scoped-atomic-update choice for `sync-protocol-client-atomic-transition-apply` (1a R2).
-- **1b** (~7 questions): page-size/dataset matrix; harness surface reuse; atomic multi-region representation for R4; internal metrics; deterministic failure injection; author-ID display choice; proceed/reject/narrow criteria.
+- **1b** (~7 questions): page-size/dataset matrix; harness surface reuse; atomic multi-region representation for `paginated-reactive-source-atomic-page-split` (1b R4); internal metrics; deterministic failure injection; author-ID display choice; proceed/reject/narrow criteria.
 - **1c** (~10 questions): route/event-envelope naming; per-page vs. periodic-status emission; progress visibility without forcing writes; a narrow wait API; buffering/cancellation limits; combined-input representation; watermark/tombstone idempotency; deterministic fault injection; scan-vs-emit metrics; N/K/F value selection.
-- **Direction 2** (~8 questions): committed-change hook choice; index-metadata seam; schema representation for `v.id` joins; process lifetime; combined-domain vs. scoped-atomic choice for R2; rebuild/checkpoint/replay strategy for R6; logical-work counters; eager-vs-lazy base-view activation.
+- **Direction 2** (~8 questions): committed-change hook choice; index-metadata seam; schema representation for `v.id` joins; process lifetime; combined-domain vs. scoped-atomic choice for `incremental-materialized-cache-transaction-atomic-visibility` (D2 R2); rebuild/checkpoint/replay strategy for `incremental-materialized-cache-consistent-bootstrap-recovery` (D2 R6); logical-work counters; eager-vs-lazy base-view activation.
 
 **Taxonomy caveat.** The tool/model attribution in General Approach above is a git-history reconstruction, not a documented fact — no manifest or frontmatter convention confirms which combination produced which doc batch. It could be upgraded from inferred to documented if such a convention is added later.
 

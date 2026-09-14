@@ -6,7 +6,7 @@ direction: 2
 date: 2026-09-11
 ---
 
-# Index + v.id metadata (Direction 2 R17-R22, R7)
+# Index + v.id metadata (Direction 2 `incremental-materialized-cache-implicit-base-index-views` (D2 R17) through `incremental-materialized-cache-reverse-join-index` (D2 R22), `incremental-materialized-cache-preregistered-room-message-feed` (D2 R7))
 
 Which existing metadata drives Skip lookups and joins without coupling to
 unstable internals. Stable-to-couple vs internal-do-not-parse split, plus
