@@ -68,8 +68,7 @@ Plan-slug key (verified against each file's own `topic:` frontmatter and
 
 ## Shared library deliverables — `shared-prereqs`, P (envelope/atomic-write library)
 
-Every P identifier is cross-document by design (it exists to be consumed by
-1a/1b/1c/Direction 2), so all of P1-P9 are listed.
+Every P identifier is cross-document by design, so all are listed.
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
@@ -84,6 +83,8 @@ Every P identifier is cross-document by design (it exists to be consumed by
 | P9 | `shared-prereqs-p-generation-fencing-extension` | **Optional** 1c-compatibility extension on the P1-P8 baseline: staging generation, atomic promotion, per-page pending ledger, generation-scoped watermarks, matching 1c's KTD7/KTD9 bar. Revised 2026-09-14 from mandatory baseline scope to optional — see `shared-prereqs`'s Outstanding Questions "P9 scope" entry. |
 
 ## Shared library deliverables — `shared-prereqs`, Q (comparator / fault-injection harness)
+
+Every Q identifier is cross-document by design, so all are listed.
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
