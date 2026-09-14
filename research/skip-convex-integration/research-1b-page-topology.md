@@ -78,7 +78,7 @@ time-only (`paginated-reactive-source-no-full-republish-scaling` (1b R14)).
 
 ## Reducer + failure posture
 
-Loaded-window aggregate (e.g. per-user count `add:+1/remove:-1`) over merged
+Loaded-window likeCount (per-message `add:+1/remove:-1` with exact inverse) over merged
 pages; split-swap generates removes + adds — atomic swap keeps it exact,
 torn writes double-count transiently. `remove` may return `null` for full
 recompute. On page failure/invalid cursor/reconnect: retain last-complete

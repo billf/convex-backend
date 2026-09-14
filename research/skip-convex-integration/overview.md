@@ -54,7 +54,7 @@ Skip consumes native Convex Data Sync (CDC + snapshot) pushed over an SSE-framed
 ### Direction 2: Backend-Native Materialized Cache
 **Plan:** `docs/plans/2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md`
 
-Skip runs inside convex-backend and maintains one pre-registered cached view (the chatroom feed from the tutorial) by consuming committed row-level changes. Changes are applied incrementally to a retained operator graph, avoiding the full re-run on each invalidation.
+Skip runs inside convex-backend and maintains one pre-registered cached view (the Shared proof-vehicle contract's room-scoped feed) by consuming committed row-level changes. Changes are applied incrementally to a retained operator graph, avoiding the full re-run on each invalidation.
 
 **Tests:** whether persistent Skip state can achieve sub-linear update work inside the database, and what the architecture looks like for seam integration and correctness validation.
 
@@ -76,7 +76,7 @@ The 8 PARTIAL docs and why (status as of the absolute-confidence fix pass — pi
 - `research-skip-externals-adapter.md` — branch-scoped to `billf/convex/adapter` (header added); paths/routes corrected (`examples/` top-level, `/v1/streams`, 387 lines).
 - `research-spike-comparison.md` — the N/K/F framework itself is sound, per-spike mappings added (`:60-82`); cited only by the shared-prerequisites plan (`1159`), zero citations from the four target spike plans (see Measurement Framework below).
 - `research-skip-source-state.md` — dual citation retained (`CollectionWriter.update:476-501` primary + `ServiceInstance.update:768-782`); cited only by the shared-prerequisites plan, no spike plan cites it.
-- `research-poc-vehicle-and-harness.md` — harness design is underspecified for implementation planning, its metrics framework is incomplete, and its proof example is missing tables Direction 2's `incremental-materialized-cache-preregistered-room-message-feed` (D2 R7) requires; only Direction 2 actually cites it despite a "shared" framing (pin fixed: `109-131`).
+- `research-poc-vehicle-and-harness.md` — two-table vehicle superseded by the Shared proof-vehicle contract (doc rewritten: contract summary up front, A1/A2 retired, keying/encoding + harness shape retained); only Direction 2 actually cites it despite a "shared" framing.
 - `research-native-operator-spec.md` — `MAX_QUERY_OPERATORS` fixed to 256; wire example hedged as proposed shape (`Skip` in neither enum yet); lacks incremental-maintenance detail for `incremental-materialized-cache-incremental-maintained-operators` (D2 R3); doesn't address Direction 2's `incremental-materialized-cache-fallback-metrics` (D2 R12) through `incremental-materialized-cache-native-surface-unchanged` (D2 R16).
 - `research-build-slices.md` — historical doc superseded by the spike plans (specs named explicitly in-doc); outdated file-count claims remain.
 

@@ -119,8 +119,8 @@ Shared inputs (Direction 1 + Direction 2):
 ### Direction 2 — backend-native Skip cache
 
 - [`research-poc-vehicle-and-harness.md`](research-poc-vehicle-and-harness.md) —
-  PoC queries, aggregates, keying/encoding rules, `sync-protocol-client-settled-checkpoint-comparator` (1a R6) harness sketch
-  (1a-plan `sync-protocol-client-cross-query-reducer` (1a R4)/`sync-protocol-client-settled-checkpoint-comparator` (1a R6)/`sync-protocol-client-chatroom-tutorial-proof` (1a R7)/`sync-protocol-client-per-table-query-proof-input` (1a R8) as used by the shared vehicle; 1a/1b/1c readers see pointers in frontmatter).
+  keying/encoding rules, `sync-protocol-client-settled-checkpoint-comparator` (1a R6) harness sketch, retired two-table A1/A2 vehicle (history only).
+  Binding vehicle for all spikes is the Shared proof-vehicle contract in the shared-prerequisites plan (five-table room feed, nullable sender, `likeCount`); 1a/1b/1c readers see pointers in frontmatter.
 - [`research-backend-change-hook.md`](research-backend-change-hook.md) —
   committed-change hook comparison recommending `LogReader` tail with
   ts-grouped atomic apply, seed/rebuild paths, retention budget.
