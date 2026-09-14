@@ -20,10 +20,10 @@ waiters` (`:594-606`) wakes `ts > waiter` and reaps closed senders. Same
 template as the write-log waiter (`write_log.rs:313-378`). Precedent to copy:
 `database.rs:1733-1742` `wait_for_write_ts` (pred-idom, no await under lock).
 
-Wakers: every `push` (`:741-755`) — ordinary commits via
+Wakers: `push` wakes waiters when `ts > latest` (`snapshot_manager.rs:741-755`, conditional at `:781-783` — idle bumps with `ts <= latest` do not wake) — ordinary commits via
 `publish_commit` (`committer.rs:1092-1139`) and max-repeatable bumps
 (`:873-882`, post-commit 5s delay / 1-2h idle jitter,
-`knobs.rs:604-619`). "Readable" = `latest_ts` (`database.rs:1728-1731`);
+`knobs.rs:604-619`). "Readable" = `now_ts_for_reads()` wrapping `latest_ts` (`database.rs:1728-1731`);
 `latest_database_snapshot` (`:2029-2044`) is the page floor
 (`application/src/streaming_export.rs:76-98`). Do not wait on
 `persisted_max_repeatable_ts` for leader push. Narrow API: expose
@@ -82,8 +82,9 @@ the boundary; staging generation + atomic promote, R6/R7).
 
 Mid-stream expiry/validation errors terminate with a typed error event, never
 a partial page as current (R11): reuse `cursor_expired_error` mapping
-(`local_backend:530-544`), 400s for undecryptable cursor / bad selection /
-cursor-ahead (`:558-573`), authz unchanged, usage/progress accounting
+(`local_backend:530-544`), 400s for undecryptable cursor / bad selection
+(`streaming_export.rs:558-573`) / cursor-ahead
+(`table_iteration/data_sync.rs:455-461`), authz unchanged, usage/progress accounting
 throttled (not per heartbeat). Restart losing Skip state → fresh snapshot;
 expired/invalid cursor → fresh snapshot; retain last-good only if it exists,
 mark stale, count the reason (R10).

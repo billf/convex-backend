@@ -8,6 +8,8 @@ date: 2026-09-11
 
 # Skip Externals/Resources and Convex Adapter Research
 
+> Scope: describes branch `billf/convex/adapter`, not `main` (examples absent from `main`).
+
 ## Part A: Skip Externals/Resources and skipruntime-ts
 
 ### 1. What is a Skip "External" / "Resource"?
@@ -172,13 +174,13 @@ const instance = await runService(service);
 A TS client (e.g., a browser or Convex client) would:
 
 1. **Connect to a running Skip service** (hosted separately, or locally)
-2. **Create a resource instance** via HTTP: `POST /skip-control/v1/streams/:resource`
-3. **Subscribe to updates** via HTTP EventSource: `GET /skip-stream/v1/streams/:streamId`
+2. **Create a resource instance** via HTTP: `POST /v1/streams/:resource` (server route in `skipruntime-ts/server/src/rest.ts:18`; `/skip-control` is a vite-proxy prefix stripped at `examples/convex_reactive/vite.config.ts:26-32`)
+3. **Subscribe to updates** via HTTP EventSource: `GET /v1/streams/:uuid` (`rest.ts:114`)
 4. **Receive streaming updates** as Server-Sent Events (SSE):
    - Initial snapshot: `event: init`, data contains `[[key, [value1, ...]], ...]`
    - Updates: `event: update`, data contains delta entries
 5. **Apply updates locally** (React state, TanStack DB, etc.)
-6. **Unsubscribe** via HTTP: `DELETE /skip-control/v1/streams/:streamId`
+6. **Unsubscribe** via HTTP: `DELETE /v1/streams/:uuid` (`rest.ts:32`)
 
 This is a **thin polling model**: the client is a reactive consumer of Skip's outputs, but writes still go to the original source (Convex mutations, Postgres inserts, etc.), not to Skip.
 
@@ -220,13 +222,13 @@ A real system might use **Option A for user-facing clients** (browser/mobile) an
 
 **New code added:**
 
-1. **`skipruntime-ts/adapters/convex/`** (~1000 lines)
+1. **`skipruntime-ts/adapters/convex/`** (387 lines in `src/index.ts`)
    - Package: `@skip-adapter/convex`
    - Main export: `ConvexExternalService<Row>`
    - Helper: `defineConvexReactiveResource<Row, Query>()`
    - Utilities: `diffSnapshot()`, `assertSkipJson()`, `createAuthenticatedConvexClient()`
 
-2. **`examples/convex_reactive/`** (~400 lines of application code + config)
+2. **`examples/convex_reactive/`** (top-level `examples/`, not under `skipruntime-ts/`; ~400 lines of application code + config)
    - Demonstrates Skip + Convex integration
    - Includes TypeScript service, React UI, HTTP server setup
    - Has a detailed `DESIGN.md` explaining the architecture and limitations
@@ -375,11 +377,11 @@ const summaries = projects.map(AttachTotals(totals));
 ```typescript
 // HTTP-based client streaming
 function useProjectSummaries() {
-  // 1. Create a stream: POST /skip-control/v1/streams/projectSummaries
-  // 2. Open EventSource: GET /skip-stream/v1/streams/{streamId}
+  // 1. Create a stream: POST /v1/streams/projectSummaries
+  // 2. Open EventSource: GET /v1/streams/{streamId}
   // 3. Listen for "init" (full snapshot) and "update" (deltas)
   // 4. Apply to React state
-  // 5. Clean up stream on unmount: DELETE /skip-control/v1/streams/{streamId}
+  // 5. Clean up stream on unmount: DELETE /v1/streams/{streamId}
 }
 ```
 

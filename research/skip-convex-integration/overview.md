@@ -70,15 +70,15 @@ Skip runs inside convex-backend and maintains one pre-registered cached view (th
 
 Phase 1 validated all 20 docs: **12 PASS / 8 PARTIAL / 0 FAIL**. No research doc was found inadequate outright — every PARTIAL finding is a refinement (a citation to fix, a scope note to correct), not a reason the doc can't be relied on for its stated purpose.
 
-The 8 PARTIAL docs and why:
-- `research-convex-reactivity.md` — citation error (`reads.rs:233-239` claimed vs. actual `reads.rs:187-191`); coverage otherwise adequate.
-- `research-convex-query-composition.md` — file reference inaccurate (`queryStreamNext` is in `async_syscall.rs`, not `syscall.rs`); the V8/isolate section is thinner than the query-composition section.
-- `research-skip-externals-adapter.md` — references removed `convex_reactive`/`convex_tanstack` examples, undercutting its "detailed teardown" framing.
-- `research-spike-comparison.md` — the N/K/F framework itself is sound, but it has zero citations from the four target spike plans and lacks explicit per-spike mappings (see Measurement Framework below).
-- `research-skip-source-state.md` — cites `ServiceInstance.update` where the code shows `CollectionWriter.update`; its frontmatter claims all-four-spikes scope but no spike plan currently cites it.
-- `research-poc-vehicle-and-harness.md` — harness design is underspecified for implementation planning, its metrics framework is incomplete, and its proof example is missing tables Direction 2's R7 requires; only Direction 2 actually cites it despite a "shared" framing.
-- `research-native-operator-spec.md` — claims `MAX_QUERY_OPERATORS` as 22 vs. the actual 256; lacks incremental-maintenance detail for R3; doesn't address Direction 2's R12-R16.
-- `research-build-slices.md` — a vague, undefined "three specs above" reference; outdated file-count claims; a historical doc superseded by the spike plans.
+The 8 PARTIAL docs and why (status as of the absolute-confidence fix pass — pins below already corrected in the docs):
+- `research-convex-reactivity.md` — citation error (fixed: `reads.rs:187-191` + `writes_overlap_by_index` at `:233`); coverage otherwise adequate.
+- `research-convex-query-composition.md` — file reference inaccurate (fixed: `queryStreamNext` in `async_syscall.rs`, consumption via `npm-packages/convex/src/server/impl/query_impl.ts`); the V8/isolate section is thinner than the query-composition section.
+- `research-skip-externals-adapter.md` — branch-scoped to `billf/convex/adapter` (header added); paths/routes corrected (`examples/` top-level, `/v1/streams`, 387 lines).
+- `research-spike-comparison.md` — the N/K/F framework itself is sound, per-spike mappings added (`:60-82`); cited only by the shared-prerequisites plan (`1159`), zero citations from the four target spike plans (see Measurement Framework below).
+- `research-skip-source-state.md` — dual citation retained (`CollectionWriter.update:476-501` primary + `ServiceInstance.update:768-782`); cited only by the shared-prerequisites plan, no spike plan cites it.
+- `research-poc-vehicle-and-harness.md` — harness design is underspecified for implementation planning, its metrics framework is incomplete, and its proof example is missing tables Direction 2's R7 requires; only Direction 2 actually cites it despite a "shared" framing (pin fixed: `109-131`).
+- `research-native-operator-spec.md` — `MAX_QUERY_OPERATORS` fixed to 256; wire example hedged as proposed shape (`Skip` in neither enum yet); lacks incremental-maintenance detail for R3; doesn't address Direction 2's R12-R16.
+- `research-build-slices.md` — historical doc superseded by the spike plans (specs named explicitly in-doc); outdated file-count claims remain.
 
 **Planning and spikes:** A higher-capability planning pass (Codex, serialized small steps) produces the four spike plans in `docs/plans/`, each narrowly scoped to one technical question. Each spike owns its own metrics, correctness harness, and scaling evidence. The spikes do not entangle; you can evaluate them independently and decide later which directions warrant implementation.
 

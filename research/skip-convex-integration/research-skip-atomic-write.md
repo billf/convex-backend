@@ -4,7 +4,6 @@ type: research-note
 status: active
 direction: cross-cutting
 date: 2026-09-11
-  - "reducer bar"
 ---
 
 # Skip atomic write (R2/R3/R4)
@@ -35,10 +34,10 @@ Correct iff the writer sends the query's full result every time.
 
 `skipruntime-ts/core/src/index.ts:476-501`: `update(values,isInit)` forks a
 uuid-named context, runs `SkipRuntime_CollectionWriter__update` over FFI
-(`binding.ts:70-74` → `FFI.sk:135-156` → `Runtime.sk:834-854` →
+(`binding.ts:70-74` → `skipruntime-ts/skiplang/ffi/src/FFI.sk:135-156` → `Runtime.sk:834-854` →
 `writeInCollection`), then `merge()`; on any throw, `abortFork()` rolls back
 and rethrows. `needGC` forbids writes inside mapper/reducer/`createGraph`
-(`:1409-1411`).
+(enforced at `update_` `:491-492`; `:1409-1411` is the definition).
 
 `ExternalService` wiring (`core/src/api.ts:450-486`,
 `core/src/index.ts:146-171,1211-1226`, `Runtime.sk:398-534`) is strictly
@@ -57,7 +56,7 @@ Current code has no (a).
 
 ## No-diff rule vs adapter baseline
 
-Adapter (`adapters/convex/src/index.ts:133-163,214-371` on
+Adapter (`skipruntime-ts/adapters/convex/src/index.ts:133-163,214-371` on
 `billf/convex/adapter`): retains a JS `Map` of the previous snapshot,
 `isDeepStrictEqual` per key, emits only changed entries + deletes. The PoC
 deletes all of that: send `rows.map(r => [getKey(r),[r]])` with `isInit:true`
@@ -72,7 +71,7 @@ Cross-table aggregate via `merge(q1,q2).map(M).reduce(R)` or fused
 `mapReduce` (`Runtime.sk:593-666`, `index.ts:368-443`); native
 count/sum/min/max available. Contract (`core/src/api.ts:81-109`): `remove`
 may return `null` to force full recompute; non-null must equal the full
-`add`-fold. Canonical example `tests/src/tests.ts:397-407`
+`add`-fold. Canonical example `skipruntime-ts/tests/src/tests.ts:397-407`
 (`initial:0, add:+1, remove:-1`). Reusable patterns in
 `examples/chatroom/reactive_service/src/chatroom.service.ts`: `GroupByMessage`
 fan-out mapper, constructor-injected dependent mapper for cross-collection
