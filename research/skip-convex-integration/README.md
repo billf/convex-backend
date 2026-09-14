@@ -150,5 +150,5 @@ Shared inputs (Direction 1 + Direction 2):
 Research only — no design decisions have been made yet. Four spike plans in
 `docs/plans/` now own the active scope (1a sync-protocol client, 1b
 paginated source, 1c Data Sync push source, Direction 2 materialized
-cache); the index above marks which notes feed each plan and which early
+cache), plus a shared-prerequisites plan (`2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`, P/Q tier — the only plan citing `research-spike-comparison.md` and `research-skip-source-state.md`); the index above marks which notes feed each plan and which early
 notes are superseded or historical.

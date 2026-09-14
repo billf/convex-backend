@@ -26,15 +26,15 @@ directly. No `ConvexClient`, no backend changes. All paths under
   (`local_backend/src/subs/mod.rs:152-196`). Invalid JSON → `bad_request`
   (`:167-175`).
 
-## ClientMessage (`convex/sync_types/src/types/mod.rs:171-206`)
+## ClientMessage (`crates/convex/sync_types/src/types/mod.rs:171-206`)
 
 - `Connect { session_id (Uuid), connection_count (u32),
   last_close_reason, max_observed_timestamp?, client_ts? }` (`:173-179`).
 - `ModifyQuerySet { base_version, new_version, modifications: Add/Remove }`
   (`:180-184`). `Query { query_id (u32), udf_path, args, journal?,
   component_path? }` (`:104-117`); `Add(Query)` / `Remove{query_id}`
-  (`:119-123`). `args` is array-wrapped Convex JSON (`base_client/mod.rs:147-148`,
-  `browser/sync/client.ts:974-980`).
+  (`:119-123`). `args` is array-wrapped Convex JSON (`crates/convex/src/base_client/mod.rs:147-148`,
+  `npm-packages/convex/src/browser/sync/client.ts:974-980`).
 - `Mutation` / `Action { request_id (u32), udf_path, args, component_path? }`
   (`:185-200`). `component_path` is dashboard/admin-only. Read-only PoC can
   omit both send paths and their responses.
@@ -76,16 +76,16 @@ Wire JSON (`sync_types/src/types/json.rs`, mirror
   otherwise and accept up to 5MB messages.
 - `MutationResponse`/`ActionResponse`: ignorable for read-only PoC
   (`client.ts:478-499`, `base_client/mod.rs:663-716`).
-- `AuthError`: fatal protocol restart (`base_client/mod.rs:684-696`).
+- `AuthError`: delegate to `authenticationManager.onAuthError` (not a fatal protocol restart; Rust returns `Err` for both `AuthError` and `FatalError`) (`base_client/mod.rs:684-700`).
 - `FatalError`: terminate, do not retry (`client.ts:504-507`).
 - Protocol `Ping`: ignore except inactivity timer (`web_socket_manager.ts:440-443`).
 
 ## Lifecycle (no ConvexClient)
 
-- `sessionId` UUIDv4 per client instance; `connectionCount` increments per
+- `sessionId` UUIDv4 per client instance (`client.ts:273,385`; protocol field `protocol.ts:121`); `connectionCount` increments per
   `onopen`; `lastCloseReason` starts `"InitialConnect"`
-  (`web_socket_manager.ts:158-164,409-410`).
-- On open send `Connect{…, maxObservedTimestamp, clientTs: Date.now()}`
+  (`web_socket_manager.ts:155-159,409-410`).
+- On open send `Connect{…, maxObservedTimestamp, clientTs: monotonicMillis()}` (`web_socket_manager.ts:389-393`)
   (`client.ts:421-429`). Track `maxObservedTimestamp = max(endVersion.ts,
   mutation ts)` (`client.ts:545-556`, `base_client/mod.rs:632-652`); resend on
   every reconnect.
@@ -102,13 +102,13 @@ Wire JSON (`sync_types/src/types/json.rs`, mirror
   JS protocol-Ping ~15s / inactivity 60s → reconnect (`web_socket_manager.ts:235-239,557-569`);
   Rust tick 5s / 30s → bail (`sync/web_socket_manager.rs:134-136,241-246`).
   Backoff JS `100ms·2^retries` cap 16s + jitter, reset only after syncing past
-  reconnect (`web_socket_manager.ts:114-149,470-475`); Rust `100ms→15s`
+  reconnect (`web_socket_manager.ts:870-883,470-475`); Rust `100ms→15s`
   (`:60-61`). Retry even on close `4040` (`:11-19,484-505`).
 
 ## De-risking spike (still JS client, not deliverable)
 
 `BaseConvexClient.addOnTransitionHandler(fn({queries, reflectedMutations,
-timestamp}))` (`client.ts:246-250,618-637`) exposes whole Transitions to
+timestamp}))` (`client.ts:633-637`) exposes whole Transitions to
 validate the atomicity claim before building the raw socket.
 
 ## Unknowns left to planning
