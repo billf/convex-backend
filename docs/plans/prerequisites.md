@@ -9,7 +9,7 @@ flowchart TB
   research["Complete input: shared research"]
   vehicle["Complete input: common PoC vehicle"]
   shared["Shared P/Q plan"]
-  p["P baseline\nAtomic-envelope convention"]
+  p["P baseline\nAtomic-source-batch contract"]
   q["Q harness\nComparator and fault fixture"]
   q12["shared-prereqs-q-language-neutral-methodology-spec"]
   oneA["1a sync-protocol client"]
@@ -45,6 +45,10 @@ flowchart TB
 - **Specification consumption:** Direction 2 implements native atomicity and
   comparator code, but uses Q12's language-neutral methodology rather than
   importing TypeScript P/Q artifacts.
+- **Encoding boundary:** 1a/1b use complete `SnapshotBatch` values; 1c uses
+  `RevisionDeltaBatch`; Direction 2 implements the latter's native equivalent.
+  In 1b, incoming Transition groups and page-swap publication groups are
+  intentionally distinct.
 - **Design reference:** a relationship informs a design but supplies no code
   dependency or completion gate.
 

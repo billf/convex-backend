@@ -1,0 +1,8 @@
+# Compound Engineering configuration for this repo.
+# See docs/solutions/tooling-decisions/opencode-ce-doc-review-external-provider.md
+# for the verified OpenCode CLI invocation shape used by the cross-model pass.
+
+# Preferred external target for ce-doc-review's cross-model judgment pass
+# (adversarial-document-reviewer, product-lens-reviewer, security-lens-reviewer).
+cross_model_peer: opencode
+cross_model_model: opencode/muse-spark-1.3-contributor-free

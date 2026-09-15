@@ -5,8 +5,8 @@ produces and how each downstream direction consumes it.
 
 ```mermaid
 flowchart LR
-  subgraph P["P: envelope and atomic-write convention"]
-    p1["Envelope type and split/key/order helpers"]
+  subgraph P["P: atomic-source-batch contract and helpers"]
+    p1["Snapshot/delta encodings and split/key/order helpers"]
     p2["Single-fork atomic-unit rule"]
     p3["Watermark and tombstone conventions"]
     p4["Optional generation-fencing extension"]
@@ -25,10 +25,10 @@ flowchart LR
 
 | Output | Produces | 1a / 1b | 1c | Direction 2 |
 |---|---|---|---|---|
-| P baseline | Envelope shape, split/key/order helpers, single-fork atomic-unit rule, watermarks, and tombstone conventions | Planned code reuse | Optional code reuse; bespoke implementation remains allowed | Design reference only |
+| P baseline | `AtomicSourceBatch`, distinct snapshot/delta encodings, split/key/order helpers, and applicable replay/tombstone conventions | Planned external-source code reuse | Optional external-source code reuse; bespoke implementation remains allowed | Native implementation follows the specification; no TypeScript dependency |
 | `shared-prereqs-p-generation-fencing-extension` | Optional staging generation, promotion, pending ledger, and generation-scoped watermarks | Not a baseline dependency | Optional compatibility reuse for stricter 1c lifecycle needs | Design reference only |
 | Q harness | Settled detector, dual-reader comparator, metrics, fault fixture, and structured report | Planned code reuse | Optional code reuse for integration proof; bespoke fallback remains allowed | Design reference only |
-| `shared-prereqs-q-language-neutral-methodology-spec` | Language-neutral checkpoint, normalization, and N/K/F metric definitions | Reference | Reference | Specification consumption for native comparator and scaling work |
+| `shared-prereqs-q-language-neutral-methodology-spec` | Four checkpoint gates, runtime/harness vocabulary, normalization, and N/K/F metric definitions | Reference | Reference | Specification consumption for native comparator and scaling work |
 
 ```mermaid
 flowchart TB
