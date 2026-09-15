@@ -103,12 +103,12 @@ Every Q identifier is cross-document by design, so all are listed.
 
 ## `paginated-reactive-source` (1b)
 
-Only identifiers actually cited from another document are listed; the rest of 1b's R1-R15/F1-F3/AE1-AE5 are local.
+Only identifiers actually cited from another document are listed; the rest of 1b's R1-R15/F1-F3/AE1-AE6 are local.
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
 | R2 | `paginated-reactive-source-bounded-prefix-load` | Loads a configured, bounded prefix of the feed rather than materializing unbounded history. |
-| R6 | `paginated-reactive-source-disjoint-page-merge` | Merges live page regions only after asserting disjoint Convex document-ID sets, then orders by indexed order with `_id` tiebreak. |
+| R6 | `paginated-reactive-source-disjoint-page-merge` | Merges live page regions only after asserting disjoint Convex document-ID sets, then produces the shared proof-vehicle contract's canonical ordering and projection. |
 | R1 | `paginated-reactive-source-indexed-reactive-pagination` | Uses an enabled Convex index and reactive pagination to expose an ordered recent-message feed as cursor-bounded pages. |
 | R3 | `paginated-reactive-source-stable-page-snapshot-region` | Gives each live page a stable identity and sends it to Skip as its own snapshot region without concatenating the loaded window or diffing rows in the bridge. |
 | R4 | `paginated-reactive-source-atomic-page-split` | Keeps the old page active until both replacement ranges are complete, then exchanges old and new regions in one atomic Skip update. |
@@ -171,7 +171,7 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | U4 | `data-sync-push-u-implement-push-service` | "Implement the Skip Data Sync push service" — imports P (or falls back to hand-building KTD7-KTD9 per the Goal Capsule's stop condition). |
 | U5 | `data-sync-push-u-deterministic-tutorial-mutations` | "Add deterministic tutorial mutations and native oracles." |
 | U6 | `data-sync-push-u-retained-graph-comparison-harness` | "Build the retained graph and comparison harness" — builds on Q (or falls back to a bespoke comparator/fault-injection core). |
-| R2 | `data-sync-push-fixed-selection-cursor` | Opens with an optional opaque cursor and one fixed selection containing the tutorial’s `messages` and `users` columns. |
+| R2 | `data-sync-push-fixed-selection-cursor` | Opens with an optional opaque cursor and one fixed selection covering all columns of the `rooms`, `users`, `memberships`, `messages`, and `likes` tables. |
 | R3 | `data-sync-push-progress-driven-page-emission` | Emits available pages without request round trips and wakes from repeatable progress beyond the prior page’s snapshot timestamp. |
 | R4 | `data-sync-push-quiescent-empty-recheck` | Makes the wait path race-free and suppresses progress refresh for established unchanged empty `upToDate` rechecks. |
 | R5 | `data-sync-push-bounded-stream-backpressure` | Bounds per-stream backlog and active streams, forcing slow consumers to resume from an applied cursor without unbounded memory or scan work. |

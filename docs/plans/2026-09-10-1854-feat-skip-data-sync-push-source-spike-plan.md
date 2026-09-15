@@ -618,7 +618,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - Renaming a user updates every joined message name; deleting the user preserves messages with a `null` sender.
   - Activating or deactivating a membership includes or excludes that sender's messages from the room feed, and adding or deleting a like updates only the message's `likeCount`.
   - One multi-table mutation changes a membership and multiple likes in one Convex transaction and returns deterministic identifiers.
-  - More than 50 messages select the latest 50 by descending `_creationTime` and `_id`, then normalize both native and Skip results to chronological display order before comparison.
+  - More than 50 messages select the latest 50 by descending `_creationTime` and `_id`, then compare both native and Skip results directly in canonical descending order with no display-order normalization.
   - `likeCount` reflects add, remove, delete, and missing liked-user cases.
   - The all-selected-rows baseline contains every selected room, user, membership, message, and like and grows with `N`.
 - **Verification:** Tutorial tests establish an independent expected result for every harness mutation and distinguish the bounded correctness oracle from the full snapshot baseline.

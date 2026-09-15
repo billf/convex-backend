@@ -15,9 +15,9 @@ mechanics.
 | Delete and replay | `QueryRemoved` in enclosing full value; fresh reconnect snapshot | Region swap removes old page; `InvalidCursor` full reset | `_id` tombstone + per-document watermark; cursor after all groups | Native delete/rebuild/replay implementation |
 | No-torn assertion | Transition observer sees no partial render | No half-swapped current region | No partial timestamp-group publication | No partial transaction-version publish |
 | Q12 checkpoint | Transition applied → result published → oracle observed → freshness recorded | Same gates, revision-tagged or quiesced | Same gates, cursor advances only after groups | Same gates, view ≥ causal required version |
-| Runtime state | `current` / stale / not-yet-loaded | `current` / stale / incomplete split | `current` / stale / snapshotting | current / rebuilding / fallback |
+| Runtime state | `current` / stale / not-yet-loaded | `current` / stale / incomplete split | `current` / stale / snapshotting / replacing | current / rebuilding / fallback |
 | Harness state | `comparison-ready` only after oracle | Same | Same | Same |
-| V1–V6 corpus | All vectors; V4 boundary/tie; V6 no-torn | All vectors; V4 requires 50 qualifiers or native shortfall proof | All vectors; V4 boundary/tie; V6 no-torn | All vectors; V4 boundary/tie; V6 no-torn |
+| V1–V6 corpus | All vectors; V4 boundary/tie; V6 final-state equality; live no-torn observation | All vectors; V4 requires 50 qualifiers or native shortfall proof; V6 final-state equality | All vectors; V4 boundary/tie; V6 final-state equality; live no-torn timestamp-group observation | All vectors; V4 boundary/tie; V6 final-state equality; live no-torn transaction observation |
 | Required metric posture | Correctness-only: Q1–Q3 plus mismatch | Snapshot rows plus page extensions | Revision rows plus cursor extensions | Native stage work plus fallback/index extensions |
 | Index assumption | Shared static indexes enabled | Same; `by_room` drives pages | Same | Same static set plus lifecycle eligibility tests |
 
