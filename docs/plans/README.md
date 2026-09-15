@@ -28,7 +28,7 @@ Skip consumes live Convex data without backend changes (1a, 1b) or with modest b
 
 Skip runs inside convex-backend, consumes committed row-level changes, and serves versioned cached results alongside native query execution.
 
-- **Direction 2 — Incremental Materialized Cache (2026-09-10-1702):** One pre-registered chatroom feed maintained by Skip's incremental engine from committed changes. Tests whether persistent Skip state can achieve sub-linear update work by applying changes to a retained operator graph rather than rerunning invalidated queries.
+- **Direction 2 — Incremental Materialized Cache (2026-09-10-1702):** One pre-registered chatroom feed maintained by Skip's incremental engine from committed changes. Tests whether persistent Skip state can achieve sub-linear update work by applying changes to a retained operator graph rather than rerunning invalidated queries. Implementation-ready as of 2026-09-15: the engine runs in a backend-supervised Node child process fed by a write-log tail, with version-gated reads, metered fallback, and a native compare-at-version oracle.
 
 ### How These Work Together
 
