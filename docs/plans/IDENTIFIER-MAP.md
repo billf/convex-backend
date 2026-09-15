@@ -66,16 +66,16 @@ Plan-slug key (verified against each file's own `topic:` frontmatter and
 `paginated-reactive-source` (1b) = `2026-09-10-1843-feat-skip-paginated-reactive-source-spike-plan.md`;
 `data-sync-push` (1c) = `2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md`.
 
-## Shared library deliverables — `shared-prereqs`, P (envelope/atomic-write library)
+## Shared library deliverables — `shared-prereqs`, P (atomic-source-batch contract and external-source helpers)
 
 Every P identifier is cross-document by design, so all are listed.
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
-| P1 | `shared-prereqs-p-envelope-type` | One documented envelope shape (`{ts, deleted, component, table, _id, _creationTime, doc}`) specified once, consumed identically by every producer. |
-| P2 | `shared-prereqs-p-library-surface` | The reusable TS library's surface: envelope type, split-mapper helper, keying convention with uniqueness checks, order-key helper. |
-| P3 | `shared-prereqs-p-single-fork-per-atomic-unit` | Enforces one `writer.update` call per atomic unit (Transition / revision-timestamp group / page-group swap) — never split per-table calls for data that must land atomically. |
-| P4 | `shared-prereqs-p-revision-watermark-idempotency` | In-value revision-watermark idempotency (`apply iff entry.ts > retained_ts`); explicitly not Skip's own subscription/session-tick watermark. |
+| P1 | `shared-prereqs-p-atomic-source-batch-contract` | Language-neutral batch mapping: source version/order, consistency group, delete/replay form, and no-torn publication for all four directions. |
+| P2 | `shared-prereqs-p-snapshot-and-revision-encodings` | Non-interchangeable `SnapshotBatch` and `RevisionDeltaBatch` encodings; TS helpers are external-source-only while Direction 2 implements natively. |
+| P3 | `shared-prereqs-p-external-single-fork-atomicity` | One external `writer.update` per external consistency group; snapshot paths use complete values and delta paths use tombstones, without prescribing Direction 2's native publisher. |
+| P4 | `shared-prereqs-p-revision-delta-watermark-idempotency` | Revision-delta-only watermark/tombstone replay safety; cursors advance after the full group succeeds. |
 | P5 | `shared-prereqs-p-tombstone-gc-policy` | Tombstone/GC convention: retain while the generation lives, discard wholesale on resnapshot, sweep once past the retention horizon. |
 | P6 | `shared-prereqs-p-poc-vehicle-demo` | Split/join/order helpers demonstrated against the shared five-table room feed, including active membership, nullable sender, and `likeCount` add/remove behavior. |
 | P7 | `shared-prereqs-p-standalone-test-suite` | The library's own test suite covers split/merge/order/watermark/tombstone with no dependency on any spike's transport or on Q. |
@@ -88,27 +88,27 @@ Every Q identifier is cross-document by design, so all are listed.
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
-| Q1 | `shared-prereqs-q-settled-checkpoint-detector` | One reusable "is settled" predicate anchored on version timestamps. |
+| Q1 | `shared-prereqs-q-settled-checkpoint-detector` | Readiness detector for source-applied and result-published gates, anchored on version timestamps. |
 | Q2 | `shared-prereqs-q-dual-reader-wiring` | Compares a Skip-derived SSE snapshot against an independent native Convex reader, no shared code path; loopback-only, PoC/test-fixture data. |
 | Q3 | `shared-prereqs-q-normalized-comparator` | Canonical-sort deep-equal comparator with nullable-sender and `likeCount` parity; reports structured mismatches, not a bare boolean. |
-| Q4 | `shared-prereqs-q-poc-vehicle-driver` | Driven against the shared five-table room-feed proof vehicle and exact native oracle. |
-| Q5 | `shared-prereqs-q-counter-timer-catalog` | Pluggable recorder implementing the shared counter/timer catalog from `research-spike-comparison.md`; a superset — 1a only populates Q1-Q3. |
+| Q4 | `shared-prereqs-q-poc-vehicle-driver` | Driven against the shared five-table room-feed proof vehicle, a versioned V1-V6 manifest, and exact canonical native oracle. |
+| Q5 | `shared-prereqs-q-counter-timer-catalog` | Required/optional/N-A, direction-tagged recorder; owns freshness/fallback recording and preserves 1a's correctness-only exemption. |
 | Q6 | `shared-prereqs-q-fault-injection-fixture` | Composable fault fixture covering the faults common to 3+ plans (disconnect-before-checkpoint, cursor expiry, table replacement, oversized transaction, etc). |
 | Q7 | `shared-prereqs-q-fault-assertion-helper` | Each injector exposes a source-agnostic detect/recover/count assertion helper. |
 | Q8 | `shared-prereqs-q-self-test-seeded-mismatches` | Harness's own suite proves the comparator catches a wrong Skip snapshot, via deliberately seeded mismatches. |
 | Q9 | `shared-prereqs-q-runnable-reference-source` | Ships runnable end-to-end against the shared proof vehicle with its own minimal reference source, before any of 1a/1b/1c/Direction 2 exists to consume it. |
 | Q10 | `shared-prereqs-q-report-format` | Report format (counts/timers/mismatch log) directly consumable by any spike's Success Criteria without redefining metric names. |
 | Q11 | `shared-prereqs-q-schema-matches-1c-jsonl` | Recorder field names/units match 1c's already-designed JSONL output (`data-sync-push-ktd-diagnostic-jsonl-schema`, KTD10) — Q generalizes 1c's U6 design rather than the reverse. |
-| Q12 | `shared-prereqs-q-language-neutral-methodology-spec` | Settled-checkpoint definition, normalization rules, counter/timer names stated language-neutrally, so a non-TS consumer (Direction 2) can implement natively against the spec instead of the code. |
+| Q12 | `shared-prereqs-q-language-neutral-methodology-spec` | Four-gate checkpoint, runtime `current` vs harness-only `comparison-ready`, canonical equality, and metric profile stated language-neutrally for native consumers. |
 
 ## `paginated-reactive-source` (1b)
 
-Only identifiers actually cited from another document are listed; the rest of 1b's R1-R15/F1-F3/AE1-AE5 are local.
+Only identifiers actually cited from another document are listed; the rest of 1b's R1-R15/F1-F3/AE1-AE6 are local.
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
 | R2 | `paginated-reactive-source-bounded-prefix-load` | Loads a configured, bounded prefix of the feed rather than materializing unbounded history. |
-| R6 | `paginated-reactive-source-disjoint-page-merge` | Merges live page regions only after asserting disjoint Convex document-ID sets, then orders by indexed order with `_id` tiebreak. |
+| R6 | `paginated-reactive-source-disjoint-page-merge` | Merges live page regions only after asserting disjoint Convex document-ID sets, then produces the shared proof-vehicle contract's canonical ordering and projection. |
 | R1 | `paginated-reactive-source-indexed-reactive-pagination` | Uses an enabled Convex index and reactive pagination to expose an ordered recent-message feed as cursor-bounded pages. |
 | R3 | `paginated-reactive-source-stable-page-snapshot-region` | Gives each live page a stable identity and sends it to Skip as its own snapshot region without concatenating the loaded window or diffing rows in the bridge. |
 | R4 | `paginated-reactive-source-atomic-page-split` | Keeps the old page active until both replacement ranges are complete, then exchanges old and new regions in one atomic Skip update. |
@@ -171,7 +171,7 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | U4 | `data-sync-push-u-implement-push-service` | "Implement the Skip Data Sync push service" — imports P (or falls back to hand-building KTD7-KTD9 per the Goal Capsule's stop condition). |
 | U5 | `data-sync-push-u-deterministic-tutorial-mutations` | "Add deterministic tutorial mutations and native oracles." |
 | U6 | `data-sync-push-u-retained-graph-comparison-harness` | "Build the retained graph and comparison harness" — builds on Q (or falls back to a bespoke comparator/fault-injection core). |
-| R2 | `data-sync-push-fixed-selection-cursor` | Opens with an optional opaque cursor and one fixed selection containing the tutorial’s `messages` and `users` columns. |
+| R2 | `data-sync-push-fixed-selection-cursor` | Opens with an optional opaque cursor and one fixed selection covering all columns of the `rooms`, `users`, `memberships`, `messages`, and `likes` tables. |
 | R3 | `data-sync-push-progress-driven-page-emission` | Emits available pages without request round trips and wakes from repeatable progress beyond the prior page’s snapshot timestamp. |
 | R4 | `data-sync-push-quiescent-empty-recheck` | Makes the wait path race-free and suppresses progress refresh for established unchanged empty `upToDate` rechecks. |
 | R5 | `data-sync-push-bounded-stream-backpressure` | Bounds per-stream backlog and active streams, forcing slow consumers to resume from an applied cursor without unbounded memory or scan work. |
@@ -188,7 +188,7 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 
 | ID | Descriptive anchor | What it says |
 |---|---|---|
-| R2 | `sync-protocol-client-atomic-transition-apply` | Each fully reassembled `Transition` applied to Skip as one atomic update spanning every included query modification. Cited by `shared-prereqs` as becoming "apply P's envelope convention to each reassembled Transition." |
+| R2 | `sync-protocol-client-atomic-transition-apply` | Each fully reassembled `Transition` is a complete `SnapshotBatch` applied atomically across every included query modification. |
 | R4 | `sync-protocol-client-cross-query-reducer` | At least one derived value computed inside Skip's reducer from data spanning more than one Convex query/table (evidences genuine incremental computation). |
 | R6 | `sync-protocol-client-settled-checkpoint-comparator` | At each controlled checkpoint the Skip-derived aggregate matches an independent Convex reader across bootstrap, multi-table update, unsubscribe, reconnect, and recovery. Cited by `shared-prereqs` as becoming "adopt Q's comparator and settled-checkpoint detector." |
 | AE7 | `sync-protocol-client-first-attempt-failure` | "First-attempt failure" acceptance example. |

@@ -45,14 +45,14 @@ convex-backend's reactivity is coarse: an invalidated query is run again and the
 
 **Sync-protocol client**
 - R1. The Skip sync client implements the read-only `/api/sync` subset required for the proof without depending on the JS `ConvexClient` or changing convex-backend: connect, one pinned authentication mode, query-set changes, transitions, liveness, fatal errors, and reconnect with a fresh query snapshot.
-- R2. Each fully reassembled `Transition` is applied to Skip as one atomic update spanning every included query modification, not as independent per-query writes.
+- R2. Each fully reassembled `Transition` is this direction's `SnapshotBatch`: it records `end_version.ts`, contains every included query modification, and is applied/published atomically rather than through independent per-query writes. `QueryRemoved` is its complete-value delete form; reconnect replaces it with a fresh snapshot.
 
 **Removal and transition integrity**
 - R9. When the server acknowledges an unsubscribe with `QueryRemoved`, the client removes that query's rows inside the enclosing R2 atomic update; it does not preserve them as last-good state.
 - R10. A chunk-eligible client reassembles and validates every `TransitionChunk` sequence before performing the single R2 update; individual chunks are never visible to Skip.
 
 **Reconciliation**
-- R3. The client presents each updated query's complete current row set to Skip with snapshot semantics, and Skip derives row additions, updates, and removals through its `isInit: true` reconciliation path rather than a bridge-computed diff.
+- R3. The client presents each updated query's complete current row set to Skip with snapshot semantics, and Skip derives row additions, updates, and removals through its `isInit: true` reconciliation path rather than a bridge-computed diff. Revision tombstones, revision watermarks, and delta replay logic do not apply to this snapshot path.
 
 **Skip-side computation**
 - R4. Skip computes the Shared proof-vehicle contract's room-scoped feed and per-message `likeCount` reducer from data spanning more than one Convex query/table, so the demo evidences genuine incremental computation rather than a 1:1 relay of Convex data.
@@ -61,7 +61,7 @@ convex-backend's reactivity is coarse: an invalidated query is run again and the
 - R5. When a subscribed query enters a failed state, its previously-derived Skip view is retained (frozen at last-good) rather than cleared, and the demo surfaces that the value may be stale. If the query has never previously succeeded, the client instead shows an explicit not-yet-loaded state, distinct from both a frozen stale value and a removed query; it never renders as an empty frozen row set.
 
 **Acceptance bar**
-- R6. At each controlled checkpoint after the same writes have settled and before another write begins, the demo's Skip-derived Shared proof-vehicle result matches an independent Convex reader across bootstrap, a multi-table update, unsubscribe, and reconnect with a fresh snapshot, and again after recovery from a query failure. No formal latency or resource-overhead comparison is required. This equality bar deliberately excludes the query-failure checkpoint itself: R5 requires the frozen last-good view to remain visibly stale rather than track the independent reader while the query is still failed, so failure is instead verified as retention-of-last-good plus a visible stale indicator (see AE2).
+- R6. At each controlled checkpoint after the same writes have settled and before another write begins, Q12's four gates hold: the Transition is applied, the derived result is published, the same-version native oracle is observed, and the freshness disposition is recorded. The demo then canonically deep-equals the Shared proof-vehicle result across bootstrap, a multi-table update, unsubscribe, and reconnect with a fresh snapshot, and again after recovery from a query failure. No formal latency or resource-overhead comparison is required. This equality bar deliberately excludes the query-failure checkpoint itself: R5 requires the frozen last-good view to remain visibly stale rather than track the independent reader while the query is still failed, so failure is instead verified as retention-of-last-good plus a visible stale indicator (see AE2).
 - R11. The proof records the implemented protocol surface, its code and test footprint, and every production concern it does not exercise, so a passing R6 establishes bounded semantic feasibility rather than an unqualified recommendation to generalize.
 
 **Proof vehicle**
@@ -183,12 +183,18 @@ flowchart LR
   - **Given:** The demo is connected and displaying a correct aggregate.
   - **When:** The server sends a `FatalError` message.
   - **Then:** The demo shows a distinct, visible failure state that is neither silent, a crash, nor indistinguishable from R5's frozen-stale indicator.
+- AE11. Canonical 50-row boundary
+  - **Covers:** R3, R6-R8.
+  - **Given:** V4 of the versioned shared semantic corpus, including 51 qualifying messages and an equal-creation-time `_id` pair.
+  - **When:** The client receives the complete per-table snapshots and the harness reaches a comparison-ready checkpoint.
+  - **Then:** The directly compared descending output contains exactly the canonical first 50, excludes the 51st, and orders the tie by `_id`; it does not normalize into a different display order before comparison.
 
 ### Success Criteria
 
 - Every R6 scenario produces the same aggregate as the independent Convex result at its controlled settled checkpoint.
 - The aggregate uses a Skip reducer with correct add and remove behavior; forwarding Convex snapshots without maintained Skip computation does not pass.
 - The protocol fixture suite proves that chunk boundaries and query removal cannot expose torn or orphaned Skip state.
+- The shared V1-V6 corpus passes, including the V4 50th/51st and `_id` assertions and V6's final-state equality; AE1 remains this direction's live no-torn observation.
 - The final report identifies the raw-client surface implemented by the proof and separately lists the untested production concerns named in Scope Boundaries.
 - A passing proof supports a later generalization decision but does not make that decision by itself.
 
@@ -210,8 +216,9 @@ flowchart LR
 ### Dependencies / Assumptions
 
 - Assumes local checkouts of `~/src/skip` (for skipruntime-ts and the chatroom example) and `~/src/convex-tutorial` remain available and roughly in their current shape.
+- Assumes the shared fixture's enabled static indexes, including `messages.by_sender[sender]`, are present. This direction does not test index lifecycle behavior.
 - Assumes a running convex-backend deployment to connect to. The auth mode for the demo's sync connection (e.g. an admin key vs. a real user token) has no product-facing consequence for a correctness-only PoC and is left to planning.
-- R2's atomic multi-collection write gap (Skip's public TypeScript API has no combined-write primitive) is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — envelope convention); adoption is a planning decision, not assumed here.
+- R2's atomic multi-collection write gap (Skip's public TypeScript API has no combined-write primitive) is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — `AtomicSourceBatch` and external-source helpers); adoption is a planning decision, not assumed here.
 - `BaseConvexClient.addOnTransitionHandler` provides a lower-cost way to validate transition grouping before the raw client is built, but it does not validate raw connection, authentication, query-set, chunk, liveness, or reconnect behavior.
 
 ### Outstanding Questions
@@ -219,7 +226,7 @@ flowchart LR
 **Deferred to Planning**
 - The shared proof vehicle fixes the canonical feed and its `likeCount` reducer; planning may choose only transport-specific input topology, not another aggregate or result shape.
 - The demo's auth mode for its sync connection (see Dependencies / Assumptions).
-- Whether to adopt the shared-prerequisites plan's P (envelope convention) for R2 rather than a bespoke mechanism — see Dependencies/Assumptions.
+- Whether to adopt the shared-prerequisites plan's P `SnapshotBatch` helpers for R2 rather than a bespoke mechanism — see Dependencies/Assumptions.
 
 ### Alternatives Considered
 
@@ -244,4 +251,5 @@ flowchart LR
 - `~/src/skip`, `skipruntime-ts/adapters/convex/src/index.ts` on branch `billf/convex/adapter` — the baseline being improved on.
 - `npm-packages/convex/src/browser/sync/client.ts` — `BaseConvexClient` and `addOnTransitionHandler`, the lower-cost transition-grouping alternative.
 - `research/skip-convex-integration/research-sync-protocol-skip-mapping.md` — 1a wire→Skip mapping: lifecycle, versions, chunks, bundle-preserving writes, PoC vehicle, correctness bar.
+- `research/skip-convex-integration/research-atomic-source-batch.md`, `research/skip-convex-integration/research-logical-checkpoint-contract.md`, `research/skip-convex-integration/research-semantic-test-vectors.md`, `research/skip-convex-integration/research-core-metric-profile.md`, and `research/skip-convex-integration/research-static-vs-dynamic-indexes.md` — shared batch, checkpoint, corpus, metric, and static-index mappings used by this correctness-only snapshot direction.
 - `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — R2's atomic-write gap (P) and R6's comparator (Q); not yet built, adoption left to planning.

@@ -75,9 +75,9 @@ flowchart TB
 **Incremental maintenance**
 
 - R1. A backend-owned, long-lived Skip graph consumes ordered row-level changes only after their Convex transaction commits; polling, post-rerun snapshots, and client-side snapshot diffing are not valid input mechanisms.
-- R2. All source changes from one Convex transaction become visible to the materialized view atomically at one Convex commit version.
+- R2. Each committed transaction is this direction's native `RevisionDeltaBatch` equivalent: all changes share one commit version and become visible to the materialized view atomically, with native delete/replay/rebuild handling rather than the external TypeScript helper.
 - R3. The view incrementally maintains joins, filters, grouped reductions, and ordering so unrelated source rows do not cause equivalent recomputation.
-- R4. The spike instruments logical work at each maintained stage so its scaling behavior can be attributed to the changed dependency neighborhood.
+- R4. The spike instruments logical work at each maintained stage using Q12's required/optional/N-A core profile, while retaining native stage names and index-lifecycle fields as Direction 2 extensions; its scaling behavior can therefore be attributed to the changed dependency neighborhood.
 
 **Authority, lifecycle, and recovery**
 
@@ -98,7 +98,7 @@ flowchart TB
 
 **Evaluation**
 
-- R13. Correctness is checked against an independent native Convex result for the same logical commit version across bootstrap, inserts, updates, deletes, multi-table transactions, restart, lag, and recovery.
+- R13. Correctness is checked against an independent native Convex result for the same logical commit version across bootstrap, inserts, updates, deletes, multi-table transactions, restart, lag, and recovery. Equality is claimed only after Q12's source-applied, result-published, oracle-observed, and freshness-recorded gates; `current` is a runtime state, while `comparison-ready` is harness-only.
 - R14. The comparison includes the strongest applicable idiomatic Convex baseline, including indexes, incrementally maintained exact counts, aggregate or counter components, and denormalization patterns where they fit the workload.
 - R15. The scaling report varies total data size and affected dependency fan-out, then shows whether Skip update work and maintained state follow the expected complexity terms without imposing fixed microsecond or byte thresholds.
 - R16. With acceleration disabled or bypassed, existing writes, UDF execution, reactive query behavior, application result shapes, and client behavior remain unchanged.
@@ -113,7 +113,7 @@ flowchart TB
 
 - R20. For the pre-registered view's validated ID fields connecting rooms, users, memberships, messages, and likes (per R7), each field validated as `v.id("targetTable")` supplies an implicit join edge from that field to the target table's `by_id` base materialization. Deriving this join edge for schema fields outside the pre-registered view is ahead-of-time schema-derived generation and is excluded from this spike per R8.
 - R21. The pre-registered view's schema-derived joins preserve its native behavior when the referenced target document is missing and never treat `v.id` as a referential-integrity guarantee.
-- R22. A reverse join from a target document to its referencing documents within the pre-registered view (per R7) requires an enabled Convex application index on the referencing ID field. Deriving reverse-join support outside the pre-registered view is excluded from this spike per R8.
+- R22. A reverse join from a target document to its referencing documents within the pre-registered view (per R7) requires an enabled Convex application index on the referencing ID field. The nullable-sender user rename/deletion path uses the shared enabled `messages.by_sender[sender]` index. Deriving reverse-join support outside the pre-registered view is excluded from this spike per R8.
 
 <!-- ce-section: work-relationships -->
 ### How This Work Fits Together
@@ -226,6 +226,11 @@ flowchart LR
   - **Given:** A message contains an ID validated for the `users` table, but the referenced user document no longer exists.
   - **When:** Skip maintains the message-to-user join.
   - **Then:** The accelerated feed produces the same missing-user behavior as the native reference result rather than assuming the ID guarantees a matching document.
+- AE8. Shared semantic corpus
+  - **Covers:** R2, R7, R13, R20-R22.
+  - **Given:** Versioned V1-V6 fixtures, with `messages.by_sender` enabled.
+  - **When:** Each vector reaches a comparison-ready native-version checkpoint.
+  - **Then:** V4 directly checks the descending 50th/51st boundary and `_id` tie-breaker, V6 reaches the common final state, and the live transaction assertion remains no-torn under the native publish boundary.
 
 ### Success Criteria
 
@@ -235,6 +240,7 @@ flowchart LR
 - Fallback, lag, rebuild, and mismatch metrics make every native-path substitution attributable.
 - The pre-registered view's five tables (rooms, users, memberships, messages, likes) expose the two implicit base-view definitions and allocate their backing state; the lifecycle test proves that incompatible index changes cannot leave acceleration active.
 - Every forward schema-derived join targets the declared table's `by_id` base materialization, every reverse fan-out uses an enabled application index, and both match native behavior for present and missing referenced documents.
+- The shared V1-V6 corpus, including its manifest version, passes; index-lifecycle failures remain attributable through Direction 2 fallback/rebuild metrics rather than being imposed on the other directions.
 - The completed spike identifies whether the backend integration is viable, which lifecycle or resource costs limit it, and whether later generalization is justified.
 
 ### Alternatives Considered
@@ -260,7 +266,7 @@ flowchart LR
 - Convex's internal committed-write and write-log machinery is a plausible construction seam, not an existing stable extension API; planning must choose and validate the narrowest safe hook.
 - Convex gives every table `by_id` and `by_creation_time` indexes, which the spike assumes can seed implicit Skip base materializations; named indexed lookups still require enabled application indexes selected explicitly by the query.
 - Convex schema validators expose the target table of each `v.id` field, but they do not enforce target-document existence; the native reference result owns each dangling-reference behavior.
-- R2's atomic multi-collection write gap is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — envelope convention), but P is an external TypeScript client over Skip's `ExternalService`/`CollectionWriter` surface — this spike is backend-owned (see Alternatives Considered) and cannot import it directly, so it needs its own backend-native implementation of the same pattern.
+- R2's atomic multi-collection write gap is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — `AtomicSourceBatch`), but P's helpers target external TypeScript consumers — this spike is backend-owned (see Alternatives Considered) and implements the specification natively rather than importing them.
 - The native reference implementation can express the same pre-registered feed semantics well enough to act as an independent correctness oracle and performance baseline.
 
 ### Outstanding Questions
@@ -276,12 +282,25 @@ flowchart LR
 - Which logical-work counters and dataset scale points make the asymptotic comparison reproducible?
 - Should later versions activate the two implicit base views eagerly for every table, or allocate their backing state only when a registered or just-in-time view depends on the table?
 
+### Deferred / Open Questions
+
+#### From 2026-09-14 review
+
+- **Skip's engine has no demonstrated non-TypeScript embedding path, but Direction 2's whole architecture assumes one** — Goal Capsule / Problem Frame / R1-R2 (backend-native Skip host) (P1, feasibility + adversarial, confidence 100)
+
+  An implementer could design around in-process Rust embedding of Skip's engine before discovering no non-TypeScript embedding path is demonstrated to exist: a direct check of the `~/src/skip` checkout found no Rust-callable surface, only a TypeScript/WASM/Node-addon one. If a native embedding never materializes, the backend-native architecture this plan's R1-R2 assume may require a co-located Node/WASM process instead, similar in shape to the external change-feed sidecar this plan already rejects. Deferred while acknowledging that Node/WASM embedding is on convex-backend's broader roadmap, which may resolve this gap independent of this spike's own design work.
+
+- **R2's "native atomic apply" doesn't say what mechanism replaces the missing Skip batch primitive** — R2 / Dependencies-Assumptions (P1, feasibility, confidence 75)
+
+  An implementer has no basis for believing R2's "native" atomic apply avoids re-deriving the single-merged-collection workaround the shared-prerequisites plan had to invent, because R2 states the atomicity gap as solved rather than naming which mechanism replaces the missing Skip batch primitive. The gap lives in Skip's engine itself, not only in the TypeScript wrapper R2 says it bypasses, so "native" implementation does not by itself sidestep it.
+
 ### Sources / Research
 
 - `research/skip-convex-integration/research-convex-reactivity.md` — Convex subscription tokens, invalidation, and full public-query reruns.
 - `research/skip-convex-integration/research-skip-engine.md` — Skip's reactive graph, collections, mappers, reducers, and incremental behavior.
 - `research/skip-convex-integration/research-skip-externals-adapter.md` — the existing push-based Convex adapter and its whole-snapshot JavaScript diffing boundary.
 - `research/skip-convex-integration/research-skip-atomic-write.md` — the lack of a public multi-collection atomic update surface in the current Skip TypeScript runtime.
+- `research/skip-convex-integration/research-atomic-source-batch.md`, `research/skip-convex-integration/research-logical-checkpoint-contract.md`, `research/skip-convex-integration/research-semantic-test-vectors.md`, `research/skip-convex-integration/research-core-metric-profile.md`, and `research/skip-convex-integration/research-static-vs-dynamic-indexes.md` — native-batch, checkpoint, corpus, metrics, and reverse-join/index-lifecycle mappings.
 - `research/skip-convex-integration/research-poc-vehicle-and-harness.md` — the Convex tutorial and Skip chatroom proof vehicles.
 - `research/skip-convex-integration/research-convex-query-composition.md` — Convex query construction and UDF isolate lifecycle.
 - `crates/database/src/token.rs`, `crates/database/src/reads.rs`, and `crates/sync/src/worker.rs` — read-set invalidation and query rerun evidence.
