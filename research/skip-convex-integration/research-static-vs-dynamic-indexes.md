@@ -14,13 +14,13 @@ All directions start from the same declared application indexes. Only
 Direction 2 tests eligibility/rebuild behavior when an index is staged,
 removed, or incompatible. This split avoids implying 1a/1b/1c must test
 backend index lifecycle while preserving Direction 2's requirement
-(D2 R17-R22, AE6 — `...1702...:108-116,219-223`).
+(D2 R17-R22, AE6 — `...1702...:114-122,225-229`).
 
 ## Static set (every direction assumes present + enabled)
 
 - Contract indexes (`...1159...:90`): `memberships.by_room_user[room,user]`,
   `messages.by_room[room]`, `likes.by_message[message]`.
-- Built-ins, always in contract (`...1702...:33,261`;
+- Built-ins, always in contract (`...1702...:39,114`;
   `research-index-id-metadata.md:49-57`): `by_id` + `by_creation_time` per
   table; full scan desugars to `by_creation_time`; new tables get both
   `Enabled`-when-empty; named `withIndex` must resolve to enabled metadata.
@@ -47,7 +47,7 @@ referential-integrity reading); R22 reverse join requires an enabled index
 on the referencing field. AE6 covers R14/R17-R19/R22: a staged/removed/
 disabled/incompatible index means no serve under a stale contract, with the
 reason named in metrics; F1 gates bootstrap on activation
-(`...1702...:169-174`).
+(`...1702...:175-180`).
 
 ## Forward vs reverse join index rules
 

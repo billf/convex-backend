@@ -20,14 +20,14 @@ complete concrete starting point; Q5/Q11 generalize it.
 
 | Metric | 1a | 1b | 1c | D2 | Basis |
 |---|---|---|---|---|---|
-| Source rows/bytes | N-A | Required / R12 | Required / R17 | Required via-spec / Q12 | `...1843...:69`; `...1854...:94`; `...1702...:296` |
+| Source rows/bytes | N-A | Required / R12 | Required / R17 | Required via-spec / Q12 | `...1843...:69`; `...1854...:94`; `...1702...:317` |
 | Atomic batches | N-A (mechanism only) | Required / R4 | Required / R8 | Required / R2 | P3 single-fork-per-unit (`...1159...:63`) |
 | Changed keys | N-A | Required / R12 | Required / R17 | Required via-spec / Q12 | same as above |
-| Dependent work | N-A | Required / R12 | Required / R17 | Required / R4 | `...1702...:80` per-stage work |
+| Dependent work | N-A | Required / R12 | Required / R17 | Required / R4 | `...1702...:86` per-stage work |
 | Reducer work | N-A | Required / R12 | Required / R17 | Required / R4 | add/remove correctness |
-| Stale duration | N-A | Optional | Required / R17-R18 | Timers via R9-R10 | `...1854...:94-95`; `...1702...:96-97` |
-| Mismatch | Required / R6 | Required / R9 | Required / R15 | Required / R12-R13 | equality bars; `...1702...:97,101` |
-| Fallback | N-A | N-A | N-A (reconnect+stale instead) | Required / R11-R12 | `...1702...:96-97`; see publication-state mapping |
+| Stale duration | N-A | Optional | Required / R17-R18 | Timers via R9-R10 | `...1854...:94-95`; `...1702...:100-101` |
+| Mismatch | Required / R6 | Required / R9 | Required / R15 | Required / R12-R13 | equality bars; `...1702...:103,107` |
+| Fallback | N-A | N-A | N-A (reconnect+stale instead) | Required / R11-R12 | `...1702...:102-103`; see publication-state mapping |
 
 1a exemption: settled-checkpoint equality only, no latency/resource comparison
 (`...1509...:64-65`); populates only Q1-Q3 (`...1159...:76`;
@@ -41,7 +41,7 @@ complete concrete starting point; Q5/Q11 generalize it.
   diagnostics (`...1854...:482`).
 - 1b R12 (`...1843...:69`) + R11 actual-sizes rule (`...1843...:68`) + R14
   fail gate (`...1843...:71`).
-- D2 R4 (`...1702...:80`) + R12 (`...1702...:97`) + R15 (`...1702...:103`,
+- D2 R4 (`...1702...:86`) + R12 (`...1702...:103`) + R15 (`...1702...:109`,
   no fixed thresholds).
 - Q5 superset catalog (`...1159...:76`; `research-spike-comparison.md:34-49`);
   Q11 = 1c JSONL schema (`...1159...:82`); Q12 language-neutral spec
@@ -56,8 +56,8 @@ complete concrete starting point; Q5/Q11 generalize it.
   wake-ups by cause + suppressed-progress/empty rechecks (`...1854...:94`;
   U2 `...1854...:503-508`; U3 `...1854...:540`).
 - Index-gating (D2 only): implicit base views + enabled-index validation
-  (R17/R19 `...1702...:108-109`), `v.id` edges (R20-R22 `...1702...:114-116`),
-  rebuild state + progress-vs-required-version (`...1702...:97`).
+  (R17/R19 `...1702...:114,116`), `v.id` edges (R20-R22 `...1702...:120-122`),
+  rebuild state + progress-vs-required-version (`...1702...:103`).
 
 ## Name-collision map (canonical Q5 name → direction-tagged alias)
 
