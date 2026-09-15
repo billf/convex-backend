@@ -35,7 +35,7 @@ flowchart TB
   oneB["1b paginated reactive source\nRequirements-only\nDecide page-swap and comparator adoption"]
   shared["P/Q shared prerequisites\nRequirements-only\nDecide package and harness topology"]
   oneC["1c Data Sync push source\nImplementation-ready\nCan start without P/Q"]
-  two["Direction 2 materialized cache\nRequirements-only\nDecide backend-native atomicity and comparator"]
+  two["Direction 2 materialized cache\nImplementation-ready\nNode-child Skip host, write-log tail, native comparator"]
 
   research --> oneA
   research --> oneB
@@ -86,7 +86,7 @@ flowchart TB
     plan1b["1b requirements-only"]
     planPQ["P/Q requirements-only"]
     plan1c["1c implementation-ready"]
-    plan2["Direction 2 requirements-only"]
+    plan2["Direction 2 implementation-ready"]
   end
 
   subgraph Delivery["Implementation and validation"]
