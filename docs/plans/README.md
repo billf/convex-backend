@@ -42,6 +42,7 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 
 **Shared constraints:**
 - All four plans share the same correctness bar: a Skip-maintained aggregate must match an independent native Convex result at settled checkpoints.
+- [Cross-spike traceability](CROSS-SPIKE-TRACEABILITY.md) is the normative matrix for product boundary, batch encoding, checkpoint gates, runtime/harness states, vectors, metrics, and index assumptions. In particular, 1b cannot claim shared-product correctness from a prefix that does not establish the canonical top 50 (unless the native oracle proves fewer qualify).
 - All plans exercise Skip's incremental engine (mappers, reducers) rather than only relaying source data unchanged.
 - All plans measure both the favorable scaling case and the costs (bootstrap, retained state, scan amplification, freshness) that accompany it.
 
@@ -52,6 +53,7 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 
 ### Documentation map
 
+- [Cross-spike traceability](CROSS-SPIKE-TRACEABILITY.md) maps the shared `AtomicSourceBatch`, Q12, V1–V6, metrics, and indexes across all four directions.
 - [Planning timeline](planning-timeline.md) defines the common maturity taxonomy and maps planning through validation.
 - [Prerequisite map](prerequisites.md) distinguishes planned sequencing gates, optional reuse, specification consumption, and design references.
 - [Detailed prerequisites](detailed-prerequisites.md) names P/Q outputs and each downstream consumption mode.

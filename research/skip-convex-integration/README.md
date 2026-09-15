@@ -118,6 +118,11 @@ Shared inputs (Direction 1 + Direction 2):
 
 ### Shared investigations (cross-cutting, unified-vehicle era)
 
+The consuming-plan mapping is maintained in
+[`docs/plans/CROSS-SPIKE-TRACEABILITY.md`](../../docs/plans/CROSS-SPIKE-TRACEABILITY.md).
+It is the normative cross-plan matrix; these notes remain the evidence and
+design rationale behind it.
+
 - [`research-1b-pagination-boundary.md`](research-1b-pagination-boundary.md) —
   three layers reconciling the canonical take-50 product with 1b's internal
   pagination: fixed output, native oracle, acquisition topology.
@@ -130,6 +135,9 @@ Shared inputs (Direction 1 + Direction 2):
 - [`research-semantic-test-vectors.md`](research-semantic-test-vectors.md) —
   versioned fixture vectors (V1–V6) with expected canonical results, AE
   coverage matrix, and manifest-parity versioning.
+- [`semantic-vectors-v1.md`](semantic-vectors-v1.md) — the materialized v1
+  manifest, complete/base-plus-delta fixtures, and V4's exact descending
+  50-row expected output.
 - [`research-core-metric-profile.md`](research-core-metric-profile.md) —
   required/optional/N-A metric profile per direction with page-, cursor-, and
   index-gating extensions plus the Q5 name-collision map.
