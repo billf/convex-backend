@@ -13,7 +13,7 @@ related_plans:
 Standardizes a small shared state vocabulary **without** standardizing
 implementations. Invariant: **never publish a partial result as current**
 (1a `...1509...:120-121`; 1b `...1843...:188-189`; 1c `...1854...:217-218`;
-D2 `...1702...:232`). Each direction keeps its lifecycle mechanics; fault
+D2 `...1702...:84`). Each direction keeps its lifecycle mechanics; fault
 results become comparable through the mapping.
 
 **Runtime vs harness split:** `Current` below is a source/view state — it
@@ -27,17 +27,17 @@ on the comparator; the comparator never redefines serving states.
 
 | Shared state | 1a | 1b | 1c | D2 | Distinguisher |
 |---|---|---|---|---|---|
-| Empty / never-loaded | not-yet-loaded (`...1509...:61`) | no complete window yet (implicit) | Snapshotting, no candidate (`...1854...:377-380`) | rebuilding, native-only (`...1702...:172-174`) | no prior good to freeze |
-| Stale / frozen | frozen last-good + indicator (`...1509...:61`) | last-complete window stale (`...1843...:64`) | Stale / Replacing-keeps-last-good (`...1854...:381-390`) | healthy-but-behind waits; unhealthy → fallback (`...1702...:96`) | prior good exists, known-behind |
-| Current (runtime) | settled source, view published, freshness known (`...1509...:64` minus oracle) | settled window published, revision known (`...1843...:63` minus oracle) | final group applied + cursor recorded (`...1854...:382` minus oracle) | view ≥ required version, disposition known (`...1702...:95` minus oracle) | source/view gates pass; no oracle needed |
+| Empty / never-loaded | not-yet-loaded (`...1509...:61`) | no complete window yet (implicit) | Snapshotting, no candidate (`...1854...:377-380`) | rebuilding, native-only (`...1702...:380`) | no prior good to freeze |
+| Stale / frozen | frozen last-good + indicator (`...1509...:61`) | last-complete window stale (`...1843...:64`) | Stale / Replacing-keeps-last-good (`...1854...:381-390`) | healthy-but-behind waits; unhealthy → fallback (`...1702...:102`) | prior good exists, known-behind |
+| Current (runtime) | settled source, view published, freshness known (`...1509...:64` minus oracle) | settled window published, revision known (`...1843...:63` minus oracle) | final group applied + cursor recorded (`...1854...:382` minus oracle) | view ≥ required version, disposition known (`...1702...:100-101` minus oracle) | source/view gates pass; no oracle needed |
 | Comparison-ready (harness only) | Current + oracle match at checkpoint | Current + same-revision oracle match | Current + oracle match, watermark held | Current + oracle match at version | all four checkpoint gates pass (see `research-logical-checkpoint-contract.md`) |
 | Removed / gone | `QueryRemoved` deletes in enclosing update (`...1509...:51`) | page removed via swap, no ghost | truncated namespace cleared on promote (`...1854...:78`) | n/a (view-scoped, not row-delete) | intent is unsubscribe/truncate, not failure |
-| Terminal / error | FatalError distinct from frozen-stale (`...1509...:184-185`) | none (page failure → stale, never terminal) | versioned `error` event, watermark frozen (`...1854...:82`) | counted native fallback + reason (`...1702...:96-97`) | 1b has no terminal-error; D2 error is substitution, not stream-close |
+| Terminal / error | FatalError distinct from frozen-stale (`...1509...:184-185`) | none (page failure → stale, never terminal) | versioned `error` event, watermark frozen (`...1854...:82`) | counted native fallback + reason (`...1702...:102-103`) | 1b has no terminal-error; D2 error is substitution, not stream-close |
 
 Lifecycle sources: 1b R4/R5/R10 (`...1843...:53-54,64`, AE5 `:184`);
 1c R6/R7 + state diagram (`...1854...:77-78,377-391`); 1c typed errors
 (`research-push-stream-seam.md:83-90`); D2 F1-F3
-(`...1702...:169-186`); cross-cutting restart/rebuild
+(`...1702...:175-192`); cross-cutting restart/rebuild
 (`research-skip-source-state.md:74-84`).
 
 ## No-equivalent states (by design)

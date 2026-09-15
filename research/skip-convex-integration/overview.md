@@ -101,7 +101,7 @@ In practice, the four spikes use this framework unevenly — same shape, differe
 
 Only 1c literally uses the N/K/F symbols and Big-O notation. Direction 2 uses the same conceptual axes without symbols. 1b uses two axes only, since its proof vehicle has no cross-table join at the input boundary. 1a has zero scaling requirements by explicit Key Decision — its Key Decisions state that success is bounded semantic correctness, not performance, and that quantifying latency or resource overhead was chosen against.
 
-`research-spike-comparison.md`'s own Phase 1 verdict is PARTIAL for exactly this reason: it's cited by none of the four plans, and it lacks explicit per-spike metric mappings. So "all four spikes use the same metric axes" is directionally true — the underlying framework covers all four — but not yet citationally true: the plans don't point back to it, and only one plan (1c) actually adopts its notation as written. `docs/plans/README.md`'s citation-hygiene/real-gap table already tracks this as a real-gap follow-up.
+`research-spike-comparison.md`'s Phase 1 PARTIAL verdict recorded an earlier state in which no spike plan cited it and it lacked explicit per-spike metric mappings. Direction 2 now cites it in its scaling decision and study unit, adopting the shared axes and counter catalog. The research note remains PARTIAL because those mappings are still incomplete across the four spikes; the earlier zero-citation claim is historical, not a current verdict. `docs/plans/README.md`'s citation-hygiene/real-gap table should be read in that historical context.
 
 ---
 

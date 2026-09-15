@@ -28,7 +28,7 @@ adopt the other's input form.
   itself a second consistency group.
 - **No torn publication:** no subscriber-visible state in which only part of
   a consistency group has landed (1a `...1509...:120-121`; 1b
-  `...1843...:188-189`; 1c `...1854...:217-218`; D2 `...1702...:232`).
+  `...1843...:188-189`; 1c `...1854...:217-218`; D2 `...1702...:84`).
 - **Versioning:** `Transition.end_version.ts` / DataSync `ts`+`snapshotTs` /
   page-set version / commit version — opaque per direction, monotonic per
   source, recorded at every checkpoint (see
@@ -96,7 +96,7 @@ or per-query ticks + `merge` (torn — rejected)
 | 1a | reassembled Transition, all mods | `end_version.ts` | `QueryRemoved` deletes in enclosing update | fresh snapshot on reconnect | R2 `...1509...:48`; R9/R10 `...1509...:51-52`; no-bridge-diff `research-sync-protocol-skip-mapping.md:70-72` |
 | 1b | page-group swap (both replacements complete) | page-set/query-set version | swap drops old region, no ghost | full reset on `InvalidCursor` | R4 `...1843...:52`; R5 `...1843...:54` |
 | 1c | exact-`ts` timestamp group | revision `ts` + `snapshotTs` + opaque cursor | `_id`-only tombstone + watermark | ledger + generation-scoped watermarks, cursor after final group | R8-R9 `...1854...:79-80`; KTD7-KTD9 via P/P9 `...1854...:338-340` |
-| D2 | committed transaction at one commit version | commit version + causal watermark | native delete path | staging rebuild + atomic promote | R1-R2 `...1702...:77-78`; cannot import P, reimplements natively `...1702...:263,274-275` |
+| D2 | committed transaction at one commit version | commit version + causal watermark | native delete path | staging rebuild + atomic promote | R1-R2 `...1702...:83-84`; cannot import P, reimplements natively `...1702...:377` |
 
 GC convention: retain while the generation lives, discard on
 resnapshot/swap, sweep watermarks past horizon (documents 14d, index 4m)

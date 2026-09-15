@@ -13,7 +13,7 @@ related_plans:
 Promotes a language-neutral logical-checkpoint definition into Q12
 (`...1159...:83`: standalone spec of Q1 checkpoint + Q3 normalization + Q5
 names, implementation-independent; Direction 2 implements native-Rust against
-it — `...1702...:296`). Each plan names the same "when may equality be
+it — `...1702...:317`). Each plan names the same "when may equality be
 claimed" concept differently; this doc fixes one shared definition with
 per-direction bindings.
 
@@ -43,7 +43,7 @@ Gates 1–2 are runtime states (see `research-publication-state-semantics.md`
 | 1a | writes settled, before next write begins | `...1509...:64` (`sync-protocol-client-settled-checkpoint-comparator` (1a R6)) | Excludes the failure checkpoint itself; R5 freeze verified via AE2, not equality |
 | 1b | writes quiesced **or** tagged by workload revision; both paths same revision | `...1843...:63` (1b R9) | Revision-tagging preferred where quiescence is flaky |
 | 1c | cursor-after-all-groups + watermarks; failures never advance watermark | `...1854...:79-82` (R8-R11); timers R18 `...1854...:95` | Logical-vs-wall-clock separation required |
-| D2 | view ≥ connection's causal sync watermark (max commit version observed) | `...1702...:94-96` (R9-R11) | Cancel/deadline → counted fallback, not comparison |
+| D2 | view ≥ connection's causal sync watermark (max commit version observed) | `...1702...:100-102` (R9-R11) | Cancel/deadline → counted fallback, not comparison |
 
 Q1's detector (`...1159...:72`: `Transition.endVersion.ts` /
 `UpToDate(ts)` / required-version marker, one "is settled" predicate) is the
