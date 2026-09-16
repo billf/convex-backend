@@ -11,7 +11,7 @@ execution: knowledge-work
 
 ## Goal Capsule
 
-- **Objective:** A concise findings memo states whether the Direction 2 spike plan is ready for spike-U1–spike-U8, separating verified facts, plan assumptions, contradictions, and launch blockers. Bare U/R/AE/KTD IDs refer to this audit; spike-plan IDs carry a `spike-` prefix.
+- **Objective:** A concise findings memo states whether the Direction 2 spike plan is ready across its eight implementation units, separating verified facts, plan assumptions, contradictions, and launch blockers. Bare R/AE/KTD/U IDs refer to this audit; spike-plan identifiers use their `incremental-materialized-cache-*` anchors from docs/plans/IDENTIFIER-MAP.md.
 - **Means:** Read-only traceability audit of the spike plan against both research sets plus directly cited code, reusing the KTD verdict taxonomy the Skip side already established (KTD1).
 - **Product authority:** Settled by the user in conversation. This plan owns only the audit; the spike plan and research notes are inputs and are not edited.
 - **Execution profile:** Knowledge work only. No code changes, no benchmark runs, no edits to the spike plan or research notes. The memo is a separate artifact.
@@ -27,14 +27,14 @@ Audit the Direction 2 backend-native materialized-cache spike plan against its s
 
 ### Problem Frame
 
-The spike plan is marked implementation-ready and proposes eight implementation units. Its correctness claims rest on Skip host behavior, Convex write-log and sync semantics, and lifecycle policies spread across two repositories. The audit exists to check those claims before implementation starts, so U1–U8 do not build on a contradicted premise or an uncommitted upstream WIP treated as settled fact.
+The spike plan is marked implementation-ready and proposes eight implementation units. Its correctness claims rest on Skip host behavior, Convex write-log and sync semantics, and lifecycle policies spread across two repositories. The audit exists to check those claims before implementation starts, so the spike implementation units do not build on a contradicted premise or an uncommitted upstream WIP treated as settled fact.
 
 ### Requirements
 
 **Matrix and evidence**
 
-- R1. Every spike-R1–spike-R22, spike-AE1–spike-AE8, and spike-KTD1–spike-KTD10 in the spike plan has one matrix row with plan claim, supporting research claim, directly cited implementation evidence, and verdict of aligned, underspecified, contradicted, or unverified.
-- R2. Every matrix row without an evidence path is explicitly marked as a host-policy assumption owned by the backend.
+- R1. Every requirement, acceptance example, and key technical decision in the spike plan (anchors in docs/plans/IDENTIFIER-MAP.md under `incremental-materialized-cache-*`) has one matrix row with plan claim, supporting research claim, directly cited implementation evidence where available, and verdict of aligned, underspecified, contradicted, or unverified.
+- R2. Every matrix row without an evidence path is classified as a deliberate backend policy, an unverified external premise, or an upstream prerequisite. Only a behavior the backend can choose and enforce is marked as a host-policy assumption.
 
 **Source re-check**
 
@@ -47,14 +47,14 @@ The spike plan is marked implementation-ready and proposes eight implementation 
 
 ### Acceptance Examples
 
-- AE1. Given one committed transaction touching membership and likes, when the matrix row for atomicity is closed, then it cites a single `ServiceInstance.update` batch, one room notification, and the spike-U1 test that pins merge versus notifier ordering.
+- AE1. Given one committed transaction touching membership and likes, when the matrix row for atomicity is closed, then it cites a single `ServiceInstance.update` batch, one room notification, and the host-package test (`incremental-materialized-cache-u-skip-host-package`) that pins merge versus notifier ordering.
 - AE2. Given the `read_many` plus `view-version-expired` surface, when U2 observes each item as committed code at a cited path plus lines versus uncommitted or only-cited, then committed items are treated as settled facts and the rest as prerequisites with the observed WIP state cited.
 - AE3. Given the JSON value boundary, when the memo is written, then int64 and bytes and missing-field handling is either a lossless contract or an explicit safe-subset restriction, with the test that closes it.
 
 ### Scope Boundaries
 
 - No edits to code, the spike plan, or any research note.
-- No performance benchmark or scaling measurement; U8 behavior is reviewed as a design, not executed.
+- No performance benchmark or scaling measurement; `incremental-materialized-cache-u-scaling-study-verdict` behavior is reviewed as a design, not executed.
 - No new product API or consistency-mode design.
 
 ### Deferred to Follow-Up Work
@@ -64,7 +64,7 @@ The spike plan is marked implementation-ready and proposes eight implementation 
 
 ### Sources / Research
 
-- docs/plans/2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md — audited artifact, spike-R1–spike-R22, spike-AE1–spike-AE8, spike-KTD1–spike-KTD10, spike-U1–spike-U8.
+- docs/plans/2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md — audited artifact; its requirements, acceptance examples, KTDs, and units resolve via the `incremental-materialized-cache-*` anchors in docs/plans/IDENTIFIER-MAP.md.
 - docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md — P contract, Q12 four-gate methodology, five-table contract.
 - research/skip-convex-integration/research-skip-engine.md — engine and reducer semantics.
 - research/skip-convex-integration/research-poc-vehicle-and-harness.md — two-table history, keying and harness shape.
@@ -90,7 +90,7 @@ The spike plan is marked implementation-ready and proposes eight implementation 
 
 ```mermaid
 flowchart TB
-  P[Spike plan R/AE/KTD] --> M[Traceability matrix]
+  P[Spike plan requirements/AEs/KTDs] --> M[Traceability matrix]
   R5[Five research notes] --> M
   C[Cited code both repos] --> M
   M --> B[Boundary stress + terminology audit]
@@ -102,7 +102,7 @@ flowchart TB
 
 - Plan readiness means validating the spike plan against both research sets and directly cited code where it determines feasibility.
 - `~/src/skip` is a read-only reference checkout; its WIP state at audit time is recorded, not fixed.
-- `@skipruntime` 0.0.23 registry availability and the `skargo` fallback are checked as stated in the spike plan dependencies.
+- `@skipruntime` 0.0.23 registry availability and the `skargo` fallback are checked as stated in the spike plan dependencies; a failed resolution is recorded as a prerequisite or blocker for affected spike units.
 
 ---
 
@@ -110,7 +110,7 @@ flowchart TB
 
 ### U1. Build the requirement traceability matrix
 
-- **Goal:** One evidence row per R, AE, and KTD with a verdict.
+- **Goal:** One evidence row per spike-plan requirement, acceptance example, and KTD with a verdict.
 - **Requirements:** R1, R2.
 - **Dependencies:** None.
 - **Files:**
@@ -124,11 +124,11 @@ flowchart TB
   1. Extract plan requirement plus chosen design per row.
   2. Attach supporting claims from the five research notes.
   3. Attach direct implementation evidence cited by those notes.
-  4. Assign verdict and mark evidence-free rows as host-policy assumptions.
+  4. Assign a verdict and classify each evidence-free row as backend policy, external premise, or upstream prerequisite; use the host-policy label only for backend-enforceable behavior.
 - **Test scenarios:**
-  - Every R, AE, and KTD has a row; none is silently dropped.
+  - Every spike-plan requirement, acceptance example, and KTD has a row; none is silently dropped.
   - Each contradicted or unverified row names the exact conflicting source location.
-- **Verification:** Matrix covers spike-R1–spike-R22, spike-AE1–spike-AE8, spike-KTD1–spike-KTD10 with no empty verdict, unless U4's staged check already recorded a decisive blocker.
+- **Verification:** Matrix covers every spike-plan requirement, acceptance example, and KTD with no empty verdict.
 
 ### U2. Re-check highest-risk source claims
 
@@ -145,14 +145,17 @@ flowchart TB
   - docs/research/research-dir2-host-requirements.md in ~/src/skip
   - docs/research/research-dir2-skip-evidence.md in ~/src/skip
 - **Approach:**
-  1. Verify single-collection `ServiceInstance.update` with no `isInit`, fork-then-merge, tombstone deletes, and non-monotonic timestamp rejection against the Skip-side line refs.
-  2. Verify reducer inverse and null-to-recompute, take-50 maintenance status, and the JSON int64 and bytes and missing-field boundary.
-  3. Verify LogReader tail grouping by commit timestamp, snapshot capture plus fence, retention handling, registry validation, and required-version composition plus readable-window expiry.
+  1. Record each repository's resolved revision, branch or ref, and dirty-state summary before inspecting its cited code; associate each code citation and WIP classification with that provenance.
+  2. Verify single-collection `ServiceInstance.update` with no `isInit`, fork-then-merge, tombstone deletes, and non-monotonic timestamp rejection against the Skip-side line refs.
+  3. Verify reducer inverse and null-to-recompute, take-50 maintenance status, and the JSON int64 and bytes and missing-field boundary.
+  4. Verify LogReader tail grouping by commit timestamp, snapshot capture plus fence, retention handling, registry validation, and required-version composition plus readable-window expiry.
+  5. Resolve `@skipruntime` 0.0.23 from the registry; if unavailable, verify the documented `skargo` fallback. Run an installed-artifact smoke (init, one combined update, read, notification) against the resolved package and record the tarball hash plus smoke outcome as the prerequisite or blocker.
 - **Test scenarios:**
-  - Merge versus notifier ordering gap is recorded with the spike-U1 test that must pin it.
+  - Merge versus notifier ordering gap is recorded with the host-package test (`incremental-materialized-cache-u-skip-host-package`) that must pin it.
   - Read and subscribe race is recorded with the subscribe-before-first-snapshot sequence plus version-tagged notifications.
   - RetentionCoordinator deferral and `ba16e0638` fixture loss are recorded as constraints, not contradictions.
-- **Verification:** Each high-risk claim resolves to confirmed, contradicted, or open with a cited line.
+  - Registry failure or an unusable `skargo` fallback is attributed to affected spike units rather than omitted from the readiness verdict.
+- **Verification:** Each high-risk claim resolves to confirmed, contradicted, or open with a cited line and repository provenance; runtime-package availability has an explicit recorded outcome.
 
 ### U3. Audit terminology and vehicle consistency
 
@@ -174,22 +177,22 @@ flowchart TB
 
 ### U4. Stress correctness boundaries and verification design
 
-- **Goal:** Prove each boundary and each acceptance example has an executable test home.
+- **Goal:** Prove each boundary and each spike-plan acceptance example has an executable test home.
 - **Requirements:** R5.
 - **Dependencies:** U2, U3.
 - **Files:**
   - docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md
   - research/skip-convex-integration/semantic-vectors-v1.md
 - **Approach:**
-  1. Check the five R5 boundaries and KTD2 WIP seams first; on a decisive blocker record the blocked-verdict path and skip the exhaustive matrix.
+  1. Check the five R5 boundaries and KTD2 WIP seams first; on a decisive blocker record the blocked-verdict path, give blocker-linked rows full evidence and line refs, and mark all other unfinished rows blocked or unverified with reason. Such a memo cannot rise above blocked.
   2. Walk the five boundaries: atomic apply, fencing, serialized read with pinning, eligibility gating, attributable fallback.
-  3. Map each AE to its unit test home and harness endpoint, flagging assertions the stated fixtures, public Skip API, or local-backend harness cannot prove.
-  3. Confirm the scaling study separates update deltas from seed and rebuild and state cost and fails all-fallback runs.
+  3. Map each spike-plan acceptance example to its spike unit test home and harness endpoint, flagging assertions the stated fixtures, public Skip API, or local-backend harness cannot prove.
+  4. Confirm the scaling study separates update deltas from seed and rebuild and state cost and fails all-fallback runs.
 - **Test scenarios:**
-  - Covers AE1. Multi-table commit maps to one batch, one notification, no torn observation.
-  - Covers spike-AE5. Writes immediately before and after snapshot capture both survive fencing.
+  - Covers `incremental-materialized-cache-atomic-multi-table-update`. Multi-table commit maps to one batch, one notification, no torn observation.
+  - Covers `incremental-materialized-cache-restart-without-stale-publication`. Writes immediately before and after snapshot capture both survive fencing.
   - A scaling run with every relevant request fallen back is recorded as failed, not as a curve.
-- **Verification:** Boundary checklist plus AE-to-test map with no unmapped AE.
+- **Verification:** Boundary checklist plus acceptance-example-to-test map with no unmapped spike-plan acceptance example; blocked or unverified marks are accepted only under a recorded decisive blocker.
 
 ### U5. Write the findings memo and verdict
 
@@ -197,15 +200,15 @@ flowchart TB
 - **Requirements:** R1, R2, R3, R4, R5.
 - **Dependencies:** U1, U2, U3, U4.
 - **Files:**
-  - docs/plans/2026-09-15-1434-chore-direction2-crosscheck-audit-plan.md
+  - research/skip-convex-integration/2026-09-15-1434-chore-direction2-crosscheck-audit-memo.md
 - **Approach:**
   1. Group findings as Blocker, Required clarification, or Risk and watch item.
   2. Give each finding source locations, impacted IDs, a document correction or implementation constraint, and the closing test.
-  3. Close with a resolved-assumptions list separating source-verified behavior from backend-owned policy and the smallest prerequisite work to unblock U1–U8.
+  3. Close with a resolved-assumptions list separating source-verified behavior from backend-owned policy and the smallest prerequisite work to unblock the spike implementation units.
 - **Test scenarios:**
   - Executive verdict is exactly one of ready, ready with explicit prerequisites, or blocked.
   - No unresolved contradiction remains on atomicity, freshness and version pinning, recovery fencing, index and schema eligibility, or fallback observability.
-- **Verification:** Memo states whether spike-U1–spike-U8 can begin and what unblocks them if not.
+- **Verification:** Memo states whether the spike implementation units can begin and what unblocks them if not; a memo carrying blocked or unverified rows from a decisive blocker is capped at blocked.
 
 ---
 
@@ -213,16 +216,16 @@ flowchart TB
 
 | Gate | Applies to | Passing outcome |
 |---|---|---|
-| Matrix completeness | U1 | All R, AE, KTD rows present with verdict or host-policy label |
-| Source citation check | U2, U3 | Every material code claim carries a repo-relative path with lines |
-| Boundary and AE mapping | U4 | Five boundaries stressed; every AE has a test home or an explicit gap flag |
-| Memo shape | U5 | Verdict plus severity groups plus resolved assumptions plus unblocker |
+| Matrix completeness | U1 | Every spike-plan requirement, acceptance-example, and KTD row present with verdict and evidence classification |
+| Source citation and provenance check | U2, U3 | Every material code claim carries a repo-relative path with lines and a recorded repository revision and dirty state; runtime-package availability has a recorded outcome |
+| Boundary and acceptance-example mapping | U4 | Five boundaries stressed; every spike-plan acceptance example has a test home or an explicit gap flag |
+| Memo shape | U5 | Verdict plus severity groups plus resolved assumptions plus unblocker; verdict is blocked while any contradicted R5-boundary row lacks a correction plus closing test, and ready requires zero contradicted rows with unverified rows as explicit prerequisites |
 
 ---
 
 ## Definition of Done
 
-- Matrix, terminology table, boundary checklist, and AE map are complete with no silent drops.
+- Matrix, terminology table, boundary checklist, and acceptance-example map are complete with no silent drops.
 - Every finding carries source locations, impacted IDs, a correction or constraint, and its closing test.
-- Verdict states spike-U1–spike-U8 readiness plus the smallest prerequisite work when not ready.
+- Verdict states spike implementation-unit readiness plus the smallest prerequisite work when not ready; ready requires zero contradicted rows, and blocked holds while any contradicted R5-boundary row lacks a correction plus closing test.
 - No edits were made to the spike plan, research notes, or code.

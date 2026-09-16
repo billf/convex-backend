@@ -151,6 +151,33 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | R20 | `incremental-materialized-cache-validated-id-join-edges` | Derives pre-registered view join edges from validated `v.id("targetTable")` fields to target `by_id` materializations. |
 | R21 | `incremental-materialized-cache-missing-target-join-semantics` | Preserves native behavior for missing referenced documents and does not treat `v.id` as referential integrity. |
 | R22 | `incremental-materialized-cache-reverse-join-index` | Requires an enabled application index on the referencing ID field for reverse joins within the pre-registered view. |
+| R5 | `incremental-materialized-cache-authoritative-convex-source` | Convex remains the sole source of truth; the Skip subsystem cannot perform or acknowledge authoritative application writes. |
+| R8 | `incremental-materialized-cache-preregistered-view-only` | The view is declared ahead of time as part of the experimental deployment; schema-driven generation, code-publish generation, and just-in-time construction are excluded. |
+| AE1 | `incremental-materialized-cache-atomic-multi-table-update` | One Convex transaction changing membership plus a like moves the accelerated feed directly between complete versions with no observable partial state. |
+| AE2 | `incremental-materialized-cache-version-gated-read` | A client requiring V2 while the view has published only V1 waits for V2 and receives a V2-or-newer accelerated result, never an older snapshot. |
+| AE3 | `incremental-materialized-cache-silent-observable-fallback` | Rebuilding, unhealthy, or behind-deadline reads return the native Convex result while metrics count the fallback with its reason. |
+| AE4 | `incremental-materialized-cache-scaling-demonstration` | Update work follows the affected dependency neighborhood on both the unrelated-data axis and the affected-fan-out axis against the native baseline. |
+| AE5 | `incremental-materialized-cache-restart-without-stale-publication` | After process-local state loss, reads use native fallback until rebuild and catch-up complete, covering writes immediately before and after snapshot capture. |
+| AE6 | `incremental-materialized-cache-index-lifecycle-gate` | A staged, removed, disabled, or incompatible required index makes acceleration ineligible before any stale-index result can be served. |
+| AE8 | `incremental-materialized-cache-shared-semantic-corpus` | V1–V6 fixtures reaching comparison-ready checkpoints, including the descending 50th/51st boundary with `_id` tie-break and a common V6 final state. |
+| KTD1 | `incremental-materialized-cache-ktd-node-child-host` | The Skip engine runs in a backend-supervised Node child process over a private Unix socket; direct Rust integration via the untyped C ABI is unsupported and out of scope, not nonexistent. |
+| KTD2 | `incremental-materialized-cache-ktd-write-log-tail-feed` | The change feed is a tail of the published write log regrouped by commit timestamp, with zero-entry applies for commits with no kept entries. |
+| KTD3 | `incremental-materialized-cache-ktd-combined-input-atomic-apply` | One combined Skip input collection is updated once per commit via `ServiceInstance.update`, with apply and read serialized per generation. |
+| KTD4 | `incremental-materialized-cache-ktd-seed-then-tail-rebuild` | Rebuild is seed-then-tail with a catch-up fence and no persistence; any failure or retention loss discards the generation and re-seeds. |
+| KTD5 | `incremental-materialized-cache-ktd-eligibility-validation` | Eligibility is validated against the snapshot registries at activation and re-validated from the same ordered tail, with a registry-only tail while ineligible. |
+| KTD6 | `incremental-materialized-cache-ktd-lifecycle-states-fallback-reasons` | Inactive, Rebuilding, Serving, Unhealthy, and Ineligible states with an enumerated fallback reason on every non-accelerated read. |
+| KTD7 | `incremental-materialized-cache-ktd-view-backed-version-pinned-reads` | View-backed subscriptions pin each Transition to the host read's captured timestamp, falling back natively on unreadable versions or deadline loss. |
+| KTD8 | `incremental-materialized-cache-ktd-logical-work-counters` | Logical-work counters on both sides with shared names at fixed N/K/F points under a pre-registered largest-to-smallest ratio rule. |
+| KTD9 | `incremental-materialized-cache-ktd-unit-plus-e2e-verification` | Pure-logic unit tests plus end-to-end local-backend runs, because this checkout carries no Rust integration fixtures. |
+| KTD10 | `incremental-materialized-cache-ktd-admin-endpoints` | Spike-only local-backend admin endpoints for status, comparison, and debug lifecycle control behind knobs and admin auth. |
+| U1 | `incremental-materialized-cache-u-skip-host-package` | Headless Node host maintaining the room-feed graph with base materializations, serialized apply and read, and per-batch work counters. |
+| U2 | `incremental-materialized-cache-u-registration-host-supervision` | `skip_cache` crate loading and validating the pre-registered view declaration while supervising the Node host process. |
+| U3 | `incremental-materialized-cache-u-feed-seed-lifecycle` | Write-log tail regrouping, consistent-snapshot seeding, and the lifecycle state machine with fence and retention handling. |
+| U4 | `incremental-materialized-cache-u-version-gate-subscription-compare` | Version-gated reads, view-backed subscriptions, and same-version comparison against the native oracle. |
+| U5 | `incremental-materialized-cache-u-sync-protocol-opt-in` | Connection-handshake acceleration opt-in with sync-worker feed substitution inside snapshot-consistent Transitions. |
+| U6 | `incremental-materialized-cache-u-local-backend-wiring` | Local-backend construction, knobs, and admin-endpoint mounting for the cache client. |
+| U7 | `incremental-materialized-cache-u-proof-vehicle-corpus-harness` | Independent oracle app, V1–V6 corpus, and correctness, fault, and lifecycle harness against the local backend. |
+| U8 | `incremental-materialized-cache-u-scaling-study-verdict` | N/K/F scaling study with maintained-state costs and the spike viability verdict report. |
 
 ## `data-sync-push` (1c)
 
