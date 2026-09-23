@@ -7,6 +7,7 @@ artifact_contract: ce-unified-plan/v1
 artifact_readiness: requirements-only
 product_contract_source: ce-brainstorm
 execution: code
+reconciled: 2026-09-23
 ---
 
 # Skip Paginated Reactive Source Spike - Plan
@@ -16,7 +17,7 @@ execution: code
 - **Objective:** Determine whether index-ordered Convex page subscriptions let Skip maintain a correct reactive feed with source-to-Skip steady-state update work governed by affected page size rather than the total loaded result.
 - **Means:** Preserve Convex reactive pages as separate Skip input regions, replace split pages atomically, and let Skip merge, order, and reduce the loaded window.
 - **Product authority:** The user selected page subscriptions over point-query fan-out and application-defined shards. This plan owns Direction 1b only; the direct client, a backend changefeed, and backend-native Skip remain separate work.
-- **Open blockers:** None at product scope. Planning must choose the smallest atomic Skip input representation for page replacement.
+- **Open blockers:** None at product scope. **(Resolved 2026-09-23)** Page replacement uses the shared-prerequisites plan's P `SnapshotBatch` keyed by page-region ID, the smallest atomic representation that keeps page granularity (one key per live page, one update per swap).
 
 ---
 
@@ -48,8 +49,8 @@ The optimization disappears at the Skip boundary if JavaScript concatenates ever
 
 - R1. The source query uses the Shared proof-vehicle contract's `messages.by_room` index and reactive pagination to expose the canonical room-scoped recent-message feed as cursor-bounded pages; supporting membership, user, and like inputs preserve that contract's predicate and projection.
 - R2. The experiment loads a configured, bounded prefix of that feed rather than materializing unbounded history. Pagination is permitted only below the observable-query boundary: before claiming shared-product correctness it loads through the 50th qualifying message, or records native-oracle evidence at the same revision that fewer than 50 qualify. A shorter prefix is topology evidence only.
-- R3. Each live page has a stable logical identity and reaches Skip as its own snapshot region; the bridge neither concatenates the complete loaded window nor computes row-level diffs.
-- R4. Incoming Transitions are transport groups, while a page-region swap is this direction's `SnapshotBatch` publication/reconfiguration group. When a page must split, the old page remains active until both replacement ranges have complete results, after which old and new page regions are exchanged in one atomic Skip update. A swap drops its old region; it is not a revision-tombstone or replay-watermark path.
+- R3. Each live page has a stable logical identity and reaches Skip as its own snapshot region, keyed by page-region ID in P's `SnapshotBatch`; the bridge neither concatenates the complete loaded window nor computes row-level diffs.
+- R4. Incoming Transitions are transport groups, while a page-region swap is this direction's `SnapshotBatch` publication/reconfiguration group. When a page must split, the old page remains active until both replacement ranges have complete results, after which old and new page regions are exchanged in one atomic Skip update built with P's helpers: the old region's key receives an empty value and each replacement region's key its complete value, with `isInit: false`. A swap drops its old region; it is not a revision-tombstone or replay-watermark path.
 - R5. A result marked `SplitRequired` is treated as incomplete and is never published as a complete page range.
 
 **Skip computation**
@@ -60,14 +61,14 @@ The optimization disappears at the Skip boundary if JavaScript concatenates ever
 
 **Correctness and lifecycle**
 
-- R9. At controlled settled checkpoints, with writes quiesced or tagged by a workload revision, the Q12 gates hold: the relevant group is applied, the page-set result is published, the independent monolithic native oracle for the same revision is observed, and freshness is recorded. The Skip feed then matches that oracle across bootstrap, insert, update, delete, page split, load-more, reconnect, and query failure recovery. Common-product correctness requires R2's 50-qualifier evidence; shorter-prefix equality is explicitly topology-scoped. Both paths must report results for the same revision before correctness is evaluated, including after rebuilds and reconnects.
+- R9. At controlled settled checkpoints, with writes quiesced or tagged by a workload revision (both provided by the shared-prerequisites plan's Q1), the Q12 gates hold, checked with Q's harness: the relevant group is applied, the page-set result is published, the independent monolithic native oracle for the same revision is observed, and freshness is recorded. The Skip feed then matches that oracle across bootstrap, insert, update, delete, page split, load-more, reconnect, and query failure recovery. Common-product correctness requires R2's 50-qualifier evidence; shorter-prefix equality is explicitly topology-scoped. Both paths must report results for the same revision before correctness is evaluated, including after rebuilds and reconnects.
 - R10. When any required page fails or its cursor becomes invalid, the source retains the last complete window as stale until it rebuilds a coherent page set; it never labels a partial window current.
 
 **Scaling evidence**
 
 - R11. The comparison varies total loaded rows and target page size, records actual page sizes and affected-page counts, and reports the observed update-work terms rather than assuming pages remain exactly at their initial size.
-- R12. The required core profile records snapshot rows/bytes (direction-tagged, never ratio-compared to revisions), atomic page-swap batches, changed keys, dependent and reducer work, and mismatches. It additionally records received page results, live and changed pages, query-set additions/removals, actual page sizes, affected-page counts, splits, rebuilds, end-to-end publication, optional stale duration, and any backend query metrics available to the harness.
-- R13. The report compares the paginated source with a monolithic indexed query returning the same logical window and states both steady-state update cost and the bootstrap and subscription-state trade-off.
+- R12. The required core profile, recorded with Q's recorder under Q11's catalog names plus direction-tagged page extensions, records snapshot rows/bytes (direction-tagged, never ratio-compared to revisions), atomic page-swap batches, changed keys, dependent and reducer work, and mismatches. It additionally records received page results, live and changed pages, query-set additions/removals, actual page sizes, affected-page counts, splits, rebuilds, end-to-end publication, optional stale duration, and any backend query metrics available to the harness.
+- R13. The report compares the paginated source with Q13's monolithic indexed feed query returning the same logical window (same prefix length) and states both steady-state update cost and the bootstrap and subscription-state trade-off.
 - R14. A run that republishes all loaded rows to Skip for each page change, omits page-split workloads, or reports only elapsed time without logical-work counts does not pass.
 
 **Isolation from adjacent directions**
@@ -96,7 +97,7 @@ This plan owns Direction 1b: reducing the granularity of existing full-query sna
 
 - Direction 1 — Skip consumes Convex as an external reactive source
   - 1a — Direct sync-protocol client: can provide the transition-grouped transport later, but 1b can proceed independently through an existing transition-level client surface.
-  - 1b — Paginated query topology: this plan; shares the 1a correctness harness and Skip atomic-update constraint without requiring its raw socket.
+  - 1b — Paginated query topology: this plan; shares the shared-prerequisites plan's Q harness and P `SnapshotBatch` helpers with 1a, without requiring 1a's raw socket.
   - 1c — Backend row-level changefeed: can eventually replace page snapshots with actual document changes; it is not required to evaluate page granularity.
 - Direction 2 — Backend-native Skip materialized cache: can proceed independently and uses committed changes before the query snapshot boundary.
 
@@ -108,8 +109,8 @@ flowchart LR
   coordinator --> swap["Atomic page split swap"]
   swap --> skipGraph["Skip page regions and reducer"]
   skipGraph --> compare["Monolithic comparison gate"]
-  p["P convention"] -. "planned sequencing reuse" .-> swap
-  q["Q harness"] -. "planned sequencing reuse" .-> compare
+  p["P SnapshotBatch helpers"] -->|"direct dependency"| swap
+  q["Q harness, Q13 fixture, Q14 observer"] -->|"direct dependency"| compare
 ```
 
 ### Actors and flows
@@ -222,7 +223,12 @@ flowchart LR
 - `numItems` is an initial target, not a hard page bound. The experiment must record actual range sizes and honor `SplitRequired` rather than reason from the target alone.
 - Sparse post-index filters can scan far more rows than they return. The proof uses an index whose range expresses the feed selection and configures applicable row and byte limits.
 - The existing `PaginatedQueryClient` and React pagination code provide lifecycle references, but their concatenated result is not a valid Skip input for R3.
-- R4's atomic page-swap gap (same combined-write primitive gap as 1a's R2) is tracked in `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s Problem Frame table (P — `AtomicSourceBatch` and external-source helpers); adoption is a planning decision, not assumed here.
+- **(Adopted 2026-09-23)** This plan depends directly on `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`'s snapshot baseline, not on its revision-delta extensions:
+  - R3/R4's page-region writes and atomic swap use P's `SnapshotBatch` helpers (same combined-write primitive gap as 1a's R2).
+  - R9's checkpoints use Q1 (quiesced or workload-revision-tagged), Q2/Q3, Q5, and Q12, and AE2/AE6's half-swapped-region check uses Q14's no-torn observer.
+  - R10, AE5, and the split and invalid-cursor cases use Q6's snapshot-path injectors and Q7's stale-retention and recovery assertions. This plan supplies only the triggers: forced `SplitRequired`, invalid cursor, query failure, and connection replacement.
+  - R12's metric names come from Q11, and R13's monolithic baseline, the supporting membership/user/like inputs, deterministic writes, and the V1-V6 loader come from Q13.
+  - A gap in P or Q is escalated to the shared plan, not worked around with a bespoke mechanism.
 - The Shared proof-vehicle contract supplies the required room-scoped fixture and `messages.by_room` index; its product semantics are not an optional expansion of this spike.
 - All shared static fixture indexes, including `messages.by_sender[sender]`, start enabled. Cursor reset and page splitting are pagination lifecycle, not index lifecycle tests.
 
@@ -232,10 +238,10 @@ flowchart LR
 
 - Which target page sizes, loaded-page counts, and dataset sizes make the two scaling axes reproducible?
 - Should the harness reuse the transition-level `BaseConvexClient` surface directly or implement the minimal interface needed by `PaginatedQueryClient`?
-- Whether to adopt the shared-prerequisites plan's P page-swap `SnapshotBatch` helpers for R4 rather than a bespoke mechanism — see Dependencies/Assumptions.
-- Which internal metrics can count actual page query executions and rows read without changing backend behavior?
-- Which failure injection produces `SplitRequired`, invalid-cursor reset, query failure, and reconnect deterministically?
-- Should the proof display author IDs or use a separately measured, fixed-size user lookup source for names?
+- **Resolved (2026-09-23):** Adopt the shared-prerequisites plan's P page-swap `SnapshotBatch` helpers for R4 and Q for R9/R12/R13, rather than a bespoke mechanism — see Dependencies/Assumptions.
+- Which internal metrics can count actual page query executions and rows read without changing backend behavior? Their field names come from Q11's catalog (page counts as direction-tagged extensions); only which counters are observable remains open.
+- Which failure injection produces `SplitRequired`, invalid-cursor reset, query failure, and reconnect deterministically? **Partly resolved (2026-09-23):** detection, recovery, and counting assertions come from Q6/Q7, and query failure and reconnect use Q6's snapshot-path injectors; only the deterministic `SplitRequired` and invalid-cursor triggers remain this plan's to design.
+- **Resolved (2026-09-23):** The Shared proof-vehicle contract's projection requires `sender` as `{ _id, name }` or `null`, so author IDs alone are not allowed. The user lookup uses Q13's `users` per-table query as a supporting input, held constant across the scaling matrix and reported separately (Scope Boundaries).
 - Before running the workload matrix, planning must fix the quantitative proceed/reject/narrow-scope rule: the specific update-work reduction threshold and the maximum acceptable bootstrap/retained-state/subscription cost. Defining this after measurement is not acceptable — it invites reading the same results as support for any outcome.
 
 ### Sources / Research
@@ -251,5 +257,5 @@ flowchart LR
 - `crates/database/src/query/mod.rs` — cursor-bounded index ranges, query fingerprints, and reactive split-cursor construction.
 - `crates/isolate/src/environment/udf/async_syscall.rs` — actual page growth and `SplitRecommended` or `SplitRequired` selection.
 - `research/skip-convex-integration/research-1b-page-topology.md` — pagination mechanics, per-page Skip regions, atomic split-swap, disjointness/ordering, metrics foundations for 1b.
-- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — R4's atomic-write gap (P) and R9/R13's comparator (Q); not yet built, adoption left to planning.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` — P's page-region `SnapshotBatch` helpers (R3/R4), Q's harness, workload-revision checkpoints, and Q14 observer (R9, AE2, AE6), Q6/Q7 faults (R10), Q11 metric names (R12), and Q13's fixture and monolithic baseline (R13); adopted as direct dependencies 2026-09-23, not yet built.
 - `research/skip-convex-integration/research-atomic-source-batch.md`, `research/skip-convex-integration/research-1b-pagination-boundary.md`, `research/skip-convex-integration/research-logical-checkpoint-contract.md`, `research/skip-convex-integration/research-semantic-test-vectors.md`, `research/skip-convex-integration/research-core-metric-profile.md`, and `research/skip-convex-integration/research-static-vs-dynamic-indexes.md` — normative 1b group distinction, product/acquisition boundary, checkpoint, corpus, metric, and index mappings.
