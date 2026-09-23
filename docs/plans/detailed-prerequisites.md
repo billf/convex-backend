@@ -8,27 +8,30 @@ flowchart LR
   subgraph P["P: atomic-source-batch contract and helpers"]
     p1["Snapshot/delta encodings and split/key/order helpers"]
     p2["Single-fork atomic-unit rule"]
-    p3["Watermark and tombstone conventions"]
-    p4["Optional generation-fencing extension"]
+    p3["Revision-delta extension: watermark and tombstone conventions"]
+    p4["Revision-delta extension: generation fencing"]
   end
 
   subgraph Q["Q: comparator and fault harness"]
     q1["Settled-checkpoint detector"]
     q2["Dual-reader normalized comparator"]
-    q3["Metrics and fault fixture"]
+    q3["Metrics (Q11 catalog authority) and two-tier fault fixture"]
     q4["Language-neutral methodology specification"]
+    q13["Q13 proof-vehicle fixture"]
   end
 
   p1 --> p2 --> p3 --> p4
-  q1 --> q2 --> q3 --> q4
+  q13 --> q1 --> q2 --> q3 --> q4
 ```
 
 | Output | Produces | 1a / 1b | 1c | Direction 2 |
 |---|---|---|---|---|
-| P baseline | `AtomicSourceBatch`, distinct snapshot/delta encodings, split/key/order helpers, and applicable replay/tombstone conventions | Planned external-source code reuse | Optional external-source code reuse; bespoke implementation remains allowed | Native implementation follows the specification; no TypeScript dependency |
-| `shared-prereqs-p-generation-fencing-extension` | Optional staging generation, promotion, pending ledger, and generation-scoped watermarks | Not a baseline dependency | Optional compatibility reuse for stricter 1c lifecycle needs | Design reference only |
-| Q harness | Settled detector, dual-reader comparator, metrics, fault fixture, and structured report | Planned code reuse | Optional code reuse for integration proof; bespoke fallback remains allowed | Design reference only |
-| `shared-prereqs-q-language-neutral-methodology-spec` | Four checkpoint gates, runtime/harness vocabulary, normalization, and N/K/F metric definitions | Reference | Reference | Specification consumption for native comparator and scaling work |
+| P snapshot baseline | `AtomicSourceBatch` specification (both encodings), TypeScript `SnapshotBatch` helpers, split/key/order helpers, single-fork rule | Planned external-source code reuse; the only P tier 1a/1b wait on | Direct dependency (U4) | Native implementation follows the specification; no TypeScript dependency |
+| P revision-delta extension (P4, P5, `shared-prereqs-p-generation-fencing-extension`) | TypeScript `RevisionDeltaBatch` helpers: revision watermarks, tombstone/GC, staging generation, promotion, pending ledger, generation-scoped watermarks | Not a dependency | Direct dependency (U4); 1c is its first validator | Design reference only |
+| Q harness | Settled detector, dual-reader comparator, recorder under Q11's single catalog authority, snapshot-path fault baseline, and structured report | Planned code reuse | Direct dependency (U6) | Design reference only |
+| Q6 revision-delta fault extension | Cursor expiry, table replacement, oversized transaction, restart mid-CDC injectors | Not a dependency | Direct dependency (U6); proven against 1c's Data Sync triggers | Design reference only |
+| `shared-prereqs-q-proof-vehicle-fixture` (Q13) | Five-table tutorial schema, indexes, deterministic mutations, native oracle and baseline queries, V1-V6 corpus loader | Planned fixture | Direct dependency (U5) | May vendor the same schema and corpus manifest |
+| `shared-prereqs-q-language-neutral-methodology-spec` | Four checkpoint gates, runtime/harness vocabulary, normalization, and N/K/F metric definitions | Reference | Reference (R15 gates) | Specification consumption for native comparator and scaling work |
 
 ```mermaid
 flowchart TB
@@ -37,14 +40,16 @@ flowchart TB
   q["Q harness"]
   q12["shared-prereqs-q-language-neutral-methodology-spec"]
   oneA["1a and 1b\nplanned code consumers"]
-  oneC["1c\noptional code consumer; fallback allowed"]
+  oneC["1c\ndirect code consumer"]
   oneCValidation["1c integration validation"]
   two["Direction 2\nnative implementation"]
 
   p -->|"planned code reuse"| oneA
   q -->|"planned code reuse"| oneA
-  p9 -. "optional compatibility reuse" .-> oneCValidation
-  q -. "optional comparator reuse" .-> oneCValidation
+  p -->|"direct dependency"| oneC
+  p9 -->|"direct dependency (revision-delta extension)"| oneC
+  q -->|"direct dependency, incl. Q13 and both Q6 tiers"| oneC
+  oneC --> oneCValidation
   q12 -. "methodology reference" .-> oneCValidation
   q12 -->|"specification consumption"| two
   p -. "design reference" .-> two

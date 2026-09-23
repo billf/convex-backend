@@ -2,7 +2,8 @@
 
 This matrix is the normative cross-reference for the four Skip/Convex spikes.
 The shared prerequisites plan owns the product contract, `AtomicSourceBatch`,
-Q12 checkpoint contract, semantic corpus, and core metric vocabulary. Local
+Q12 checkpoint contract, semantic corpus, core metric vocabulary (Q11's single
+schema authority), and the Q13 proof-vehicle fixture. Local
 plans retain their own transport, cursor, deadline, recovery, and lifecycle
 mechanics.
 
@@ -19,6 +20,7 @@ mechanics.
 | Harness state | `comparison-ready` only after oracle | Same | Same | Same |
 | V1–V6 corpus | All vectors; V4 boundary/tie; V6 final-state equality; live no-torn observation | All vectors; V4 requires 50 qualifiers or native shortfall proof; V6 final-state equality | All vectors; V4 boundary/tie; V6 final-state equality; live no-torn timestamp-group observation | All vectors; V4 boundary/tie; V6 final-state equality; live no-torn transaction observation |
 | Required metric posture | Correctness-only: Q1–Q3 plus mismatch | Snapshot rows plus page extensions | Revision rows plus cursor extensions | Native stage work plus fallback/index extensions |
+| P/Q consumption | P snapshot baseline; Q with snapshot-path fault baseline; Q13 fixture | Same | P snapshot baseline plus revision-delta extension (P4, P5, P9); Q13 fixture; Q with both Q6 tiers; no local fallback | Q12 specification only; native atomicity and comparator; may vendor Q13's schema and corpus manifest |
 | Index assumption | Shared static indexes enabled | Same; `by_room` drives pages | Same | Same static set plus lifecycle eligibility tests |
 
 `current` never depends on the comparator. `comparison-ready` is harness-only,

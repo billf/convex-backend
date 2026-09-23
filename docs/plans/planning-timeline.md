@@ -68,8 +68,8 @@ flowchart LR
   qHarness -. "planned sequencing gate" .-> oneA
   pBaseline -. "planned sequencing gate" .-> oneB
   qHarness -. "planned sequencing gate" .-> oneB
-  usableP -. "optional reuse; bespoke fallback allowed" .-> oneCProof
-  usableQ -. "optional reuse; bespoke fallback allowed" .-> oneCProof
+  usableP -->|"direct dependency, incl. revision-delta extension"| oneCProof
+  usableQ -->|"direct dependency, incl. Q13 fixture and both Q6 tiers"| oneCProof
   q12 -. "shared-prereqs-q-language-neutral-methodology-spec" .-> two
   oneAProof --> decision["Generalization decision"]
   oneBProof --> decision
@@ -92,7 +92,7 @@ flowchart TB
   subgraph Delivery["Implementation and validation"]
     d1["P/Q built → usable → stable"]
     d2["1a/1b build and validate"]
-    d3["1c build; validate with usable P/Q or fallback"]
+    d3["1c build; validate with P/Q (no fallback)"]
     d4["Direction 2 native build; validate against shared-prereqs-q-language-neutral-methodology-spec"]
     d5["Generalization decision"]
   end
@@ -103,7 +103,7 @@ flowchart TB
   plan1c --> d3
   plan2 --> d4
   d1 -. "sequencing claim for 1a/1b" .-> d2
-  d1 -. "optional reuse" .-> d3
+  d1 -->|"direct dependency for 1c U4-U6"| d3
   d2 --> d5
   d3 --> d5
   d4 --> d5

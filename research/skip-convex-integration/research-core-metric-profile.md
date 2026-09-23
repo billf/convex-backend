@@ -36,15 +36,16 @@ complete concrete starting point; Q5/Q11 generalize it.
 ## Recorder inventory
 
 - 1c KTD10 (`...1854...:344`: `DataSyncPage`/`SyncResult` stats, per-page
-  diagnostics, stage durations, labeled backend metrics, 1b-compatible names)
-  + U6 `bench/compare.ts` (`...1854...:632,640`) + U1 scan/emission
+  diagnostics, stage durations, labeled backend metrics, names from the Q11 catalog)
+  + U6 `bench/compare.ts` wiring of Q's recorder (1c U6) + U1 scan/emission
   diagnostics (`...1854...:482`).
 - 1b R12 (`...1843...:69`) + R11 actual-sizes rule (`...1843...:68`) + R14
   fail gate (`...1843...:71`).
 - D2 R4 (`...1702...:86`) + R12 (`...1702...:103`) + R15 (`...1702...:109`,
   no fixed thresholds).
 - Q5 superset catalog (`...1159...:76`; `research-spike-comparison.md:34-49`);
-  Q11 = 1c JSONL schema (`...1159...:82`); Q12 language-neutral spec
+  Q11 = single schema authority (this catalog via `research-spike-comparison.md`;
+  1c's KTD10 JSONL must be expressible in it, revised 2026-09-23); Q12 language-neutral spec
   (`...1159...:83`; see `research-logical-checkpoint-contract.md`).
 
 ## Extensions
