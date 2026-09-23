@@ -10,6 +10,8 @@ execution: code
 
 # Skip Cross-Plan Documentation Map - Plan
 
+> **Superseded in part (2026-09-23).** This completed plan records the maps as built on 2026-09-14. Since then 1a, 1b, and 1c all adopt P/Q as direct dependencies (1a/1b the snapshot baseline; 1c also the revision-delta extensions), and 1c's bespoke fallback was withdrawn. Statements below about a 1a/1b sequencing claim, 1c's optional reuse, and its fallback are historical; the current relationships are in [prerequisites.md](prerequisites.md), [detailed-prerequisites.md](detailed-prerequisites.md), and the [shared prerequisites plan](2026-09-11-1159-feat-skip-shared-prerequisites-plan.md).
+
 ## Goal Capsule
 
 - **Objective:** Readers can understand the two Skip/Convex directions, each plan's maturity and dependencies, and maintain their cross-document references without mistaking a proposed sequencing dependency for a technical impossibility.
@@ -48,7 +50,7 @@ The current README overstates P/Q as a hard prerequisite for every Direction 1 i
 
 ### Acceptance Examples
 
-- AE1. A reader comparing 1a, 1b, and 1c sees P/Q as the shared plan's proposed sequencing dependency for 1a/1b, sees 1c as implementation-ready, and sees its integration gate conditioned on usable P/Q or a documented bespoke fallback.
+- AE1. A reader comparing 1a, 1b, and 1c sees P/Q as the shared plan's proposed sequencing dependency for 1a/1b, sees 1c as implementation-ready, and sees its integration gate conditioned on usable P/Q or a documented bespoke fallback. *(Historical; superseded 2026-09-23: no fallback, direct P/Q dependency for 1a, 1b, and 1c.)*
 - AE2. A reader evaluating Direction 2 sees Q12 as a methodology specification and does not infer that Direction 2 consumes TypeScript P/Q code or inherits Direction 1's atomicity implementation.
 - AE3. A maintainer changes a dated plan, follows its one-line pointer, updates the relevant canonical graph node/edge/status and identifier-map row, then reruns Mermaid rendering and reference resolution.
 
@@ -164,8 +166,8 @@ First reconcile names and facts, then write canonical graphs and README contract
 
 **Test scenarios:**
 
-- 1a/1b show planned P/Q sequencing gates rather than a hard technical block.
-- 1c shows P/Q as optional reuse, with its documented fallback satisfying the independent start condition.
+- 1a/1b show planned P/Q sequencing gates rather than a hard technical block. *(Historical; superseded 2026-09-23: direct dependency by decision.)*
+- 1c shows P/Q as optional reuse, with its documented fallback satisfying the independent start condition. *(Historical; superseded 2026-09-23: direct dependency, fallback withdrawn.)*
 - Direction 2 consumes `shared-prereqs-q-language-neutral-methodology-spec` as a specification and shows native atomicity/comparator work as its own.
 
 **Verification:** Both documents render, use only stable anchors for cross-plan references, and link to their owning plans and the identifier map.
