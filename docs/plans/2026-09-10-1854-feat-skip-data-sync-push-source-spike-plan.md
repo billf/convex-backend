@@ -15,7 +15,7 @@ reconciled: 2026-09-23
 
 ## Goal Capsule
 
-- **Objective:** Determine whether a modest convex-backend change can expose selected Convex documents as a genuine push-reactive Skip source whose steady-state delivery and input work follow changed documents rather than complete query results.
+- **Objective:** Determine whether a modest convex-backend change can expose selected Convex documents as a push-reactive Skip source whose steady-state delivery and input work follow changed documents rather than complete query results.
 - **Means:** Add an experimental, authenticated Data Sync SSE stream, suspend it on native readable-timestamp notification, and apply document revisions to a retained Skip graph (KTD1, KTD3, KTD7).
 - **Product authority:** The user selected a continuous push stream over a blocking request loop and an extension to `/api/sync`. This plan owns Direction 1c only; the client-only source experiments and backend-native Skip remain separate work.
 - **Execution profile:** Six dependency-ordered units across `convex-backend`, `skip`, and `convex-tutorial`, each sized for an independently reviewable commit. U4-U6 consume the shared-prerequisites deliverables P and Q rather than hand-building their equivalents.
@@ -41,7 +41,7 @@ Convex's `/api/sync` protocol is push-reactive, but its result updates are produ
 
 Convex already has a stronger starting point for an external document source. `/api/v1/data/sync` provides table selection, document revisions and tombstones, table truncations, opaque resumable cursors, paged initial snapshot construction, and a continuous CDC phase. During CDC it does not split a transaction across pages. The caller must currently issue another HTTP request for every page and periodically poll after `upToDate`.
 
-Direction 1c changes that last delivery step, not the capture model. While pages are immediately available, the backend drains them into one streaming response. At `upToDate`, it suspends on the same locally readable repeatable-snapshot progression that the application supplies as the floor for the next Data Sync page. This is genuine backend push: a client timer does not manufacture reactivity, and a wake-up cannot be lost between checking the cursor and registering the wait.
+Direction 1c changes that last delivery step, not the capture model. While pages are immediately available, the backend drains them into one streaming response. At `upToDate`, it suspends on the same locally readable repeatable-snapshot progression that the application supplies as the floor for the next Data Sync page. This is backend push: a client timer does not manufacture reactivity, and a wake-up cannot be lost between checking the cursor and registering the wait.
 
 The live application supplies Data Sync with its latest locally readable repeatable snapshot, while the low-level iterator can otherwise advance from persistence's maximum repeatable timestamp. The spike must measure mutation-acknowledgment-to-readable-observation and readable-to-delivered delays rather than assume `/api/sync`-equivalent freshness or a fixed persistence delay. The former is a local-harness proxy for commit-to-readable delay, not a portable claim about commit timing. Data Sync selection is also table- and column-granular, not row-granular, so initial transfer and retained Skip source state grow with all selected documents even when the derived output is bounded.
 
