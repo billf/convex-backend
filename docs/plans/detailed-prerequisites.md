@@ -36,6 +36,8 @@ flowchart LR
 | `shared-prereqs-q-no-torn-observer` (Q14) | Observer of every published intermediate feed state; asserts no partial atomic group through the full chained graph | Direct dependency (1a Transition, 1b page-region swap) | Direct dependency (U6, exact-`ts` groups) | Implements the equivalent from Q12 |
 | `shared-prereqs-q-language-neutral-methodology-spec` | Four checkpoint gates, runtime/harness vocabulary, normalization, and N/K/F metric definitions | Reference | Reference (R15 gates) | Specification consumption for native comparator and scaling work |
 
+Implementation locations (KTD1-KTD3 of the shared plan): P is `skip: skipruntime-ts/adapters/atomic-batch/` (`@skip-adapter/atomic-batch`), Q is `skip: examples/convex_proof_harness/` (`skip-convex-proof-harness`), and Q13 is `convex-tutorial: convex/proofVehicle/`. The snapshot baseline is units `shared-prereqs-u-p-contract-scaffold` through `shared-prereqs-u-report-schemas` (U1-U12); the revision-delta tier is U13-U15; `shared-prereqs-u-methodology-spec` (U16, Q12's text) gates neither. Q14 watches a dedicated `groupProbe` resource for V6, because the canonical feed alone cannot show a membership-first tear.
+
 ```mermaid
 flowchart TB
   p["P baseline"]
