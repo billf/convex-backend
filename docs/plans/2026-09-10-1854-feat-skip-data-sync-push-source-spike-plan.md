@@ -49,7 +49,7 @@ The live application supplies Data Sync with its latest locally readable repeata
 
 - **Use an SSE-framed Data Sync stream.** (session-settled: user-directed — chosen over blocking Data Sync requests and extending `/api/sync` because it provides one continuous server-pushed response while reusing the existing document-sync contract.) Governs R1-R5.
 - **Wake on locally readable repeatable progress.** The caught-up stream waits on the backend notification advanced with the snapshot state the next application-level Data Sync page can use; a periodic client or server timer is not a data-delivery mechanism. Governs R3, R4, R17.
-- **Require progress quiescence.** The stream must not refresh `_data_sync_progress` for an established empty `upToDate` recheck, because the resulting commit and delayed persisted-repeatable bump can otherwise form a self-sustaining wake cycle. First pages, state changes, real progress, and the existing paged endpoint retain their current accounting. Governs R3, R4, R17.
+- **Require progress quiescence.** The stream must not refresh `_data_sync_progress` for an established empty `upToDate` recheck, because the resulting commit and delayed persisted-repeatable bump can otherwise form a self-sustaining wake cycle. First pages, state changes, real progress, and the existing paged endpoint retain their current accounting. Because KTD5 renews every connection at a bounded age and every response's first page records progress, an idle stream's `_data_sync_progress.last_updated` stays at most one connection age stale, well inside the three-day `DATA_SYNC_ACTIVE_WINDOW` used by `list_active_syncs`. Governs R3, R4, R17.
 - **Reuse Data Sync correctness and recovery.** Snapshot status, truncations, document timestamps, opaque cursors, retention errors, and table selection remain the source contract rather than being reimplemented from the write log. Governs R2, R6-R11.
 - **Accept at-least-once delivery.** The consumer considers a cursor applied only after the corresponding Skip update succeeds; reconnect may replay work, which must be idempotent. The spike does not claim exactly-once processing across two systems. Governs R8-R10.
 - **Keep selection fixed for a connection.** The proof registers the Shared proof-vehicle contract's five tables when the stream opens. Changing the selection requires a new connection and resynchronization. Governs R2, R6, R19.
@@ -440,8 +440,8 @@ After the mandatory first page of a response, an established empty `upToDate` pa
 0. **(Added 2026-09-12; revised 2026-09-23)** External prerequisite: P and Q from `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` reach a stable interface. U4 depends on P's snapshot baseline plus revision-delta extension; U5 on Q13; U6 on Q including Q14 and the Q6 faults that apply to Data Sync (both tiers, excluding the baseline's query-state faults). This plan does not build P or Q and does not gate its own start on them: U1-U3 and U4's parser/transport work proceed in parallel, and U4-U6 may develop against P/Q's specified interfaces before those packages exist. U4-U6's Definition of Done and Verification Contract rows require P/Q integration. There is no local hand-build fallback; a P/Q gap is escalated to the shared-prerequisites plan (Goal Capsule stop conditions).
 1. U1 makes backend scan and emission work observable without changing public JSON.
 2. U2 adds the native wake and proves progress quiescence across the delayed committer schedule.
-3. U4 imports P and proves the version-1 parser, lifecycle, and atomic Skip update against recorded fixtures before the backend route is built.
-4. U3 composes U1 and U2 into the bounded experimental stream and verifies its canonical fixtures match U4's corpus.
+3. **(Revised 2026-09-23)** The canonical version-1 wire fixtures and manifest are hand-authored from KTD6's written contract in `convex-backend` (`crates/local_backend/testdata/data_sync_stream/v1/`, U3's fixture directory) before any route exists; U4 vendors a byte-identical copy. U4 then imports P and proves the version-1 parser, lifecycle, and atomic Skip update against that vendored copy before the backend route is built.
+4. U3 composes U1 and U2 into the bounded experimental stream and proves that its route output reproduces the canonical corpus; U6's fixture check confirms U4's vendored copy is still byte-identical.
 5. U5 adopts Q13's tutorial fixture as the deterministic source, oracle, and monolithic baseline, adding only 1c-specific proof support.
 6. U6 imports Q and builds the retained graph, running the end-to-end correctness and scaling comparison.
 
@@ -530,7 +530,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
 
 - **Goal:** Serve Data Sync pages continuously, wait natively when caught up, and terminate safely under errors, backpressure, credential age, disconnect, or backend shutdown.
 - **Requirements:** R1-R5, R11, R17-R20.
-- **Dependencies:** U1, U2, and U4's recorded version-1 contract fixtures.
+- **Dependencies:** U1, U2, and the canonical version-1 wire fixtures authored from KTD6 in this unit's fixture directory (Implementation Sequence step 3). U3 owns that corpus; it does not depend on U4's vendored copy.
 - **Files:**
   - `convex-backend: crates/common/src/knobs.rs` — add spike transport and connection-lifetime knobs.
   - `convex-backend: crates/local_backend/src/streaming_export.rs` — share page conversion, define version-1 local types, precompute the first event, and run the stream loop.
@@ -556,6 +556,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - An unrelated write causes one measured empty recheck and no page event for an established unchanged status.
   - Empty cold start, empty table replacement, truncation-only pages, and status-only transitions are emitted.
   - An established empty recheck does not record progress after the throttle expires, and one or two streams stay quiescent across multiple delayed persisted-repeatable bumps.
+  - Across an age renewal, an idle stream's progress row is refreshed by the new response's first page, so `active_syncs` keeps listing it and its `last_updated` is never more than one connection age old.
   - A capacity-one queue never holds more than the planned pages; a large transaction is one exclusive overrun event; a blocked send closes with the slow-consumer cause after the configured timeout.
   - A fifth stream at the default per-deployment limit fails with HTTP 429, and disconnect, timeout, connection-age renewal, stream error, and shutdown each release a permit for a later connection.
   - Dropping the response cancels production while waiting, building a page, and blocked on send.
@@ -568,7 +569,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
 
 - **Goal:** Convert version-1 stream events into exact, atomic, replay-safe updates of one Skip external resource.
 - **Requirements:** R2, R6-R12, R17-R20.
-- **Dependencies:** KTD6's version-1 contract; recorded fixtures allow implementation before a live backend or U3 exists. **(Reconciled 2026-09-12; revised 2026-09-23)** the shared-prerequisites plan's P (`docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`): the snapshot baseline (P1-P3 contract, split-mapper and order-key helpers, P6-P8) plus the revision-delta extension (P4 watermark idempotency, P5 tombstone/GC, P9 generation fencing and pending-page ledger) for the state machine and bookkeeping KTD7-KTD9 describe. The extension targets this plan's exact bar; if P's interface cannot satisfy a test scenario below, escalate it as a P defect and hold this unit's verification until it is fixed there.
+- **Dependencies:** KTD6's version-1 contract and a vendored copy of the canonical wire fixtures authored in `convex-backend` (Implementation Sequence step 3), which allow implementation before a live backend or U3's route exists. **(Reconciled 2026-09-12; revised 2026-09-23)** the shared-prerequisites plan's P (`docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`): the snapshot baseline (P1-P3 contract, split-mapper and order-key helpers, P6-P8) plus the revision-delta extension (P4 watermark idempotency, P5 tombstone/GC, P9 generation fencing and pending-page ledger) for the state machine and bookkeeping KTD7-KTD9 describe. The extension targets this plan's exact bar; if P's interface cannot satisfy a test scenario below, escalate it as a P defect and hold this unit's verification until it is fixed there.
 - **Files:**
   - `skip: skipruntime-ts/adapters/convex/src/data_sync_push.ts` — add the streaming transport, parser, and lifecycle wiring around P; import P for the generation-fenced state machine and replay ledger rather than reimplementing them.
   - `skip: skipruntime-ts/adapters/convex/src/data_sync_push.test.ts` — add fake-fetch and real Skip-runtime tests, including validating P's behavior against this unit's own test scenarios below.
@@ -740,7 +741,9 @@ Verification must preserve three compatibility gates: the existing `/api/v1/data
 
   Repository Boundaries and U3's file list say `convex-backend`/U3 owns the canonical fixture corpus that the Skip adapter vendors a copy of. But the Implementation Sequence puts U4 before U3 ("U4 proves the version-1 parser... against recorded fixtures before the backend route is built"), and U3's own Dependencies line lists U4's fixtures as a prerequisite for U3 — the reverse of the ownership claim. Reconcile which repository authors the fixtures first, or clarify that both sides independently author fixtures against KTD6's written spec and cross-verify later.
 
-  **Note (2026-09-12):** unaffected by the P/Q reconciliation above — these are KTD6's wire-format envelope fixtures (SSE page framing, timestamp encoding), a distinct concern from P's own test fixtures (P7) or Q's reference-implementation fixtures (Q9). Still open.
+  **Note (2026-09-12):** unaffected by the P/Q reconciliation above — these are KTD6's wire-format envelope fixtures (SSE page framing, timestamp encoding), a distinct concern from P's own test fixtures (P7) or Q's reference-implementation fixtures (Q9).
+
+  **Resolved (2026-09-23):** `convex-backend` authors the canonical corpus first, by hand from KTD6's written contract and before any route exists; U4 vendors a byte-identical copy; U3's route must reproduce the canonical corpus; U6's fixture check guards the vendored copy against drift. U3's Dependencies no longer list U4's fixtures (Implementation Sequence step 3, U3 and U4 Dependencies).
 
 - **KTD4's deployment-aggregate memory bound is not a real ceiling under concurrent oversized transactions** — KTD4, Risks and Mitigations (P2, adversarial, confidence 75)
 
