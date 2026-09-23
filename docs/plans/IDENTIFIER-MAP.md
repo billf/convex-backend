@@ -103,6 +103,29 @@ Every Q identifier is cross-document by design, so all are listed.
 | Q13 | `shared-prereqs-q-proof-vehicle-fixture` | Q owns the app-layer convex-tutorial fixture: five tables, required indexes, deterministic mutations with acknowledgment data, bounded native-oracle feed query, per-table queries (1a R8 subscriptions, 1b supporting inputs, parity baselines), bounded monolithic (1b R13) and all-selected-rows (1c KTD11) baselines, V1-V6 corpus loader. 1a, 1b, and 1c's U5 consume it; Q2/Q4/Q9 depend on it. Added 2026-09-23. |
 | Q14 | `shared-prereqs-q-no-torn-observer` | Observes every published intermediate state of the Skip-side canonical feed during a multi-table transaction and asserts none reflects part of an atomic group through the full mapper/join/order/reducer chain; first proven on Q9's reference run, reused by 1a, 1b, and 1c for live no-torn assertions. Added 2026-09-23. |
 
+## Shared library implementation units — `shared-prereqs`
+
+Unit anchors for the enrichment of 2026-09-23. Cite as `shared-prereqs-u-<slug>`.
+
+| ID | Descriptive anchor | What it says |
+|---|---|---|
+| U1 | `shared-prereqs-u-p-contract-scaffold` | P contract spec and package scaffold: SPEC.md, README review surface, dependency-surface test (AE8, AE10). |
+| U2 | `shared-prereqs-u-snapshot-batch-helpers` | `SnapshotBatch` builder, one-update apply, namespaced keys, order key, split mappers (AE1, AE3, F1). |
+| U3 | `shared-prereqs-u-room-feed-group-probe` | Room-feed graph on P plus the `groupProbe` resource Q14 watches for V6. |
+| U4 | `shared-prereqs-u-proof-vehicle-schema-queries` | Q13 schema, indexes, oracle, prefix and all-selected-rows baselines; tutorial `messages` migration. |
+| U5 | `shared-prereqs-u-proof-vehicle-mutations-corpus-loader` | Q13 acked mutations, `corpus/v1.json`, phased import loader with label binding, guarded reset. |
+| U6 | `shared-prereqs-u-normalized-comparator` | Comparator with structured mismatches and semantic-hash-checked vendored corpus (AE6, AE12). |
+| U7 | `shared-prereqs-u-readiness-recorder-report` | Readiness gates 1-2, catalog-validated recorder, JSONL report (AE7). |
+| U8 | `shared-prereqs-u-dual-readers-parity` | Loopback SSE reader, version-recording native reader, pure label-mapped parity function. |
+| U9 | `shared-prereqs-u-no-torn-observer` | Q14 observer: pre/post group states, both write orders detected, indistinguishable groups refused (AE13). |
+| U10 | `shared-prereqs-u-snapshot-fault-tier` | Snapshot-path fault injectors and detect/recover/count assertions (AE5). |
+| U11 | `shared-prereqs-u-snapshot-reference-run` | Q9 loopback reference service and `reference:snapshot` end-to-end run (F1, F3-F5). |
+| U12 | `shared-prereqs-u-report-schemas` | Candidate report/mismatch JSON Schemas and Q review surface (AE8); in the snapshot-baseline gate. |
+| U13 | `shared-prereqs-u-revision-delta-extension` | P4/P5/P9 watermarks, tombstones, generation state machine (AE2, AE9). |
+| U14 | `shared-prereqs-u-revision-delta-fault-tier` | CDC-path fault injectors against a scripted mock; real triggers in 1c U6. |
+| U15 | `shared-prereqs-u-revision-delta-reference-run` | `reference:revision` F2 run with both two-group orders. |
+| U16 | `shared-prereqs-u-methodology-spec` | Q12 METHODOLOGY.md for Direction 2 (AE11); gates neither tier. |
+
 ## `paginated-reactive-source` (1b)
 
 Only identifiers actually cited from another document are listed; the rest of 1b's R1-R15/F1-F3/AE1-AE6 are local.

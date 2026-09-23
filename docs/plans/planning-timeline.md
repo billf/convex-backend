@@ -33,7 +33,7 @@ flowchart TB
   vehicle["Complete input: common PoC vehicle"]
   oneA["1a sync-protocol client\nRequirements-only\nAdopts P snapshot baseline and Q"]
   oneB["1b paginated reactive source\nRequirements-only\nAdopts P snapshot baseline and Q"]
-  shared["P/Q shared prerequisites\nRequirements-only\nDecide package and harness topology"]
+  shared["P/Q shared prerequisites\nImplementation-ready\nU1-U12 snapshot baseline, U13-U15 revision-delta"]
   oneC["1c Data Sync push source\nImplementation-ready\nU4-U6 verified only with P/Q, no fallback"]
   two["Direction 2 materialized cache\nImplementation-ready\nNode-child Skip host, write-log tail, native comparator"]
 
@@ -84,7 +84,7 @@ flowchart TB
   subgraph Planning["Planning"]
     plan1a["1a requirements-only"]
     plan1b["1b requirements-only"]
-    planPQ["P/Q requirements-only"]
+    planPQ["P/Q implementation-ready"]
     plan1c["1c implementation-ready"]
     plan2["Direction 2 implementation-ready"]
   end
