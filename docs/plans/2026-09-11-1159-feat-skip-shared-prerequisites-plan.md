@@ -4,7 +4,6 @@ type: feat
 date: 2026-09-11
 topic: skip-shared-prerequisites
 artifact_contract: ce-unified-plan/v1
-artifact_readiness: requirements-only
 product_contract_source: ce-brainstorm
 execution: code
 reconciled: 2026-09-23
@@ -17,11 +16,15 @@ reconciled: 2026-09-23
 - **Objective:** Build, once, the two pieces of infrastructure three Skip/Convex spikes (1a, 1b, and 1c) consume instead of each building its own. The first is a documented atomic multi-table write convention for Skip. The second is a correctness-comparator plus fault-injection harness. Each is an independently reviewable and independently useful deliverable, so no spike re-solves either and no correctness claim rests on ungrounded ad hoc code. Direction 2 shares the underlying atomicity and comparison problems, but its backend-native implementation cannot consume P or Q as code; it is a design-reference consumer, not an implementation dependency. 1c designed its own equivalent of both (KTD7-KTD9; KTD10) before either existed as a shared artifact; as of 2026-09-23 it adopts P (including the revision-delta extension) and Q as direct dependencies instead of hand-building them, and 1a and 1b likewise adopt P's snapshot baseline and Q directly rather than leaving adoption to their own planning (see Problem Frame and Key Decisions for the classification, and How This Work Fits Together for the per-spike detail).
 - **Means:** (P) Publish the language-neutral `AtomicSourceBatch` contract, then provide TypeScript helpers only for external-source consumers that choose its encodings. (Q) Build a shared correctness-comparator and fault-injection harness against the formal five-table proof vehicle defined below, exposing counters and timers matching the shared catalog research already defined.
 - **Product authority:** Not separately brainstormed — derived directly from four already product-authority-settled sibling plans. 1a and 1b named the same two structural problems under different requirement numbers; as of 2026-09-23 (user decision) they adopt P's snapshot baseline and Q as direct dependencies instead of deferring that choice to their own planning. 1c designed its own version first and has since adopted P and Q as direct dependencies (user decision, 2026-09-23). Direction 2 names the same problems but requires backend-native implementation, so this plan supplies design evidence rather than a direct dependency. This plan owns the shared prerequisite tier beneath 1a, 1b, and 1c, with a design-reference relationship to Direction 2; see How This Work Fits Together for the exact per-spike mapping.
-- **Open blockers:** None at product scope. Planning must choose a packaging location for the P library (a new directory under `npm-packages/` in this repo vs. a contribution to `~/src/skip/examples/` or `skipruntime-ts/adapters/`) and a process topology for the Q harness (in-process test helper vs. a small standalone server).
+- **Open blockers:** None. Packaging, harness topology, and the Q9 reference source are resolved in KTD1-KTD4.
+- **Stop conditions:** Stop and escalate when a consuming spike's scenario cannot be met through P's or Q's interface; fix it here as a P/Q defect, never locally. Stop when a unit would require a Skip runtime or FFI change or a convex-backend change (P8). Stop when the corpus translation disagrees with `research/skip-convex-integration/semantic-vectors-v1.md`; the research doc wins.
+- **Execution profile:** Three repositories: `skip` for P and Q, `convex-tutorial` for Q13, `convex-backend` for docs only. Snapshot-baseline units U1-U12 first, then revision-delta units U13-U15; U16 (Direction 2's specification) follows U12 and gates neither tier.
 
 ---
 
 ## Product Contract
+
+**Product Contract preservation:** Product Contract meaning unchanged except three review-approved corrections (2026-09-23): the fixture allows repeated likes per `(message, user)` as V6 requires, Q12 assigns gate three to Q2, and AE13's observer watches `groupProbe` alongside the feed. Deferred-to-Planning questions are resolved in place and point at KTD1-KTD4.
 
 ### Summary
 
@@ -82,7 +85,7 @@ Each sibling plan hits both gaps independently, in its own vocabulary — real d
 - Q9. The harness ships runnable end-to-end against the proof-vehicle fixture Q13 builds, with a minimal reference source of its own (wiring one P external batch encoding to a trivial mock, or to the existing `billf/convex/adapter` baseline) sufficient to prove Q works before any of 1a/1b/1c/Direction 2 exists to consume it.
 - Q10. The report format (counts, timers, mismatch log) is directly consumable by any of the four spikes' own Success Criteria sections — a spike's report cites the harness's output schema rather than redefining metric names.
 - Q11. The recorder's field names and units have one authority: `research-spike-comparison.md`'s shared counter/timer catalog, with `research-core-metric-profile.md`'s required/optional/not-applicable mapping. 1c's JSONL output (KTD10, produced by its U6 through Q's recorder) must be expressible in that schema; Q is not derived from 1c's design, and no consumer defines metric names of its own. 1c's already-designed U6 harness remains the most detailed validation target for the recorder and the revision-delta fault extension.
-- Q12. A standalone specification document — separate from Q's TypeScript implementation, checked in alongside it — states the four required gates before equality is claimed: source group applied, result published, native oracle observed, and freshness disposition recorded. `current` is a runtime publication state independent of the comparator; `comparison-ready` is harness-only and additionally requires the oracle. Q1 owns readiness (gates one/two), Q3 canonical deep equality (gate three: descending `[_creationTime, _id]`, nullable sender, exact `likeCount`), and Q5 freshness/fallback recording (gate four). It maps each direction's local terms while preserving its deadline, cursor, and recovery implementation, and defines the N/K/F axes plus required/optional/N-A metrics in implementation-independent terms for Direction 2's native comparator.
+- Q12. A standalone specification document — separate from Q's TypeScript implementation, checked in alongside it — states the four required gates before equality is claimed: source group applied, result published, native oracle observed, and freshness disposition recorded. `current` is a runtime publication state independent of the comparator; `comparison-ready` is harness-only and additionally requires the oracle. Q1 owns readiness (gates one/two), Q2 native-oracle observation (gate three), and Q5 freshness/fallback recording (gate four); Q3's canonical deep equality (descending `[_creationTime, _id]`, nullable sender, exact `likeCount`) runs only after all four gates are satisfied. It maps each direction's local terms while preserving its deadline, cursor, and recovery implementation, and defines the N/K/F axes plus required/optional/N-A metrics in implementation-independent terms for Direction 2's native comparator.
 - Q13. Q owns the proof-vehicle fixture: the app-layer additions to `~/src/convex-tutorial` that the Shared proof-vehicle contract requires. These are the `rooms`, `memberships`, and `likes` tables with the migrated `messages { room, sender, body }` shape; the required application indexes; deterministic mutations for every required mutation (sender rename, membership activation/deactivation, like add/remove, dangling sender, the membership-plus-likes transaction), each returning acknowledgment data (affected IDs and a harness-readable completion marker) so any consumer's recorder can start wall-clock timers without inferring internal Convex timestamps; the bounded canonical native-oracle feed query; plain per-table queries for the five tables, which serve as parity-check baselines, as 1a's R8 subscription inputs, and as 1b's supporting membership/user/like inputs; two monolithic baselines, a bounded indexed feed query taking a prefix length (1b R13) and an all-selected-rows query (1c KTD11); and the versioned V1-V6 corpus loader, which can load the same manifest into a deployment and into `convex-test`. Q2, Q4, and Q9 depend on it. Q13 has one owner, this plan: an addition a consumer needs lands as a Q13 change with Q13's own tests, reviewed with Q by the plan owner, never as a consumer-only fixture commit, and the requesting unit is verified only after that change lands. Every spike consumes this fixture rather than building its own; 1a and 1b use it for their subscriptions, writes, and baselines, 1c's U5 uses it directly, and Direction 2's backend-owned app may vendor the same schema and corpus manifest.
 - Q14. A no-torn observer subscribes to the Skip-side canonical feed resource and records every published intermediate state, not only settled checkpoints, while a multi-table transaction runs. It asserts that no published state reflects part of an atomic group. For the proof vehicle's membership-plus-likes transaction, that means no state where the membership filter has changed but `likeCount` has not, or the reverse, after the change has passed through the full chain: split mappers, membership filter, sender join, descending order and `take(50)`, and the `likeCount` reducer. Q9's reference run is the first to prove this end to end. Every direction reuses it for its live no-torn assertion (1a's Transition, 1b's page-region swap, 1c's exact-`ts` group) and supplies only which group to watch; Direction 2 implements the equivalent observer from Q12.
 
@@ -90,7 +93,7 @@ Each sibling plan hits both gaps independently, in its own vocabulary — real d
 
 This is the single product used by 1a, 1b, 1c, and Direction 2. A spike may vary only its transport, lifecycle mechanics, and measurement; it may not substitute a different schema, query, projection, ordering, or reducer. This contract supersedes the older two-table tutorial vehicle in `research-poc-vehicle-and-harness.md` for the four spikes.
 
-- **Fixture schema:** `rooms { name }`; `users { name }`; `memberships { room: v.id("rooms"), user: v.id("users"), active: boolean }`; `messages { room: v.id("rooms"), sender: v.id("users"), body: string }`; and `likes { message: v.id("messages"), user: v.id("users") }`. The fixture permits at most one membership per `(room, user)` and at most one like per `(message, user)`.
+- **Fixture schema:** `rooms { name }`; `users { name }`; `memberships { room: v.id("rooms"), user: v.id("users"), active: boolean }`; `messages { room: v.id("rooms"), sender: v.id("users"), body: string }`; and `likes { message: v.id("messages"), user: v.id("users") }`. The fixture permits at most one membership per `(room, user)`. Likes may repeat a `(message, user)` pair; `likeCount` counts like rows, and V6 relies on this.
 - **Required application indexes:** `memberships.by_room_user` on `[room, user]`, `messages.by_room` on `[room]`, `messages.by_sender` on `[sender]`, and `likes.by_message` on `[message]`. Built-in `by_id` and `by_creation_time` indexes remain part of every table's contract. Every direction starts with this same enabled static set; only Direction 2 tests staged, disabled, removed, incompatible, or rebuild/fallback lifecycle behavior.
 - **Canonical query:** for one caller-supplied room ID, select only messages in that room whose sender has an active matching membership. Order by `(_creationTime desc, _id desc)`, take exactly 50, and do not paginate above the observable-query boundary. 1b may paginate only below that boundary and must merge/order there; every spike's native oracle applies the same predicate, order, and limit.
 - **Canonical projection:** each returned message is `{ _id, _creationTime, room, body, sender, likeCount }`, where `sender` is `{ _id, name }` when the referenced user exists and `null` when it does not, and `likeCount` is the number of `likes` rows whose `message` equals the message ID. A missing or inactive membership excludes the message; a missing liked-user document does not remove its like row from the count.
@@ -231,7 +234,7 @@ flowchart LR
   - **When:** The harness runs each fixture against its independent native reader and Skip-derived result.
   - **Then:** It records the manifest version, directly compares each descending canonical expected output, rejects a V4 result that includes the 51st row or reverses an `_id` tie, and requires V6's final state to match.
 - AE13. **Covers:** Q14.
-  - **Given:** Q9's reference source feeding the full proof-vehicle chain (split mappers, membership filter, sender join, order and `take(50)`, `likeCount` reducer), with Q14's observer subscribed to the Skip-side feed.
+  - **Given:** Q9's reference source feeding the full proof-vehicle chain (split mappers, membership filter, sender join, order and `take(50)`, `likeCount` reducer), with Q14's observer subscribed to the Skip-side `groupProbe` resource (per-message active flag and `likeCount`, before the membership filter) for partial states, and to the canonical feed in parallel.
   - **When:** One Convex transaction deactivates a membership and adds likes to that sender's messages, and separately a seeded reference source publishes the two changes as two updates.
   - **Then:** The observer records no published state with only one of the changes for the atomic run, and reports a torn state for the seeded two-update run.
 - AE14. **Covers:** Q2, Q13.
@@ -287,15 +290,15 @@ flowchart LR
 ### Outstanding Questions
 
 **Escalated decisions — defer to an independent model before planning**
-- **Direction 2 relationship:** With Q12 added (2026-09-13), Direction 2 already gets more than a bare design reference for the comparator methodology — it gets a specification to implement against directly, even though it still cannot consume Q's TypeScript code or P at all. The remaining open question is narrower than before: is a specification sufficient, or should this plan expand further to ship an actual backend-native atomic-write companion (for P) and/or a native-Rust reference comparator implementation (beyond Q12's spec) that Direction 2 can consume as code? The spec-only path (current state) leaves Direction 2 to implement both P's atomicity pattern and Q12's methodology itself, just from a shared written contract instead of independently-worded prose. The code-companion path would make Direction 2 a direct consumer but adds a backend-owned implementation and test surface this plan does not currently specify. Decide which outcome is intended; do not restore a "hard prerequisite" claim for Direction 2 without also naming the consumable backend-native deliverable.
+- **Direction 2 relationship:** With Q12 added (2026-09-13), Direction 2 already gets more than a bare design reference for the comparator methodology — it gets a specification to implement against directly, even though it still cannot consume Q's TypeScript code or P at all. The remaining open question is narrower than before: is a specification sufficient, or should this plan expand further to ship an actual backend-native atomic-write companion (for P) and/or a native-Rust reference comparator implementation (beyond Q12's spec) that Direction 2 can consume as code? The spec-only path (current state) leaves Direction 2 to implement both P's atomicity pattern and Q12's methodology itself, just from a shared written contract instead of independently-worded prose. The code-companion path would make Direction 2 a direct consumer but adds a backend-owned implementation and test surface this plan does not currently specify. Decide which outcome is intended; do not restore a "hard prerequisite" claim for Direction 2 without also naming the consumable backend-native deliverable. Q12's JSON Schemas (U12) are candidate schemas for the common interface the 2026-09-14 review entry below asks for; the interface counts as started only once Direction 2's plan cites a schema version.
 - **P9 scope (resolved 2026-09-12; revised 2026-09-14; resolved 2026-09-23):** Revision watermarks, tombstone/GC, generation fencing, pending-page ledgers, and generation-scoped watermarks (P4, P5, P9) form the revision-delta extension. It is required scope, because 1c adopts it as a direct dependency, but it is not part of the snapshot baseline that 1a and 1b wait on. Both 1a and 1b state that revision tombstones, watermarks, and delta replay do not apply to their snapshot paths, so neither opts into it.
 
 **Deferred to Planning**
-- Packaging location for the P library: a new directory under `npm-packages/` in this repo (matching where `npm-packages/convex/` already lives) vs. a contribution under `~/src/skip/examples/` or `skipruntime-ts/adapters/` directly.
-- Process topology for the Q harness: an in-process test helper library (simplest, matches `convex-test`'s model) vs. a small standalone comparator server (closer to `research-poc-vehicle-and-harness.md`'s SSE-fronted sketch).
-- Whether to formally propose the P library as an upstream `~/src/skip` contribution now, or hold it back until at least one consuming spike validates it in practice.
-- Whether `docs/plans/README.md` should be updated now to list this plan as a prerequisite tier, or only once P and Q are built (this plan takes no position; it is a follow-up outside this plan's own scope per How This Work Fits Together).
-- Exact minimal reference source for Q9 — wiring against `billf/convex/adapter`'s existing diff-and-push path, vs. a smaller hand-written mock that avoids depending on that branch's continued existence. **Partly resolved (2026-09-23):** Q9 keeps its own minimal mock so Q stays independently reviewable and provable before any spike exists; 1c's U4/U6 is the first real-consumer validation and the only proof of the revision-delta fault extension. Which mock to use remains a planning choice.
+- **Resolved (2026-09-23, KTD1):** Packaging location for the P library. P ships as the Skip workspace package `@skip-adapter/atomic-batch` at `skip: skipruntime-ts/adapters/atomic-batch/`.
+- **Resolved (2026-09-23, KTD2):** Process topology for the Q harness. Q is an in-process library, the Skip workspace package `skip-convex-proof-harness`; it starts only the loopback reference service.
+- **Resolved (2026-09-23, KTD1):** Upstream contribution timing. P sits beside the existing Skip adapters as the contribution candidate, and the proposal waits until the provisional gate clears.
+- **Resolved (2026-09-23):** `docs/plans/README.md` lists this plan's prerequisite tier as of this enrichment's graph maintenance.
+- **Resolved (2026-09-23, KTD4):** Q9's minimal reference source is a hand-written `ConvexClient` subscription to Q13's all-selected-rows query producing one `SnapshotBatch` per update, with seeded torn and wrong-output variants. It does not use `billf/convex/adapter`'s diff-and-push path.
 - **Resolved (2026-09-23):** 1c's plan was edited to consume P/Q directly: U4 imports P with the revision-delta extension, U5 consumes Q13's fixture, U6 builds on Q, and the local hand-build fallback was replaced by escalating P/Q gaps to this plan.
 - **Resolved (2026-09-12 doc review, strengthened):** P/Q's shared shape, derived from four planning documents' text rather than any real implementation, is treated as provisional — not final — until validated against a real consuming implementation (1c's U4/U6, the first planned consumer; or 1a/1b if either integrates first). See the corresponding Success Criteria entry.
 - **Resolved (2026-09-14 doc review; superseded 2026-09-23):** P9's generation-fencing/replay-ledger scope moved out of the baseline on 2026-09-14. On 2026-09-23 it became part of the revision-delta extension together with P4 and P5, required because 1c adopts it and never carried by 1a or 1b (see the P9 scope entry above). (From 2026-09-12 doc review; revised 2026-09-14 and 2026-09-23.)
@@ -327,9 +330,13 @@ flowchart LR
 
   Planning may under-budget review and test time for P1-P8 on the assumption that it is low-risk documentation work. P3's single-fork-per-atomic-unit invariant must correctly handle three distinct atomic-unit shapes (per reassembled Transition, per revision-timestamp group, per page-group swap), but only one of the three — the read-only `convex_reactive` precedent — has ever actually shipped; generalizing to the other two is new design work, not pure extraction, contrary to the "not new design risk" framing in Key Decisions.
 
+  **Resolved (2026-09-23):** Sized as design work in U2 and U13, each with its own test suite, and the revision-delta shapes are validated against 1c's U4 scenarios.
+
 - **Both plans lean on a single fixture corpus for claims it doesn't fully cover** — Q4/Q6 (correctness-comparator and fault-injection harness) and the materialized-cache plan's R13 (P2, adversarial, confidence 75)
 
   A reader could believe the versioned V1-V6 fixture corpus's rigor covers the lifecycle/fault half of the correctness claims resting on it, when it doesn't: the corpus's fixtures cover only data-shape scenarios (dangling references, membership, likes, boundary/tie, deletes, one atomic transaction), while bootstrap, lag, recovery, and Q6's named fault scenarios (oversized transaction, disconnect-before-checkpoint, Skip-process restart mid-CDC) are validated only by separate, unversioned fault injectors with none of the corpus's manifest-versioning rigor.
+
+  **Resolved (2026-09-23):** Fault scenarios carry a `faultSetVersion` alongside the corpus manifest (U10, U14). The corpus still makes no lifecycle claims.
 
 - **Serializing 1a/1b behind this plan departs from the non-blocking relationship 1c already has, with no evaluation of that alternative** — Key Decisions / Alternatives Considered (P2, product-lens, confidence 75)
 
@@ -365,3 +372,455 @@ flowchart LR
 - `docs/plans/2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md`, Implementation Units U5-U6 and KTD10 — 1c's deterministic-mutation oracle and comparison harness, which now consume Q13's fixture and Q's harness; KTD10's JSONL is expressed in Q11's catalog schema.
 - `docs/plans/2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md`, "Deferred / Open Questions" — 1c's flagged uncertainty about whether Skip's `ExternalService` supports KTD7-KTD8's assumed atomicity/staging primitives; this plan's Problem Frame verification (direct source reads of `skipruntime-ts/core/src/index.ts` plus the shipped `convex_reactive` precedent) answers it at the single-collection-write level, and 1c's U4 validates the remaining bookkeeping through P9.
 - `docs/plans/README.md` — the cross-plan overview and shared-constraints framing this plan sits beneath as a prerequisite tier.
+- `crates/database/src/transaction.rs:575-586` and `crates/common/src/document.rs:230-237` — ordinary inserts get strictly increasing `_creationTime`, so V4's tie needs import (KTD5).
+- `crates/database/src/bootstrap_model/import_facing.rs:31-37,68-90,106-112` — snapshot import accepts an explicit `_creationTime` and an explicit `_id` for the target table (KTD5).
+- `~/src/skip/skipruntime-ts/server/src/rest.ts:110-150` and `server.ts:105-166` — SSE endpoints, event framing, heartbeat, and `runService`'s all-interfaces listen (KTD7, U11).
+- `~/src/skip/skipruntime-ts/adapters/convex/src/index.test.ts:18-84` — FakeConvex and recorder-writer test patterns (U2, U13).
+- `~/src/skip/docs/plans/2026-09-14-skip-shared-prerequisites-plan.md` at `a802b744` — the Skip-side companion, reconciled to this plan's KTD1/KTD2 and U-IDs.
+
+---
+
+## Planning Contract
+
+### Repository Boundaries
+
+- `skip` (`~/src/skip`, npm workspaces): P and Q. Neither changes Skip runtime or FFI code (P8).
+- `convex-tutorial` (`~/src/convex-tutorial`): Q13's `proofVehicle` fixture and the `messages` migration.
+- `convex-backend` (this repo): this plan and its cross-doc graph only. No backend code changes.
+
+Paths below carry a `skip:` or `convex-tutorial:` prefix, the convention 1c's plan uses.
+
+### Output Structure
+
+```text
+skip: skipruntime-ts/adapters/atomic-batch/
+  package.json  tsconfig.json  tsconfig.test.json  README.md  SPEC.md
+  src/index.ts  src/snapshot.ts  src/keys.ts  src/split.ts
+  src/room_feed.ts  src/revision_delta.ts  src/generation.ts
+  src/*.test.ts
+skip: examples/convex_proof_harness/
+  package.json  README.md  METHODOLOGY.md  schema/report.schema.json  schema/mismatch.schema.json
+  src/comparator.ts  src/corpus.ts  src/readiness.ts  src/recorder.ts  src/catalog.ts
+  src/sse_reader.ts  src/native_reader.ts  src/observer.ts  src/parity.ts  src/faults/*.ts
+  reference/service.ts  reference/source.ts  reference/run.ts
+  testdata/semantic-vectors-v1.json  testdata/sse/  src/*.test.ts
+convex-tutorial: convex/proofVehicle/
+  feed.ts  tables.ts  mutations.ts  fixture.ts  corpus/v1.json  corpus/v1.parity.json  proofVehicle.test.ts
+convex-tutorial: scripts/proof-vehicle-load.ts
+  (schema additions in convex/schema.ts; getMessages/sendMessage migrated in convex/chat.ts)
+```
+
+### Key Technical Decisions
+
+- KTD1. **P ships as the Skip workspace package `@skip-adapter/atomic-batch` at `skip: skipruntime-ts/adapters/atomic-batch/`.** Its consumers are 1c's U4 (`skip: skipruntime-ts/adapters/convex/`) and U6 (`skip: examples/convex_data_sync_push/`). Both are Skip workspaces, and both import P through a workspace link. The package pins `@skipruntime/core` 0.0.23, the version its sibling adapters use. Living beside the existing adapters also makes it the upstream-contribution candidate. The contribution waits until the provisional gate in Success Criteria clears. (session-settled: user-directed — chosen over `npm-packages/` in convex-backend because every TypeScript consumer is a Skip workspace and a cross-repo link would be fragile.) Governs P1-P9.
+- KTD2. **Q is an in-process library, not a comparator server.** It ships as the private Skip workspace package `skip-convex-proof-harness` at `skip: examples/convex_proof_harness/`. 1c's `bench/compare.ts` imports its detector, readers, comparator, recorder, injectors, and observer. The only process Q starts is the loopback Skip service for the reference runs (U11, U15). A standalone comparator server would add a second network boundary no consumer needs. (session-settled: user-directed — same packaging reason as KTD1.) Governs Q1-Q11, Q14.
+- KTD3. **The Q13 fixture lives in `convex-tutorial` under a `proofVehicle` module namespace.** Q calls its functions by name (`makeFunctionReference("proofVehicle/feed:roomFeed")`-style references) instead of importing tutorial-generated types across repos, so Q has no compile-time dependency on the tutorial. The coupling is exactly three things: the function names fixed in U4, the corpus file, and the deployment loader CLI with its JSON output (KTD5). Governs Q2, Q13.
+- KTD4. **Q9's reference source is a hand-written `ConvexClient` subscription to Q13's all-selected-rows query.** Each update becomes one `SnapshotBatch` under a single query key, so one Convex transaction maps to one Skip write, the `convex_reactive` single-combined-query pattern. It avoids `@skip-adapter/convex` because that adapter computes bridge-side row diffs (`diffSnapshot`), which P2 forbids for snapshot batches. Seeded variants split V6's update into two writes, one variant per order (membership first, likes first); each waits for the first write's SSE event before issuing the second, so the intermediate state is actually published. Both are AE13's torn runs, observed through U3's `groupProbe`. The source builds each batch inside its `BaseConvexClient` `addOnTransitionHandler` callback: when the all-selected-rows query appears in `transition.queries`, it reads that query's local result and tags the batch with the transition's timestamp. It does not use an `onUpdate` callback, because `ConvexClient` delivers `onUpdate` from a transition handler registered earlier, so a timestamp recorded in a later handler would be one transition stale. The source issues harness mutations through the same client; the timestamp current when a mutation's promise resolves is gate 1's required version under U7's revision-tagged discipline. Skip notifies a stream only when its output changes, so a step with no output change publishes nothing. The Q-owned streaming route therefore writes `event: checkpoint` carrying the transition timestamp on every open stream for every source-client transition, after that transition's batch `writer.update` resolves when it carries one; gate 2 fires on the first checkpoint at or past the required version, and every feed `update` received before it is that checkpoint's published state. Governs Q1, Q9, AE13.
+- KTD5. **The V1-V6 corpus becomes machine-readable JSON with symbolic labels.** `convex-tutorial: convex/proofVehicle/corpus/v1.json` is a faithful translation of `semantic-vectors-v1.md` with `fixtureSetVersion: "1.0.0"` and no added rows. The deployment loader is a Node script, `convex-tutorial: scripts/proof-vehicle-load.ts`, not a Convex module: snapshot import is a CLI operation no function can call, and every `.ts` under `convex/` is pushed and loaded by the tutorial tests. It takes a vector ID, prints the label-binding map as JSON on stdout, and writes each vector's base rows through phased snapshot import with explicit `_creationTime` offset from a fixed epoch base: rooms and users first (with `--replace`, then each label's ID is read back), memberships and messages next with resolved foreign keys, likes last. Tie pairs bind by descending `_id`, so the expected order holds whatever IDs import assigns. V4's tied rows are imported with placeholder bodies, and after binding a fixture mutation patches each body to `message-<bound label>`; a patch leaves `_creationTime` unchanged. (Import also accepts an explicit `_id` carrying the target table's number, `crates/database/src/bootstrap_model/import_facing.rs:68-90`; phasing avoids pre-minting those IDs.) Deltas run through Q13's deterministic mutations. The tutorial copy is canonical. Q vendors a copy at `skip: examples/convex_proof_harness/testdata/semantic-vectors-v1.json` and checks it by semantic hash (parsed JSON, canonically serialized with sorted keys, plus `fixtureSetVersion`); the reference run fails on semantic drift, not on formatting. Governs Q4, Q13, AE12.
+- KTD6. **Q11's catalog is one TypeScript constant plus a JSON Schema.** A typed record of counter and timer names, units, and the per-direction required/optional/N-A profile, transcribed from `research-spike-comparison.md` and `research-core-metric-profile.md`. The recorder rejects unknown names and reports a missing required metric as a harness error. The JSON Schema (U12) is the language-neutral twin that 1c's JSONL and, if it adopts it, Direction 2 validate against. Governs Q5, Q10, Q11, Q12.
+- KTD7. **The Skip-side reader is a small SSE client written inside Q.** The Skip streaming routes (`POST /v1/streams/:resource`, `GET /v1/streams/:uuid`) emit `init`/`update` events whose `data:` is a `[key, values]` array and whose `id:` is the watermark, plus a 30 s heartbeat written as `event: update` with `data:[]` and no `id:` line (`skip: skipruntime-ts/server/src/rest.ts:131-144`). skipruntime-ts has no Node client for them. One reader serves Q2's settled snapshot and Q14's every-event observer, refuses non-loopback URLs, and fails closed on unknown event names or malformed data. It knows three event names: `init`, `update`, and the reference service's `checkpoint` (KTD4). Governs Q2, Q14.
+- KTD8. **The Q13 migration keeps tutorial behavior.** `messages` moves from `{user, body}` to `{room, sender, body}`. `sendMessage` lazily creates a default room. `getMessages` is a query and cannot insert, so it returns `[]` when that room does not exist; otherwise it returns the latest 50 messages with author names through the `sender` join and keeps a `user` field aliasing `sender`, so `src/App.tsx:50` needs no change; `chat.test.ts`'s raw-document assertion on `messages[0].user` becomes `messages[0].sender`, and its `getMessages` assertions keep using the `user` alias. A deployment with no legacy `{user, body}` rows is a required precondition of U4/U5 verification: use a fresh local deployment or clear `messages` before the first push. Convex's schema push already rejects mismatched existing documents, and U5's loader also aborts with the harness error `legacy-messages-present` if any `messages` row lacks `room`. Harness-only functions live under `proofVehicle/` and are documented as proof support. The destructive `proofVehicle/fixture:reset` refuses to run unless the deployment env var `PROOF_VEHICLE_FIXTURE` is `1`, set through `npx convex env set`. Governs Q13.
+
+### High-Level Technical Design
+
+Component topology across repositories:
+
+```mermaid
+flowchart TB
+  subgraph tutorial["convex-tutorial"]
+    q13["Q13 proofVehicle: schema, indexes, mutations with acks, oracle and baseline queries, corpus v1.json, loader"]
+  end
+  subgraph skip["skip workspaces"]
+    p["@skip-adapter/atomic-batch: spec, SnapshotBatch, split/key/order helpers, room feed and groupProbe, revision-delta extension"]
+    q["skip-convex-proof-harness: readiness, SSE and native readers, comparator, recorder, faults, Q14 observer, reference runs, Q12 spec and schemas"]
+    c1c["1c: adapters/convex data_sync_push, examples/convex_data_sync_push"]
+  end
+  q13 -->|function names, corpus| q
+  p --> q
+  p --> c1c
+  q --> c1c
+  q12["Q12 spec and candidate JSON Schemas"] -.->|spec only| d2["Direction 2 native comparator"]
+  p -.->|snapshot baseline| c1ab["1a, 1b"]
+  q -.-> c1ab
+```
+
+Settled-checkpoint comparison (Q12's four gates, as Q wires them):
+
+```mermaid
+sequenceDiagram
+  participant H as Harness driver
+  participant V as Q13 mutation
+  participant S as Skip service (SSE)
+  participant N as Native ConvexClient
+  participant R as Q5 recorder
+  H->>V: run delta (ack: ids, completion marker)
+  H->>R: start timers from ack
+  S-->>H: gates 1 and 2 via Q1 (required version applied, result published)
+  H->>N: read canonical feed at same deployment
+  N-->>H: gate 3 (oracle observed)
+  H->>R: gate 4 freshness disposition
+  H->>H: Q3 compare, structured mismatch or match
+```
+
+Revision-delta generation lifecycle (P9):
+
+```mermaid
+stateDiagram-v2
+  [*] --> Cold
+  Cold --> Staging: snapshot page
+  Staging --> Staging: page applied, ledger pending
+  Staging --> Live: final page group succeeds, atomic promote
+  Live --> Live: CDC ts-group applied, cursor advances after all groups
+  Live --> Staging: table replacement or resnapshot (new generation)
+  Staging --> Cold: restart without retained state
+  Live --> Cold: cursor expired or invalid
+```
+
+### Implementation Sequence
+
+1. Snapshot baseline: U1 → U2 → U3; U4 → U5; U6 → U7; U8 after U4 and U6; U9 after U8; U10 after U7 and U8; U12 after U6 and U7; U11 last, after U3, U5, U7-U10, and U12. This tier releases 1a and 1b.
+2. Revision-delta tier: U13 after U2; U14 after U10 and U13; U15 after U11, U13, and U14. This tier releases verification of 1c's U4 and U6.
+3. Direction 2 specification: U16 after U12, on its own schedule; it gates neither tier.
+
+### Assumptions
+
+- 1a and 1b have no settled code location yet. To claim the snapshot-baseline release they consume P and Q as Skip workspaces. If either needs to land outside the Skip workspace, that trips the first Goal Capsule stop condition and packaging is re-planned here, not patched over with a cross-repo `file:` link, the fragility KTD1 rejected.
+- `@skipruntime/wasm` must be built before any runtime-backed scenario (U3's same-tick test, U11, U15). In the Skip workspace it links to `skipruntime-ts/wasm`, which has no `dist/` in a fresh checkout; its `build` script runs `skargo` from the Skiplang toolchain (built per `~/src/skip` INSTALL.md, or inside the repo `Dockerfile`). If it cannot be built, stop and escalate under the Goal Capsule stop conditions; do not substitute a mock runtime.
+- With that build in place, a real Skip runtime runs under `tsx --test` through `@skipruntime/wasm`'s `initService`; if `tsx --test` cannot host it, the runtime-backed scenarios move into U11's harness script. `runService` is not used: it calls `listen(port)` with no host (`skip: skipruntime-ts/server/src/server.ts:147,160`), and `@skipruntime/server` exports only `server.ts`, so it cannot bind loopback-only without a Skip change (P8).
+- Whether `convex-test` honors an explicit `_creationTime` is unknown. If it does not, the convex-test path proves V4's boundary but not its tie; the tie is proven by the snapshot reference run and by Q3's synthetic tests.
+
+---
+
+## Implementation Units
+
+| U-ID | Title | Key files | Depends on |
+|---|---|---|---|
+| U1 | P contract spec and package scaffold | `skip: skipruntime-ts/adapters/atomic-batch/{SPEC.md,README.md,package.json}` | none |
+| U2 | Snapshot batch helpers | `skip: .../atomic-batch/src/{snapshot,keys,split}.ts` | U1 |
+| U3 | Room-feed graph and group probe (P6) | `skip: .../atomic-batch/src/room_feed.ts` | U2 |
+| U4 | Q13 schema, indexes, queries | `convex-tutorial: convex/schema.ts, convex/chat.ts, convex/proofVehicle/{feed,tables}.ts` | none |
+| U5 | Q13 mutations, corpus, loader | `convex-tutorial: convex/proofVehicle/{mutations,fixture}.ts, corpus/v1.json` | U4 |
+| U6 | Comparator and corpus expectations | `skip: examples/convex_proof_harness/src/{comparator,corpus}.ts` | U5 |
+| U7 | Readiness detector, recorder, report | `skip: .../convex_proof_harness/src/{readiness,recorder,catalog}.ts` | U6 |
+| U8 | Dual readers and parity check | `skip: .../convex_proof_harness/src/{sse_reader,native_reader}.ts` | U4, U6 |
+| U9 | Q14 no-torn observer | `skip: .../convex_proof_harness/src/observer.ts` | U8 |
+| U10 | Snapshot-path faults and assertions | `skip: .../convex_proof_harness/src/faults/` | U7, U8 |
+| U11 | Q9 reference source and snapshot run | `skip: .../convex_proof_harness/reference/` | U3, U5, U7-U10, U12 |
+| U12 | Q report/mismatch JSON Schemas and review surface | `skip: .../convex_proof_harness/{schema/,README.md}` | U6, U7 |
+| U13 | P revision-delta extension | `skip: .../atomic-batch/src/{revision_delta,generation}.ts` | U2 |
+| U14 | Q6 revision-delta fault extension | `skip: .../convex_proof_harness/src/faults/revision_delta.ts` | U10, U13 |
+| U15 | Revision-delta reference run (F2) | `skip: .../convex_proof_harness/reference/` | U11, U13, U14 |
+| U16 | Q12 methodology specification | `skip: .../convex_proof_harness/METHODOLOGY.md` | U12 |
+
+### U1. P contract spec and package scaffold
+
+- **Goal:** Publish the language-neutral `AtomicSourceBatch` contract and an empty, buildable package.
+- **Requirements:** P1, P2 (specification half), P8, AE8 (P half), AE10.
+- **Dependencies:** None.
+- **Files:**
+  - `skip: skipruntime-ts/adapters/atomic-batch/SPEC.md` — per-direction mapping table, both encodings, the torn-state invariant, and P3's source-only scope note.
+  - `skip: skipruntime-ts/adapters/atomic-batch/README.md` — no-runtime-change statement, the confirmed absence of `updateMany`, standalone value, provisional label, and a "Reviewing this package" section.
+  - `skip: skipruntime-ts/adapters/atomic-batch/{package.json,tsconfig.json,tsconfig.test.json}` — mirror `@skip-adapter/postgres`.
+  - `skip: package.json`, `skip: package-lock.json` — workspace entry.
+- **Approach:** Write SPEC.md from P1-P3 and the Shared proof-vehicle contract without restating the research; cite it. The README's review section lists the whole review surface: README, `src/index.ts` types, and the test suite.
+- **Patterns to follow:** `skip: skipruntime-ts/adapters/convex/package.json` scripts (`tsx --test`, typecheck, lint).
+- **Test scenarios:**
+  - Covers AE10. A dependency-surface test asserts the package imports only public `@skipruntime/core` symbols.
+  - Covers AE8. The same test asserts nothing is imported from any spike package (`adapters/convex`, `examples/convex_data_sync_push`) or from Q.
+- **Verification:** The package builds, lints, and passes its dependency-surface test inside the workspace.
+
+### U2. Snapshot batch helpers
+
+- **Goal:** TypeScript helpers that write one complete `SnapshotBatch` as one Skip update.
+- **Requirements:** P2, P3, P7, AE1, AE3, F1 (library half).
+- **Dependencies:** U1.
+- **Files:** `skip: .../atomic-batch/src/{snapshot,keys,split,index}.ts` and their tests.
+- **Approach:**
+  - A keyed builder for query-ID and page-region keys that rejects duplicate keys.
+  - `applySnapshotBatch` issues exactly one `writer.update(entries, isInit)`; `isInit: true` is allowed only when every live key is present, and a partial `isInit` throws. No row diffing.
+  - Namespaced key helpers (`<component>/<table>/<id>`) and a descending `[_creationTime, _id]` order-key comparator.
+  - Split mappers that project a combined collection into per-table collections.
+- **Patterns to follow:** `skip: examples/convex_reactive/skip/service.ts:34-49` split mappers; a recorder writer like `skip: skipruntime-ts/adapters/convex/src/index.test.ts:62-84`.
+- **Test scenarios:**
+  - Covers AE1. A multi-table batch produces exactly one update.
+  - Unchanged keys are omitted; an emptied query is written as an empty value.
+  - A partial `isInit` is rejected; duplicate keys are rejected.
+  - The order key sorts equal `_creationTime` by descending `_id`.
+  - Split mappers route each namespaced key to its table and reject unknown tables with an error.
+  - Covers AE3. The suite runs with no dependency on Q or any spike.
+- **Verification:** `npm test -w @skip-adapter/atomic-batch` passes.
+
+### U3. Room-feed graph and group probe
+
+- **Goal:** The proof-vehicle room feed built on P, plus the watched state Q14 needs for V6.
+- **Requirements:** P6, AE1.
+- **Dependencies:** U2.
+- **Files:** `skip: .../atomic-batch/src/room_feed.ts` and its test.
+- **Approach:** A Skip graph over the split collections:
+  - an active-membership filter keyed by `(room, user)`;
+  - a nullable sender join;
+  - a per-message `likeCount` reducer with exact inverse removal;
+  - a descending order-key `take(50)`;
+  - `groupProbe`, a separate resource keyed by message with value `{active, likeCount}` taken before the membership filter. It derives from the same split collections in the same update, exists only as Q14's watched state, and never enters the Q3 comparison.
+
+  Exported for U11, U15, and consumers.
+- **Patterns to follow:** `convex_reactive` `TasksByProject`/`AddTaskTotals`/`AttachTotals` (`service.ts:51-111`); `skip: examples/chatroom/reactive_service` lookup joins.
+- **Test scenarios:**
+  - A deleted sender yields `sender: null`.
+  - Flipping membership includes or excludes the message.
+  - Adding then removing a like returns `likeCount` to 0; deleting a liked user keeps the count.
+  - 51 messages yield 50, and an equal-time pair orders by descending `_id`.
+  - One combined update changing membership and likes changes both outputs in the same tick.
+  - `groupProbe` reports `{active, likeCount}` for a message whose membership is inactive.
+- **Verification:** `npm test -w @skip-adapter/atomic-batch` passes.
+
+### U4. Q13 schema, indexes, and queries
+
+- **Goal:** Q13's five-table schema and read side, with tutorial behavior preserved.
+- **Requirements:** Q13, Q4 (oracle), Q2 (parity reads).
+- **Dependencies:** None. Run `npx convex dev` once first so `convex-tutorial: convex/_generated/ai/guidelines.md` exists, and read it before writing Convex code.
+- **Files:** `convex-tutorial: convex/schema.ts`, `convex/chat.ts`, `convex/chat.test.ts`, `convex/proofVehicle/{feed,tables}.ts`, `convex/proofVehicle/proofVehicle.test.ts`.
+- **Approach:** Per KTD8:
+  - five tables and the four application indexes from the Shared proof-vehicle contract;
+  - `proofVehicle/feed:roomFeed(room)` — the canonical oracle;
+  - `proofVehicle/feed:roomFeedPrefix(room, n)` — the bounded indexed baseline (1b R13);
+  - `proofVehicle/tables:allSelectedRows` — the monolithic baseline (1c KTD11) and Q9's source query;
+  - `proofVehicle/tables:*` — plain per-table reads. Parity reads return rows; Q computes each table's `{count, contentHash}` after mapping every `_id` and foreign key to its corpus label through the load-binding map and replacing `_creationTime` with its corpus value, because raw IDs always differ between a deployment and convex-test;
+  - migrate `sendMessage`/`getMessages`.
+- **Patterns to follow:** existing `convex-tutorial: convex/chat.ts` and `chat.test.ts`.
+- **Test scenarios:**
+  - The tutorial flow still returns author names and the `user` field, and `getMessages` returns `[]` before any message is sent.
+  - The oracle orders descending by `(_creationTime, _id)`, limits to 50, excludes missing or inactive memberships, returns `sender: null` for a deleted user, and computes exact `likeCount`.
+  - The prefix query honors `n`; `allSelectedRows` returns every row.
+- **Verification:** `npm test` in convex-tutorial passes.
+
+### U5. Q13 mutations, corpus, and loader
+
+- **Goal:** Deterministic writes, the machine-readable corpus, and a loader for both a deployment and convex-test.
+- **Requirements:** Q13, Q4, Q2 (convex-test admission), AE12, AE14.
+- **Dependencies:** U4.
+- **Files:** `convex-tutorial: convex/proofVehicle/{mutations,fixture}.ts` (mutations, `fixture:reset`, V4's body-patch mutation, the no-write `fixture:marker`), `convex/proofVehicle/corpus/v1.json`, `scripts/proof-vehicle-load.ts` (deployment loader CLI), tests in `proofVehicle.test.ts`.
+- **Approach:**
+  - Mutations: send, update, and delete message; rename and delete user; activate and deactivate membership; add and remove like; dangling sender; `membershipAndLikesTxn`. Every mutation returns `{affectedIds, marker}`. Adding a like and `membershipAndLikesTxn` do not deduplicate `(message, user)`, because V6 adds a second like by `b` on `a1`.
+  - `corpus/v1.json` per KTD5; the manifest version is exposed to callers.
+  - `fixture:reset` behind the `PROOF_VEHICLE_FIXTURE` guard.
+  - The deployment loader CLI (`scripts/proof-vehicle-load.ts`): the `legacy-messages-present` check, phased per-vector `npx convex import`, ID read-back through `proofVehicle/tables:*` queries, label binding, and V4's post-bind body patch; it prints the label-binding map as JSON.
+  - A convex-test loader that inserts directly, and a mutation-log recorder so one log replays into either target.
+  - A label-mapped parity helper in convex-tutorial, and golden per-table `{count, contentHash}` values for each vector's base state recorded beside `corpus/v1.json` (`corpus/v1.parity.json`). Q's parity function (U8) must reproduce them, which pins the two implementations to one result.
+- **Test scenarios:**
+  - Each mutation's acks match the rows it wrote.
+  - V6's transaction leaves two like rows on `a1`, so its count before the membership filter is 2.
+  - Reset refuses to run without the guard.
+  - Each vector's delta under convex-test produces its `Out(...)`, V4's tie excepted per Assumptions.
+  - Covers AE14. Replaying one log into a deployment-shaped load (import-assigned IDs) and a convex-test load yields equal label-mapped parity hashes; when the deployment log omits one mutation, the parity check fails with a harness error before any comparison.
+  - V4's tied rows carry `message-<bound label>` bodies after the patch.
+  - The loader aborts on a legacy `messages` row.
+- **Verification:** `npm test` in convex-tutorial passes; every vector's expected output, V4's tie included, is also checked on a local deployment through the import loader during U11.
+
+### U6. Comparator and corpus expectations
+
+- **Goal:** The normalized comparator and corpus-driven expected outputs.
+- **Requirements:** Q3, Q4, Q8, AE4, AE6, AE12.
+- **Dependencies:** U5.
+- **Files:** `skip: examples/convex_proof_harness/src/{comparator,corpus}.ts`, `testdata/semantic-vectors-v1.json`, tests; `skip: package.json` workspace entry.
+- **Approach:** Canonicalize both sides (descending order, nullable sender, exact `likeCount`); emit a structured mismatch `{vector, key, field, expected, actual}` in the shape U12's mismatch schema later formalizes; load the vendored corpus, verify its semantic hash, and resolve labels through the load-binding map. No tolerance options.
+- **Test scenarios:**
+  - Identical feeds match.
+  - Covers AE6, AE12. Wrong `likeCount`, a swapped tie, an included 51st row, `"Unknown"` in place of `null`, a missing row, and an extra row each produce a mismatch naming key and field.
+  - Every V1-V6 expected output matches itself.
+  - A semantically changed vendored corpus fails the semantic-hash check; a reformatted one passes.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes.
+
+### U7. Readiness detector, recorder, and report
+
+- **Goal:** Q1's readiness gates, Q5's recorder with Q11's catalog, and the JSONL report.
+- **Requirements:** Q1, Q5, Q10, Q11.
+- **Dependencies:** U6.
+- **Files:** `skip: .../convex_proof_harness/src/{readiness,recorder,catalog}.ts` and tests.
+- **Approach:** A readiness predicate over a caller-supplied version stream (Transition `end_version.ts`, `UpToDate(ts)`, page-set version) under two disciplines, quiesced and revision-tagged; it owns gates 1 and 2 only. The recorder owns gate 4 and the freshness disposition, validates names against KTD6's catalog, and writes JSONL.
+- **Test scenarios:**
+  - Readiness never fires before the required version, even when a heartbeat or empty update arrives.
+  - A step with no output change (V3 delta 3's delete of `U(c)`) settles on its `checkpoint` event.
+  - Revision-tagged mode ignores an earlier revision.
+  - In quiesced mode the harness coordinator holds new writes until Q1 reports gates one and two and Q2 reports gate three; Q1 itself never reads the oracle.
+  - An unknown metric name throws; a missing required metric for the chosen direction profile is a harness error.
+  - 1a's correctness-only profile accepts only Q1-Q3 plus the mismatch count.
+  - A direction tag is required on the snapshot-row and revision slots.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes.
+
+### U8. Dual readers and parity check
+
+- **Goal:** Independent Skip-side and native readers, and the parity gate for convex-test.
+- **Requirements:** Q2, AE4.
+- **Dependencies:** U4, U6.
+- **Files:** `skip: .../convex_proof_harness/src/{sse_reader,native_reader,parity}.ts`, `testdata/sse/`, tests.
+- **Approach:**
+  - The SSE reader per KTD7. A heartbeat is an `update` with `data:[]` and no `id:` line; an empty update that carries `id:` is a real update. Non-loopback hosts are refused, and unknown event names or malformed `data:` fail closed.
+  - The native reader uses `ConvexClient` against the same deployment by default, resolves functions by name, and records the transition version each result was read at. A separate sync session only transitions when its own subscriptions change (`crates/sync/src/worker.rs`), so a long-lived subscription can trail the target. After gate 2, the reader therefore takes a fresh one-shot read, which forces a transition at the latest timestamp. The sample is admitted when its version is at or past Q1's target revision and no later harness mutation has resolved; a sample read before the target or after a later write is labeled incomparable, never a Skip mismatch.
+  - Q has no convex-test reader: `convexTest` needs the tutorial's modules and a Vite environment, which KTD3 and the Skip package exclude. Q exports the label-mapped parity function as pure code over two per-table row sets; Q2's convex-test admission and AE14's live proof run in convex-tutorial's U5 suite.
+  - The two readers share no code.
+- **Test scenarios:** against a fake SSE server on `127.0.0.1`:
+  - Events split across chunks and multiple events per chunk parse correctly.
+  - Heartbeats are ignored while an `id:`-bearing empty update is delivered; `checkpoint` events are delivered with their version.
+  - A `0.0.0.0` or remote URL is refused; an unknown event name fails closed.
+  - Transcripts recorded from the real server in U11 replay without error.
+  - A native result read before the target revision, or after a later harness write resolved, is labeled incomparable; one read at or past the target with no later write is admitted.
+  - The parity function reports a harness error, never a mismatch, when two row sets differ.
+  - The parity function reproduces the golden hashes in the tutorial's `corpus/v1.parity.json` (vendored beside the corpus copy) from the same label-mapped rows.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes.
+
+### U9. Q14 no-torn observer
+
+- **Goal:** An observer that detects any published intermediate state of a named atomic group, in either write order.
+- **Requirements:** Q14, AE13.
+- **Dependencies:** U8.
+- **Files:** `skip: .../convex_proof_harness/src/observer.ts` and tests.
+- **Approach:**
+  - Subscribe through the SSE reader and record every published state keyed by its `id:` watermark.
+  - The caller names an atomic group as a watched resource plus the pre-state and post-state values of its watched keys. A torn state is any published state on those keys equal to neither.
+  - The observer refuses, as a harness error, a group whose pre and post are equal or whose single-half partial states equal either one, so a group that cannot tell both orders apart never counts as proof.
+  - For V6 the canonical feed alone fails that check: a membership-first intermediate already equals the final `Out()`. The watched resource is U3's `groupProbe`: pre `{active: true, likeCount: 1}`, post `{active: false, likeCount: 2}`; a membership-first tear shows `{false, 1}` and a likes-first tear `{true, 2}`. The feed stream is observed in parallel and must show only V6's pre or post output.
+- **Test scenarios:** synthetic event sequences:
+  - An atomic sequence passes.
+  - A membership-first and a likes-first two-step sequence each report the torn event's watermark.
+  - A group definition on the feed alone for V6 is rejected as a harness error.
+  - Unrelated interleaved updates do not false-positive; heartbeats are ignored.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes; the live proof is U11.
+
+### U10. Snapshot-path faults and assertions
+
+- **Goal:** Q6's snapshot-path baseline tier and Q7's reusable assertions.
+- **Requirements:** Q6 (baseline), Q7, AE5.
+- **Dependencies:** U7, U8.
+- **Files:** `skip: .../convex_proof_harness/src/faults/` and tests.
+- **Approach:** An injector interface `{trigger(), expectedState, counterName}`. Baseline injectors: disconnect before a checkpoint and reconnect; `QueryFailed` vs `QueryRemoved` vs not-yet-loaded; multi-table transaction; slow consumer with bounded-backlog exhaustion. Assertion helpers check detection, recovery to a match at the next checkpoint, and a count under the catalog name. Expected states follow `research-publication-state-semantics.md`: freeze, blank, or not-yet-loaded, never partial-as-current. Scenarios carry a `faultSetVersion`.
+- **Test scenarios:** against a mock source:
+  - Covers AE5. Each of the three query states maps to its own expected state and counter.
+  - Recovery that never matches fails the assertion; a double count fails.
+  - A consumer supplies only `trigger`.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes.
+
+### U11. Q9 reference source and snapshot reference run
+
+- **Goal:** Prove Q end to end on a local deployment before any spike exists.
+- **Requirements:** Q9, Q14, AE4, AE6, AE7, AE12, AE13, F1, F3, F4, F5.
+- **Dependencies:** U3, U5, U7-U10, U12.
+- **Files:** `skip: .../convex_proof_harness/reference/{service,source,run}.ts`, `package.json` script `reference:snapshot`.
+- **Approach:**
+  - `service.ts` runs U3's feed and `groupProbe` on `initService`, with Q-owned control and streaming routes mirroring `skip: skipruntime-ts/server/src/rest.ts` (POST/GET/DELETE `/v1/streams`, `init`/`update` with `id:` watermark, 30 s heartbeat) plus KTD4's `checkpoint` event on Express listeners bound explicitly to `127.0.0.1`.
+  - `source.ts` implements KTD4: both seeded two-write orders, transition-timestamp tagging, a seeded-wrong-output variant, and a scripted fault seam for query-state and bounded-backlog events a `ConvexClient` subscription cannot emit.
+  - `run.ts` loads each vector by running the tutorial's loader CLI as a subprocess and parsing its label-binding map. The loader's writes resolve no promise on the source client, so after it exits `run.ts` issues a no-write `proofVehicle/fixture:marker` mutation through the source client; the timestamp current when it resolves is the base state's required version. It then runs the vector's deltas, compares at every checkpoint, exercises U10's assertions with live triggers where available and the scripted seam for `QueryFailed`, `QueryRemoved`, not-yet-loaded, and bounded-backlog exhaustion, records SSE transcripts into `testdata/sse/`, and writes the JSONL report. Transport-specific triggers stay with consuming spikes.
+  - The run fails on a corpus semantic-hash difference against the tutorial copy.
+- **Test scenarios:**
+  - V1-V6 all match; V4's boundary and tie hold on the deployment.
+  - Covers AE13. The V6 atomic run shows no torn state on `groupProbe` or the feed, and both seeded two-write orders report torn.
+  - Covers F1. Every snapshot vector arrives through one `writer.update` per source transaction, checked by a counting writer wrapper.
+  - Covers AE6, F5. The seeded wrong output reports the diverging key and field.
+  - Covers AE7. The report validates against the schema and lists every catalog entry, zero or N/A where not exercised.
+  - Covers F4. A live disconnect recovers to a match; scripted query-state and backlog faults reach their expected states through the same U10 assertions.
+  - Both listeners' `address()` is loopback, and the bind check refuses a non-loopback listener.
+  - Every checkpoint's gate 1 waits on the transition timestamp captured when the mutation resolved, and each batch's feed update precedes its `checkpoint` event.
+  - Each batch's tag equals the timestamp of the transition that delivered its rows.
+  - V4's base comparison waits for the marker issued after the body patch.
+- **Verification:** `npm run reference:snapshot -w skip-convex-proof-harness` against a fresh `npx convex dev` exits 0, without U13-U15.
+
+### U12. Q report/mismatch JSON Schemas and review surface
+
+- **Goal:** The candidate report and mismatch schemas U11 validates against, and Q's independent review surface.
+- **Requirements:** Q10, Q12 (schema half), AE8 (Q half).
+- **Dependencies:** U6, U7.
+- **Files:** `skip: .../convex_proof_harness/schema/{report,mismatch}.schema.json`, `README.md`.
+- **Approach:** The schemas are candidates for the interface Direction 2's review entry asks for, not a claimed shared interface. The README states standalone value, the provisional label, and a "Reviewing this package" section naming the comparator, fault injectors, and seeded-mismatch tests as the review surface.
+- **Test scenarios:**
+  - U7's report and U6's mismatch fixtures validate; a report with a renamed metric fails.
+  - Covers AE8. A dependency-surface test asserts Q imports no spike package.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes.
+
+### U13. P revision-delta extension
+
+- **Goal:** Watermarks, tombstones, and the generation state machine that 1c's U4 consumes.
+- **Requirements:** P4, P5, P9, P7 (extension suite), AE2, AE9, F2 (library half).
+- **Dependencies:** U2.
+- **Files:** `skip: .../atomic-batch/src/{revision_delta,generation}.ts` and tests.
+- **Approach:**
+  - Envelope `{ts, deleted, component, table, _id, _creationTime, doc}`, with `ts` carried as a string or bigint.
+  - In-value watermark: apply iff `entry.ts > retained_ts`, never the session tick.
+  - `_id`-only tombstones become `[key, []]`, derived from the retained value.
+  - A generation object with staging, atomic promotion, and a per-page pending ledger; the cursor is released only after every group succeeds. Watermarks are generation-scoped.
+  - GC: retain while the generation lives, discard wholesale on swap, sweep past the horizon.
+- **Patterns to follow:** `skip: skipruntime-ts/adapters/convex/src/index.ts:249-332` generation fencing and delivery chain; 1c U4's scenario list (`docs/plans/2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md`, U4).
+- **Test scenarios:**
+  - Covers AE2. A replayed older `ts` is ignored and counted.
+  - An upsert followed by a tombstone in an uncheckpointed page cannot be resurrected by replay.
+  - Failure before the first group, between groups, and after the final update but before the cursor is set replays with no loss and no double apply.
+  - A cold multi-page snapshot publishes nothing partial and promotes once; a second replacement restarts only the candidate.
+  - A late event from an old generation is dropped.
+  - Covers AE9. A tombstone is retained within its generation and discarded on swap.
+  - Timestamps above `2^53` stay distinct and ordered.
+- **Verification:** `npm test -w @skip-adapter/atomic-batch` passes.
+
+### U14. Q6 revision-delta fault extension
+
+- **Goal:** The CDC-path fault injectors, proven against a scripted mock here and against real triggers in 1c's U6.
+- **Requirements:** Q6 (extension), Q7.
+- **Dependencies:** U10, U13.
+- **Files:** `skip: .../convex_proof_harness/src/faults/revision_delta.ts` and tests.
+- **Approach:** Injectors for cursor expired, invalid, and ahead; table replacement and the return to snapshotting; an oversized transaction past the Data Sync soft limits (16384 entries, 64 MiB, 32768 rows); a Skip-process restart mid-CDC. Each reuses U10's assertions and ships a scripted-mock trigger; 1c's U6 supplies the real triggers.
+- **Test scenarios:**
+  - Each injector against the scripted mock reaches its expected publication state and counter.
+  - A restart with no retained state starts cold.
+- **Verification:** `npm test -w skip-convex-proof-harness` passes.
+
+### U15. Revision-delta reference run (F2)
+
+- **Goal:** F2 end to end through the revision-delta extension.
+- **Requirements:** P3, P4, P9, Q14, F2.
+- **Dependencies:** U11, U13, U14.
+- **Files:** `skip: .../convex_proof_harness/reference/` additions, `package.json` script `reference:revision`.
+- **Approach:** A scripted `RevisionDeltaBatch` source replays V6 as one exact-`ts` group into U3's feed on the reference service, with the Q14 observer on `groupProbe`. Seeded variants use two groups, one per order.
+- **Test scenarios:**
+  - One group shows no torn state.
+  - Both two-group orders report torn.
+  - A replayed group is ignored and its counter increments.
+- **Verification:** `npm run reference:revision -w skip-convex-proof-harness` exits 0 on the same deployment setup.
+
+### U16. Q12 methodology specification
+
+- **Goal:** Q12 as language-neutral text for Direction 2, outside the snapshot-baseline gate.
+- **Requirements:** Q12 (specification half), AE11.
+- **Dependencies:** U12.
+- **Files:** `skip: .../convex_proof_harness/METHODOLOGY.md`.
+- **Approach:** Cover the four gates, `current` vs `comparison-ready`, normalization rules, the per-direction binding table, and the N/K/F axes, citing `research-logical-checkpoint-contract.md` rather than restating it, and referencing U12's schemas by version.
+- **Test scenarios:** None beyond U12's schema tests; this unit is prose.
+- **Verification:** Covers AE11: a reviewer maps every term Direction 2's R4/R12/R13/R15 use onto a METHODOLOGY section without opening Q's TypeScript source. Not required for the snapshot-baseline gate.
+
+---
+
+## Verification Contract
+
+| Scope | Command | Proves |
+|---|---|---|
+| Skip runtime prerequisite | `npm run build -w @skipruntime/wasm` in `~/src/skip` (Skiplang toolchain per INSTALL.md or the repo `Dockerfile`) | U3's runtime scenario, U11, U15 can run |
+| P package | `npm test -w @skip-adapter/atomic-batch` (typecheck plus `tsx --test`) | U1-U3, U13 |
+| Q package | `npm test -w skip-convex-proof-harness` | U6-U10, U12, U14 at unit level |
+| Q12 spec | review of `METHODOLOGY.md` against Direction 2's R4/R12/R13/R15 | U16 (AE11) |
+| Q13 | `npm test` in convex-tutorial (vitest plus convex-test) | U4, U5; V4's boundary only. V4's tie is proven by the snapshot reference run, and the baseline gate fails without it |
+| Snapshot reference | fresh local `npx convex dev` in convex-tutorial, `npx convex env set PROOF_VEHICLE_FIXTURE 1`, then `npm run reference:snapshot -w skip-convex-proof-harness` | U11; AE4, AE6, AE7, AE12, AE13, F1, F3-F5 live |
+| Revision reference | same deployment setup, then `npm run reference:revision -w skip-convex-proof-harness` | U15; F2 live |
+| Lint | `npm run lint` in each touched Skip workspace | style parity |
+| Docs | render Mermaid in touched `docs/plans/*` and check cross-plan anchors resolve | graph maintenance |
+
+Snapshot-baseline release gate: U1-U12 green plus the snapshot reference run; U13-U16 are not required. Revision-delta gate: U13-U15 green including the revision reference run, then 1c's U4/U6 scenarios, per the provisional gate.
+
+---
+
+## Definition of Done
+
+- Every unit's test scenarios exist and pass under the Verification Contract commands.
+- Both reference runs exit 0 against a fresh local deployment after their tiers are built; the snapshot run's V4 tie scenario is the required proof of the tie.
+- AE1-AE14 and F1-F5 each name an owning unit and scenario.
+- No Skip runtime, FFI, or convex-backend code changed (P8).
+- The tutorial app flow still works (KTD8).
+- P's README, Q's README, and Q's METHODOLOGY (U16) each state standalone value, and both packages stay labeled provisional until a real consumer validates them.
+- The cross-doc graph reflects the shipped state.
+- Abandoned-attempt code is removed from the diff.
