@@ -27,7 +27,7 @@ Each spike tests one feasibility question about how to span this gap. They are o
 ### Direction 1a: Sync-Protocol Client
 **Plan:** `docs/plans/2026-09-10-1509-feat-skip-sync-protocol-client-plan.md`
 
-Skip consumes live Convex data as a direct WebSocket client of the `/api/sync` protocol. Convex bundles all transaction-grouped query changes into one Transition, and Skip's `isInit: true` atomic update writes them without client-side diffing.
+Skip consumes live Convex data as a direct WebSocket client of the `/api/sync` protocol. Convex bundles all transaction-grouped query changes into one Transition, and one atomic Skip update writes each changed query's complete value (keyed by query ID, per the shared plan's P `SnapshotBatch`) without client-side diffing.
 
 **Tests:** whether Skip's snapshot reconciliation and atomic update boundary can preserve transaction grouping end-to-end, and what the correctness harness looks like.
 
@@ -120,9 +120,9 @@ The concrete methodology behind this (from `research-skip-source-state.md`): a p
 
 ## Known Constraints and Unknowns
 
-**No public multi-collection atomic write in Skip's TypeScript API.** All four independent spikes hit the same structural gap as an open planning question: Skip Runtime's current public API does not expose one atomic write spanning several external collections, only single-collection updates. This surfaces in every plan's Dependencies/Assumptions and Outstanding Questions sections (1a, 1b, 1c's requirements framing, and Direction 2), each proposing its own workaround (a single combined input domain, or a narrowly scoped multi-collection atomic-write capability) without a shared resolution. This is one structural gap in the shared vehicle, not four separate minor concerns.
+**No public multi-collection atomic write in Skip's TypeScript API.** All four independent spikes hit the same structural gap as an open planning question: Skip Runtime's current public API does not expose one atomic write spanning several external collections, only single-collection updates. This surfaces in every plan's Dependencies/Assumptions and Outstanding Questions sections (1a, 1b, 1c's requirements framing, and Direction 2), each proposing its own workaround (a single combined input domain, or a narrowly scoped multi-collection atomic-write capability) without a shared resolution. This is one structural gap in the shared vehicle, not four separate minor concerns. **Update 2026-09-23:** 1a, 1b, and 1c now adopt the shared plan's P (a single combined input domain) as a direct dependency; Direction 2 implements the native equivalent.
 
-**Shared fault-injection surface.** `research-skip-source-state.md` defines a fault list all four plans independently instantiate subsets of: disconnect-before-checkpoint, cursor expiry/invalid/ahead, table replacement, oversized transactions, `QueryFailed` vs. `QueryRemoved`, slow-consumer/backlog exhaustion, mid-CDC restart, and page-split + invalid-cursor reset.
+**Shared fault-injection surface.** `research-skip-source-state.md` defines a fault list all four plans independently instantiate subsets of: disconnect-before-checkpoint, cursor expiry/invalid/ahead, table replacement, oversized transactions, `QueryFailed` vs. `QueryRemoved`, slow-consumer/backlog exhaustion, mid-CDC restart, and page-split + invalid-cursor reset. **Update 2026-09-23:** the shared plan's Q6/Q7 now own these once; consumers supply only triggers, and query-state faults apply only to the query-subscription spikes (1a, 1b).
 
 **Per-plan outstanding questions** (each plan's own Outstanding Questions section is the source of truth — these are signposts, not the full text):
 - **1a** (~3 questions): which cross-table aggregate the demo computes; the demo's auth mode; single-domain vs. scoped-atomic-update choice for `sync-protocol-client-atomic-transition-apply` (1a R2).

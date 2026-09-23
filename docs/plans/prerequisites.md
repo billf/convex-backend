@@ -1,8 +1,9 @@
 # Skip/Convex prerequisite map
 
-This graph distinguishes planned gates, direct dependencies, and design-reference
-relationships. It does not make a sequencing proposal into a claim that a
-spike is technically impossible to implement another way.
+This graph distinguishes direct dependencies, specification consumption, and
+design-reference relationships. The 1a, 1b, and 1c dependencies on P/Q are
+adoption decisions (2026-09-23), not claims that a spike is technically
+impossible to implement another way.
 
 ```mermaid
 flowchart TB
@@ -19,6 +20,7 @@ flowchart TB
   oneCValidation["1c integration validation"]
   pRd["P revision-delta extension\n(P4, P5, P9)"]
   q13["Q13 proof-vehicle fixture"]
+  q14["Q14 no-torn observer"]
 
   research --> shared
   vehicle --> shared
@@ -27,10 +29,16 @@ flowchart TB
   q --> q12
   p --> pRd
   q --> q13
-  p -. "planned sequencing gate" .-> oneA
-  q -. "planned sequencing gate" .-> oneA
-  p -. "planned sequencing gate" .-> oneB
-  q -. "planned sequencing gate" .-> oneB
+  q --> q14
+  p -->|"direct dependency (snapshot baseline)"| oneA
+  q -->|"direct dependency (snapshot-path tier)"| oneA
+  p -->|"direct dependency (snapshot baseline)"| oneB
+  q -->|"direct dependency (snapshot-path tier)"| oneB
+  q13 -->|"fixture, per-table queries, baselines"| oneA
+  q13 -->|"fixture, per-table queries, baselines"| oneB
+  q14 -->|"live no-torn check"| oneA
+  q14 -->|"live no-torn check"| oneB
+  q14 -->|"direct dependency (U6)"| oneCValidation
   oneC -->|"U4-U6 verified only with P/Q"| oneCValidation
   pRd -->|"direct dependency (U4)"| oneCValidation
   q13 -->|"direct dependency (U5)"| oneCValidation
@@ -40,14 +48,18 @@ flowchart TB
   q -. "design reference only" .-> two
 ```
 
-- **Planned sequencing gate:** the shared plan proposes P/Q before 1a or 1b
-  so they can reuse a common convention and comparator. The shared plan's
-  recorded challenge to a “hard prerequisite” framing remains controlling.
+- **Direct dependency (1a and 1b, adopted 2026-09-23):** 1a and 1b use P's
+  `SnapshotBatch` helpers for their atomic writes, and Q (snapshot-path fault
+  tier, Q13 fixture and baselines, Q14 no-torn observer) for comparison,
+  faults, and metrics, supplying only their own triggers. It is a decision to
+  avoid duplicate work, not a necessity claim; gaps are escalated to the
+  shared plan.
 - **Direct dependency (1c, adopted 2026-09-23):** 1c can start its backend
   units and push-service parser work without P/Q, but its push service (U4)
   imports P's snapshot baseline plus the revision-delta extension, its tutorial
   unit (U5) consumes Q13's fixture, and its comparison harness (U6) builds on
-  Q with both Q6 fault tiers. There is no bespoke fallback; P/Q gaps are fixed
+  Q with Q14 and the Q6 faults that apply to a Data Sync source (not the
+  baseline's query-state faults). There is no bespoke fallback; P/Q gaps are fixed
   in the shared plan. 1a and 1b wait only on the snapshot baseline, never on
   the revision-delta extensions.
 - **Specification consumption:** Direction 2 implements native atomicity and
