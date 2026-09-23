@@ -104,17 +104,21 @@ resnapshot/swap, sweep watermarks past horizon (documents 14d, index 4m)
 
 ## P-coverage vs residual gaps
 
-Covered by P1-P8: single-fork invariant, envelope/key/order helpers, in-value
-watermark, tombstone/GC convention, no-runtime-change. Residual: FFI
-`updateMany`/fork-handle signature + concurrent-fork semantics
-(`research-skip-atomic-write.md:81-85`); generation-fencing/ledger as
-optional P9 (`...1159...:69`); per-direction version/cursor types; sweep
-horizon values; `remove → null` correctness per aggregate.
+Covered by P's snapshot baseline (P1-P3, P6-P8): single-fork invariant,
+envelope/key/order helpers, no-runtime-change. Covered by P's revision-delta
+extension (P4, P5, P9; required for 1c, never carried by 1a/1b as of
+2026-09-23): in-value watermark, tombstone/GC convention, generation
+fencing/ledger. Residual: FFI `updateMany`/fork-handle signature +
+concurrent-fork semantics (`research-skip-atomic-write.md:81-85`);
+per-direction version/cursor types; sweep horizon values; `remove → null`
+correctness per aggregate.
 
 ## Open questions
 
-- P9 mandatory for 1b page-swap ledger or 1a reconnect, or 1c-only optional
-  (`...1159...:272`)?
+- ~~P9 mandatory for 1b page-swap ledger or 1a reconnect, or 1c-only
+  optional?~~ Resolved 2026-09-23 (shared-prereqs P9 scope entry): P9 is part
+  of the revision-delta extension 1c consumes directly; 1a/1b state that
+  revision watermarks and delta replay do not apply to their snapshot paths.
 - Cursor-after-apply durability owner: client memory vs persisted (1c R9 vs
   D2 R6/R10)?
 - Native batch primitive (option-a) vs permanent single-collection
