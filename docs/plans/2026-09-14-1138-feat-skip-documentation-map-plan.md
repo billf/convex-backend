@@ -14,7 +14,7 @@ execution: code
 
 ## Goal Capsule
 
-- **Objective:** Readers can understand the two Skip/Convex directions, each plan's maturity and dependencies, and maintain their cross-document references without mistaking a proposed sequencing dependency for a technical impossibility.
+- **Objective:** Help readers understand the two Skip/Convex directions, each plan's maturity and dependencies, and how to maintain cross-document references. A proposed sequencing dependency must not be mistaken for a technical impossibility.
 - **Means:** Establish three canonical diagram documents, make the directory README the maintenance contract, reconcile stable cross-plan anchors, and give each dated plan self-contained local diagrams. (KTD1, KTD2)
 - **Product authority:** The supplied review map is authoritative for scope, status taxonomy, dependency semantics, validation, and review requirements.
 - **Stop conditions:** Do not overwrite the existing working-tree version of `docs/plans/IDENTIFIER-MAP.md`; do not send document content to OpenCode until the user authorizes that egress.

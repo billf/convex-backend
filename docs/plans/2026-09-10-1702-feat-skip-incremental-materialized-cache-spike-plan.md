@@ -485,11 +485,11 @@ feedRowsByRoom              : messagesByRoom join membershipsByRoomUser, usersBy
 roomFeed(room)              : resource over feedRowsByRoom(room) ordered (_creationTime desc, _id desc) take 50
 ```
 
-Whether Skip can maintain the ordered take-50 slice without touching every message in the room is a spike finding, not an assumption; U1 keys `feedRowsByRoom` so that the room's descending order is the key order and measures the alternative if `take` proves whole-group.
+Whether Skip can maintain the ordered take-50 slice without touching every message in the room is a spike finding, not an assumption. U1 keys `feedRowsByRoom` so that the room's descending order is the key order and measures the alternative if `take` proves whole-group.
 
 ### Implementation Sequence
 
-U1 and U2 can proceed in parallel once the protocol types in U2 are agreed; U3 → U4 → U5 are sequential; U6 wires everything and unblocks U7; U8 runs last. Milestone A (U1-U4) proves seed, apply, and gate in isolation; milestone B (U5-U7) proves the ordinary-client path and correctness matrix; milestone C (U8) produces the scaling evidence and verdict.
+U1 and U2 can proceed in parallel once the protocol types in U2 are agreed. U3, U4, and U5 are sequential. U6 wires everything and unblocks U7. U8 runs last. Milestone A (U1-U4) proves seed, apply, and gate in isolation; milestone B (U5-U7) proves the ordinary-client path and correctness matrix; milestone C (U8) produces the scaling evidence and verdict.
 
 ---
 

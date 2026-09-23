@@ -8,7 +8,7 @@ date: 2026-09-11
 
 # Sync-protocol → Skip mapping (sub-direction 1a)
 
-Thinking log: 1a mandates a Skip client speaking the real `/api/sync`
+Thinking log: 1a mandates a Skip client speaking the `/api/sync`
 WebSocket protocol directly, with no convex-backend changes. The open
 question is not whether the wire is reachable (grounding proves a
 protocol-agnostic Rust client exists) but how wire concepts map onto Skip

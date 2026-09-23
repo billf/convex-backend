@@ -8,9 +8,9 @@ date: 2026-09-11
 
 # 1b page topology (paginated reactive source)
 
-How index-ordered Convex pages reach Skip as separate regions with atomic
-split-swap, without flattening. Supports the 1b spike plan (`paginated-reactive-source-indexed-reactive-pagination` (1b R1) through `paginated-reactive-source-transition-grouped-client-scope` (1b R15), `paginated-reactive-source-steady-state-page-update` (1b F1) through `paginated-reactive-source-comparison-run` (1b F3)).
-No backend changes; no claim that pages are row deltas.
+Index-ordered Convex pages reach Skip as separate regions with atomic
+split-swap, without flattening. This supports the 1b spike plan (`paginated-reactive-source-indexed-reactive-pagination` (1b R1) through `paginated-reactive-source-transition-grouped-client-scope` (1b R15), `paginated-reactive-source-steady-state-page-update` (1b F1) through `paginated-reactive-source-comparison-run` (1b F3)).
+It needs no backend changes and does not claim that pages are row deltas.
 
 ## Pagination mechanics (verified)
 

@@ -2,7 +2,7 @@
 
 This graph distinguishes direct dependencies, specification consumption, and
 design-reference relationships. The 1a, 1b, and 1c dependencies on P/Q are
-adoption decisions (2026-09-23), not claims that a spike is technically
+adoption decisions (2026-09-23). They are not claims that a spike is technically
 impossible to implement another way.
 
 ```mermaid

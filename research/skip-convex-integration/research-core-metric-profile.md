@@ -12,7 +12,7 @@ related_plans:
 # Core metric profile (required / optional / N-A + extensions)
 
 Defines common counters/timers as required, optional, or not applicable per
-direction — 1a correctly "correctness-only" — then adds page-, cursor-, and
+direction. 1a is "correctness-only". It then adds page-, cursor-, and
 index-gating fields as extensions. 1c's recorder (KTD10/U6) is the most
 complete concrete starting point; Q5/Q11 generalize it.
 

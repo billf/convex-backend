@@ -48,7 +48,7 @@ partNumber/totalParts/transitionId, enforce in-order append, `join("") →
 parse → assert Transition`; interleaved non-chunk clears the buffer
 (`:457-462`). Rust rejects chunks outright (`base_client/mod.rs:720-724`),
 proving the gating. Planning instruction: the Skip write happens once per
-**reassembled** Transition — `sync-protocol-client-atomic-transition-apply` (1a R2)'s atomic unit is post-reassembly, never one
+**reassembled** Transition. `sync-protocol-client-atomic-transition-apply` (1a R2)'s atomic unit is post-reassembly, never one
 write per chunk. Demo-scale transactions never exercise this path; record it
 as untested-at-scale.
 

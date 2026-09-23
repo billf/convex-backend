@@ -8,7 +8,7 @@ date: 2026-09-11
 
 # Skip Integration Spike Plans
 
-This directory contains the four independent spike plans that explore Skip/Convex integration across two major directions. Each plan is deliberately scoped to answer one specific question about feasibility, scaling, or architectural boundary.
+This directory contains the four independent spike plans that explore Skip/Convex integration across two directions. Each plan is scoped to answer one specific question about feasibility, scaling, or architectural boundary.
 
 ---
 

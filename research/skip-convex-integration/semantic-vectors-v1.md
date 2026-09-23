@@ -9,9 +9,9 @@ date: 2026-09-14
 # Shared semantic fixture corpus v1
 
 This is the versioned manifest and canonical data source for V1–V6. A runner
-must preserve these IDs, timestamps, operation order, and expected output; it
+must preserve these IDs, timestamps, operation order, and expected output. It
 may translate the notation into its fixture language but may not generate
-additional ambient rows. A major version changes the predicate, projection,
+additional rows. A major version changes the predicate, projection,
 order, limit, or static index set. A minor version may add vectors or rows.
 
 | Manifest field | Value |

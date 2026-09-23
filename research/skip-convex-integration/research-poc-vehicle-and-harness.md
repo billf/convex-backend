@@ -49,7 +49,7 @@ Required fixture additions (app-layer, not backend): rooms/memberships/
 likes tables + indexes, deterministic mutations (rename, activation,
 like add/remove, dangling sender, multi-table txn), a bounded
 canonical-result query, and an all-selected-rows baseline query.
-Unbounded `collect()` is fine at PoC scale; any future bounding must fail
+Unbounded `collect()` is fine at PoC scale. Any future bounding must fail
 loudly (silent `take` in Convex would read as mass deletion downstream).
 Whether tutorial UDF additions count as prohibited "backend change" is
 unstated — planning to confirm, presumed allowed.

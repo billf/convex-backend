@@ -11,12 +11,12 @@ date: 2026-09-11
 ## Core Finding: The Reactivity Gap
 
 **convex-backend's coarse invalidation model:**
-When a write changes rows, Convex tracks read-sets to find overlapping queries, then invalidates and fully re-runs them. This is O(n) — the entire query result recomputes, even if only one row changed.
+When a write changes rows, Convex tracks read-sets to find overlapping queries, then invalidates and fully re-runs them. This is O(n). The entire query result recomputes, even if only one row changed.
 
 **Skip's incremental computation model:**
 Skip propagates changes through a memoized graph of operators (mappers, reducers, collections). A write calls `Reducer.add` or `.remove` on affected keys, and Skip recomputes only the nodes that depend on those keys. This is O(1) for most changes — the cost scales with the size of the change, not the size of the result.
 
-This gap is why the Skip/Convex integration matters: bridging these two models lets applications maintain complex derived state (joins, aggregates, ordered feeds, filtered views) with work that scales to the change rate, not the data size.
+This gap is why the Skip/Convex integration matters. Bridging these two models lets applications maintain complex derived state (joins, aggregates, ordered feeds, filtered views) with work that scales to the change rate, not the data size.
 
 ---
 

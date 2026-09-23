@@ -21,7 +21,7 @@ implementation.
 
 **Complete inputs** are research and the common PoC vehicle. **Usable** means
 P baseline or Q is implemented and integrated by a real consumer. **Stable**
-means that real-consumer integration has shown its interface needs no bespoke
+means that real-consumer integration has shown its interface needs no custom
 adaptation. A plan can be implementation-ready before the shared P/Q it
 depends on becomes usable or stable.
 

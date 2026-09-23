@@ -3,8 +3,8 @@
 This matrix is the normative cross-reference for the four Skip/Convex spikes.
 The shared prerequisites plan owns the product contract, `AtomicSourceBatch`,
 Q12 checkpoint contract, semantic corpus, core metric vocabulary (Q11's single
-schema authority), the Q13 proof-vehicle fixture, and the Q14 no-torn observer. Local
-plans retain their own transport, cursor, deadline, recovery, and lifecycle
+schema authority), the Q13 proof-vehicle fixture, and the Q14 no-torn observer.
+Local plans retain their own transport, cursor, deadline, recovery, and lifecycle
 mechanics.
 
 | Concern | 1a — sync protocol | 1b — paginated source | 1c — Data Sync push | Direction 2 — materialized cache |
