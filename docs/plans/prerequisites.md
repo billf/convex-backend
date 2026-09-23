@@ -1,6 +1,6 @@
 # Skip/Convex prerequisite map
 
-This graph distinguishes planned gates, optional reuse, and design-reference
+This graph distinguishes planned gates, direct dependencies, and design-reference
 relationships. It does not make a sequencing proposal into a claim that a
 spike is technically impossible to implement another way.
 
@@ -17,19 +17,24 @@ flowchart TB
   oneC["1c Data Sync push source"]
   two["Direction 2 materialized cache"]
   oneCValidation["1c integration validation"]
+  pRd["P revision-delta extension\n(P4, P5, P9)"]
+  q13["Q13 proof-vehicle fixture"]
 
   research --> shared
   vehicle --> shared
   shared --> p
   shared --> q
   q --> q12
+  p --> pRd
+  q --> q13
   p -. "planned sequencing gate" .-> oneA
   q -. "planned sequencing gate" .-> oneA
   p -. "planned sequencing gate" .-> oneB
   q -. "planned sequencing gate" .-> oneB
-  oneC -. "independent implementation island" .-> oneCValidation
-  p -. "optional reuse after P is usable" .-> oneCValidation
-  q -. "optional reuse after Q is usable" .-> oneCValidation
+  oneC -->|"U4-U6 verified only with P/Q"| oneCValidation
+  pRd -->|"direct dependency (U4)"| oneCValidation
+  q13 -->|"direct dependency (U5)"| oneCValidation
+  q -->|"direct dependency (U6)"| oneCValidation
   q12 -. "specification consumption" .-> two
   p -. "design reference only" .-> two
   q -. "design reference only" .-> two
@@ -38,10 +43,13 @@ flowchart TB
 - **Planned sequencing gate:** the shared plan proposes P/Q before 1a or 1b
   so they can reuse a common convention and comparator. The shared plan's
   recorded challenge to a “hard prerequisite” framing remains controlling.
-- **Optional reuse:** 1c can start its implementation units without P/Q. Its
-  push-service and retained-graph comparison units need usable P/Q only to
-  complete shared integration validation; their documented bespoke fallbacks
-  remain valid.
+- **Direct dependency (1c, adopted 2026-09-23):** 1c can start its backend
+  units and push-service parser work without P/Q, but its push service (U4)
+  imports P's snapshot baseline plus the revision-delta extension, its tutorial
+  unit (U5) consumes Q13's fixture, and its comparison harness (U6) builds on
+  Q with both Q6 fault tiers. There is no bespoke fallback; P/Q gaps are fixed
+  in the shared plan. 1a and 1b wait only on the snapshot baseline, never on
+  the revision-delta extensions.
 - **Specification consumption:** Direction 2 implements native atomicity and
   comparator code, but uses Q12's language-neutral methodology rather than
   importing TypeScript P/Q artifacts.

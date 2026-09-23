@@ -75,12 +75,12 @@ Every P identifier is cross-document by design, so all are listed.
 | P1 | `shared-prereqs-p-atomic-source-batch-contract` | Language-neutral batch mapping: source version/order, consistency group, delete/replay form, and no-torn publication for all four directions. |
 | P2 | `shared-prereqs-p-snapshot-and-revision-encodings` | Non-interchangeable `SnapshotBatch` and `RevisionDeltaBatch` encodings; TS helpers are external-source-only while Direction 2 implements natively. |
 | P3 | `shared-prereqs-p-external-single-fork-atomicity` | One external `writer.update` per external consistency group; snapshot paths use complete values and delta paths use tombstones, without prescribing Direction 2's native publisher. |
-| P4 | `shared-prereqs-p-revision-delta-watermark-idempotency` | Revision-delta-only watermark/tombstone replay safety; cursors advance after the full group succeeds. |
-| P5 | `shared-prereqs-p-tombstone-gc-policy` | Tombstone/GC convention: retain while the generation lives, discard wholesale on resnapshot, sweep once past the retention horizon. |
+| P4 | `shared-prereqs-p-revision-delta-watermark-idempotency` | Revision-delta extension: watermark/tombstone replay safety; cursors advance after the full group succeeds. Direct dependency of 1c's U4; not carried by 1a/1b. |
+| P5 | `shared-prereqs-p-tombstone-gc-policy` | Revision-delta extension: tombstone/GC convention — retain while the generation lives, discard wholesale on resnapshot, sweep once past the retention horizon. |
 | P6 | `shared-prereqs-p-poc-vehicle-demo` | Split/join/order helpers demonstrated against the shared five-table room feed, including active membership, nullable sender, and `likeCount` add/remove behavior. |
-| P7 | `shared-prereqs-p-standalone-test-suite` | The library's own test suite covers split/merge/order/watermark/tombstone with no dependency on any spike's transport or on Q. |
+| P7 | `shared-prereqs-p-standalone-test-suite` | Standalone test suites: the snapshot baseline covers reconciliation and split/merge/order; the revision-delta extension covers watermark/tombstone and generation fencing; neither depends on any spike's transport or on Q. |
 | P8 | `shared-prereqs-p-no-runtime-change-required` | States no Skip runtime/FFI change is required; a batch primitive's absence is recorded as an out-of-scope future option. |
-| P9 | `shared-prereqs-p-generation-fencing-extension` | **Optional** 1c-compatibility extension on the P1-P8 baseline: staging generation, atomic promotion, per-page pending ledger, generation-scoped watermarks, matching 1c's KTD7/KTD9 bar. Revised 2026-09-14 from mandatory baseline scope to optional — see `shared-prereqs`'s Outstanding Questions "P9 scope" entry. |
+| P9 | `shared-prereqs-p-generation-fencing-extension` | Revision-delta extension (with P4-P5): staging generation, atomic promotion, per-page pending ledger, generation-scoped watermarks, matching 1c's KTD7/KTD9 bar. Revised 2026-09-14 from mandatory baseline to optional; 2026-09-23 required for 1c as a direct dependency, never part of the 1a/1b snapshot baseline — see `shared-prereqs`'s Outstanding Questions "P9 scope" entry. |
 
 ## Shared library deliverables — `shared-prereqs`, Q (comparator / fault-injection harness)
 
@@ -93,13 +93,14 @@ Every Q identifier is cross-document by design, so all are listed.
 | Q3 | `shared-prereqs-q-normalized-comparator` | Canonical-sort deep-equal comparator with nullable-sender and `likeCount` parity; reports structured mismatches, not a bare boolean. |
 | Q4 | `shared-prereqs-q-poc-vehicle-driver` | Driven against the shared five-table room-feed proof vehicle, a versioned V1-V6 manifest, and exact canonical native oracle. |
 | Q5 | `shared-prereqs-q-counter-timer-catalog` | Required/optional/N-A, direction-tagged recorder; owns freshness/fallback recording and preserves 1a's correctness-only exemption. |
-| Q6 | `shared-prereqs-q-fault-injection-fixture` | Composable fault fixture covering the faults common to 3+ plans (disconnect-before-checkpoint, cursor expiry, table replacement, oversized transaction, etc). |
+| Q6 | `shared-prereqs-q-fault-injection-fixture` | Two-tier fault fixture: a snapshot-path baseline (disconnect-before-checkpoint, query-failure states, multi-table transaction, slow consumer) that 1a/1b gate on, and a revision-delta extension (cursor expiry, table replacement, oversized transaction, restart mid-CDC) required by 1c's U6. |
 | Q7 | `shared-prereqs-q-fault-assertion-helper` | Each injector exposes a source-agnostic detect/recover/count assertion helper. |
 | Q8 | `shared-prereqs-q-self-test-seeded-mismatches` | Harness's own suite proves the comparator catches a wrong Skip snapshot, via deliberately seeded mismatches. |
-| Q9 | `shared-prereqs-q-runnable-reference-source` | Ships runnable end-to-end against the shared proof vehicle with its own minimal reference source, before any of 1a/1b/1c/Direction 2 exists to consume it. |
+| Q9 | `shared-prereqs-q-runnable-reference-source` | Ships runnable end-to-end against Q13's proof-vehicle fixture with its own minimal reference source, before any of 1a/1b/1c/Direction 2 exists to consume it. |
 | Q10 | `shared-prereqs-q-report-format` | Report format (counts/timers/mismatch log) directly consumable by any spike's Success Criteria without redefining metric names. |
-| Q11 | `shared-prereqs-q-schema-matches-1c-jsonl` | Recorder field names/units match 1c's already-designed JSONL output (`data-sync-push-ktd-diagnostic-jsonl-schema`, KTD10) — Q generalizes 1c's U6 design rather than the reverse. |
+| Q11 | `shared-prereqs-q-single-metric-schema-authority` | Recorder field names/units come from one authority — `research-spike-comparison.md`'s catalog with `research-core-metric-profile.md`'s mapping; 1c's KTD10 JSONL (`data-sync-push-ktd-diagnostic-jsonl-schema`) must be expressible in it. Renamed 2026-09-23 from `shared-prereqs-q-schema-matches-1c-jsonl`. |
 | Q12 | `shared-prereqs-q-language-neutral-methodology-spec` | Four-gate checkpoint, runtime `current` vs harness-only `comparison-ready`, canonical equality, and metric profile stated language-neutrally for native consumers. |
+| Q13 | `shared-prereqs-q-proof-vehicle-fixture` | Q owns the app-layer convex-tutorial fixture: five tables, required indexes, deterministic mutations, bounded native-oracle and per-table baseline queries, V1-V6 corpus loader. 1c's U5 consumes it; Q4/Q9 depend on it. Added 2026-09-23. |
 
 ## `paginated-reactive-source` (1b)
 
@@ -193,11 +194,11 @@ Only identifiers actually cited from another document are listed; the rest of 1b
 | KTD6 | `data-sync-push-ktd-lossless-timestamp-representation` | Version-1 `page` events encode revision `ts`/`snapshotTs` as canonical decimal strings; cursor stays in the event payload, not the SSE `id`. |
 | KTD7 | `data-sync-push-ktd-generation-fenced-ingestion` | Models ingestion as a generation-fenced state machine via P: private candidate, first-consistent-page publish, replacement clone-and-promote, page-local replay ledger, generation rejection of late events. U4 imports P (P9) instead of hand-building this. |
 | KTD8 | `data-sync-push-ktd-single-collection-tagged-keys` | Documents and control metadata share one Skip collection via tagged `(component, table, _id)` keys, so one `callbacks.update` call applies both tables and freshness state atomically. This is P's envelope/split-mapper convention (P1-P3). |
-| KTD9 | `data-sync-push-ktd-scoped-replay-watermarks` | Replay watermarks and the pending-page ledger stay generation-scoped until the containing page cursor is recorded; process loss discards cursor and starts cold. This is P's watermark/tombstone convention (P4-P5), scoped per P9. |
-| KTD10 | `data-sync-push-ktd-diagnostic-jsonl-schema` | Internal page statistics and per-page diagnostics exposed without expanding the public Data Sync contract; JSONL schema shares logical count names/units with 1b. Q11 generalizes this into Q's schema. |
-| U4 | `data-sync-push-u-implement-push-service` | "Implement the Skip Data Sync push service" — imports P (or falls back to hand-building KTD7-KTD9 per the Goal Capsule's stop condition). |
-| U5 | `data-sync-push-u-deterministic-tutorial-mutations` | "Add deterministic tutorial mutations and native oracles." |
-| U6 | `data-sync-push-u-retained-graph-comparison-harness` | "Build the retained graph and comparison harness" — builds on Q (or falls back to a bespoke comparator/fault-injection core). |
+| KTD9 | `data-sync-push-ktd-scoped-replay-watermarks` | Replay watermarks and the pending-page ledger stay generation-scoped until the containing page cursor is recorded; process loss discards cursor and starts cold. Consumed from P's revision-delta extension (P4, P5, P9). |
+| KTD10 | `data-sync-push-ktd-diagnostic-jsonl-schema` | Internal page statistics and per-page diagnostics exposed without expanding the public Data Sync contract; JSONL is produced by Q's recorder in Q11's single-authority schema, with direction-tagged 1c cursor extensions. |
+| U4 | `data-sync-push-u-implement-push-service` | "Implement the Skip Data Sync push service" — imports P's snapshot baseline plus revision-delta extension; P gaps are escalated to `shared-prereqs`, with no hand-built fallback. |
+| U5 | `data-sync-push-u-adopt-shared-proof-vehicle` | "Adopt the shared proof-vehicle fixture and add 1c proof support" — consumes Q13 and adds only 1c-specific timing/baseline support. Renamed 2026-09-23 from `data-sync-push-u-deterministic-tutorial-mutations`. |
+| U6 | `data-sync-push-u-retained-graph-comparison-harness` | "Build the retained graph and comparison harness" — builds on Q (Q1-Q13, both Q6 tiers); Q gaps are escalated, with no bespoke fallback. |
 | R2 | `data-sync-push-fixed-selection-cursor` | Opens with an optional opaque cursor and one fixed selection covering all columns of the `rooms`, `users`, `memberships`, `messages`, and `likes` tables. |
 | R3 | `data-sync-push-progress-driven-page-emission` | Emits available pages without request round trips and wakes from repeatable progress beyond the prior page’s snapshot timestamp. |
 | R4 | `data-sync-push-quiescent-empty-recheck` | Makes the wait path race-free and suppresses progress refresh for established unchanged empty `upToDate` rechecks. |
