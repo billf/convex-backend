@@ -33,7 +33,7 @@ The current README overstates P/Q as a hard prerequisite for every Direction 1 i
 
 ### Key Decisions
 
-- **Describe P/Q as a recorded sequencing claim, not a proven impossibility.** 1a/1b may be scheduled behind P/Q; 1c retains its documented fallback and Direction 2 owns its native work. Governs R1, R3, R4.
+- **Describe P/Q as a recorded sequencing claim, not a proven impossibility.** 1a/1b may be scheduled behind P/Q; 1c retains its documented fallback and Direction 2 owns its native work. Governs R1, R3, R4. *(Historical; superseded 2026-09-23: direct P/Q dependency, fallback withdrawn.)*
 - **Use descriptive anchors for all cross-document graph and prose references.** Numbered P/Q/R/U identifiers remain local metadata, not cross-plan link targets. Governs R2, R5.
 - **Keep canonical cross-plan graphs separate from dated-plan diagrams.** The three standalone documents own the shared topology; each dated plan owns only its local boundary. Governs R2, R6.
 
@@ -285,7 +285,7 @@ First reconcile names and facts, then write canonical graphs and README contract
 - [x] Plan committed as baseline (review-driven premises, research paths, and renderer fallback applied).
 - [x] U1 — identifier map and descriptive anchors reconciled against the dated plans without overwriting unrelated working-tree content.
 - [x] U2 — timeline taxonomy and dependency graphs verified and amended for the Direction 2 Q12 specification boundary.
-- [x] U3 — prerequisite maps verified and amended so 1c's optional P/Q reuse attaches only to integration validation.
+- [x] U3 — prerequisite maps verified and amended so 1c's optional P/Q reuse attaches only to integration validation. *(Historical; superseded 2026-09-23: direct P/Q dependency, fallback withdrawn.)*
 - [x] U4 — README ownership, state, links, and maintenance contract verified.
 - [x] U5 — all five dated plans verified with two local diagrams and a canonical-maintenance pointer.
 - [x] U6 — all 21 Mermaid blocks rendered successfully to `/private/tmp/skip-doc-graphs-final-review-aXsPgm` with ephemeral `npx @mermaid-js/mermaid-cli` 11.17.0; 57 local Markdown links resolved.
