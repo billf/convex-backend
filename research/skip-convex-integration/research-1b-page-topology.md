@@ -42,6 +42,9 @@ No backend changes; no claim that pages are row deltas.
 - One external resource per page → N Skip input dirs; each page update is
   `update(entries, isInit:true)` reconciled natively via `native_eq`
   (`EagerDir.sk`) with one tick per `writeInCollection` (`Runtime.sk`).
+  (Superseded 2026-09-23 by the shared plan's P2/P3: pages are keys in one
+  collection, written `isInit: false` per changed region in one update per
+  swap; option A below, without the per-page `isInit` loss.)
   No JS concat of the loaded window, no row diffing (`paginated-reactive-source-stable-page-snapshot-region` (1b R3)).
 - No public multi-region batch exists (`core/src/index.ts:476-501,768-782`;
   `CollectionWriter` fork/merge private): two calls = two ticks. Options:

@@ -94,7 +94,10 @@ cross-collection joins, `take` in `instantiate`, two-external `createGraph`.
 No harness exists. Feasible shape: parallel-reader comparator — (a) PoC Skip
 service exposing the room feed over SSE (`POST /v1/streams/:resource` +
 `GET /v1/streams/:uuid`), (b) independent reader (`ConvexClient` or
-`convex-test`) on the same five plain per-table queries. Drive writes through the app,
+`convex-test`) on the same five plain per-table queries. (Updated 2026-09-23: the
+shared plan's Q2 defaults to `ConvexClient` on the same deployment; `convex-test`
+is a separate database and is admitted only after Q13's loader replays the same
+manifest and mutation log and a per-table parity check passes.) Drive writes through the app,
 anchor point-in-time on `Transition.end_version.ts`, snapshot the Skip
 resource per Transition, compute the expected feed locally (membership filter
 + nullable sender, per-message `likeCount`, explicit sort), deep-equal after normalization.
@@ -104,7 +107,7 @@ resource per Transition, compute the expected feed locally (membership filter
   transaction) so one Transition carries every affected table's `QueryUpdated`s. Assert no
   intermediate render shows one table advanced without the other.
 - Failure probe (`sync-protocol-client-query-failure-recovery` (1a F2)/`sync-protocol-client-stale-last-good-on-failure` (1a AE2)/`sync-protocol-client-last-good-failure-state` (1a R5)): force `QueryFailed`, assert frozen last-good +
-  visible stale indicator, then recovery to matching on fresh `isInit:true`.
+  visible stale indicator, then recovery to matching on the query's fresh complete value (`isInit:false`, shared P3).
 - Frozen values must be surfaced as possibly-stale, never as current.
 
 ## Left to planning

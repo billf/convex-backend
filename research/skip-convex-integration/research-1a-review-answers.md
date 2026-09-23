@@ -22,8 +22,8 @@ the local entry silently (`browser/sync/remote_query_set.ts:75-77`,
 no removal event to UI (`client.ts:566-616` only ever emits Updated).
 
 Skip rule: mirror the delete translated into Skip writes, folded into that
-Transition's atomic unit — write the query's empty row set with `isInit:true`
-(or drop the collection) in the same batch, never as a separate write and
+Transition's atomic unit — write the query's key with an empty value
+(`isInit:false`, shared P2/P3 as of 2026-09-23) in the same batch, never as a separate write and
 never ignored. Ignoring orphans rows that keep feeding the cross-table
 reducer (e.g. ghost room after room-switch). Distinct from `QueryFailed`
 (`sync-protocol-client-last-good-failure-state` (1a R5) freeze-at-last-good): Removed = deliberate client action → delete;
@@ -80,6 +80,6 @@ non-requirements leaves generalizability to judgment: reconnect/resumption
 and token refresh/expiry (whole-set invalidation, `worker.rs:954-966`),
 mutation/action lifecycle (PoC is subscribe-only), unsubscribe/resubscribe
 (`QueryRemoved` never fires statically), and all performance behavior of
-per-transition `isInit:true` full writes. Keep `sync-protocol-client-settled-checkpoint-comparator` (1a R6) as the PoC gate; append a
+per-transition complete-value writes. Keep `sync-protocol-client-settled-checkpoint-comparator` (1a R6) as the PoC gate; append a
 "what passing `sync-protocol-client-settled-checkpoint-comparator` (1a R6) does not establish" note listing exactly these, so the
 worth-generalizing call stays explicit.

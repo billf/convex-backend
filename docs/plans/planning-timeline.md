@@ -22,8 +22,8 @@ implementation.
 **Complete inputs** are research and the common PoC vehicle. **Usable** means
 P baseline or Q is implemented and integrated by a real consumer. **Stable**
 means that real-consumer integration has shown its interface needs no bespoke
-adaptation. A plan can be implementation-ready before its optional shared
-reuse becomes usable or stable.
+adaptation. A plan can be implementation-ready before the shared P/Q it
+depends on becomes usable or stable.
 
 ## Planning state
 
@@ -31,8 +31,8 @@ reuse becomes usable or stable.
 flowchart TB
   research["Complete input: Skip/Convex research"]
   vehicle["Complete input: common PoC vehicle"]
-  oneA["1a sync-protocol client\nRequirements-only\nDecide atomic-write and comparator adoption"]
-  oneB["1b paginated reactive source\nRequirements-only\nDecide page-swap and comparator adoption"]
+  oneA["1a sync-protocol client\nRequirements-only\nAdopts P snapshot baseline and Q"]
+  oneB["1b paginated reactive source\nRequirements-only\nAdopts P snapshot baseline and Q"]
   shared["P/Q shared prerequisites\nRequirements-only\nDecide package and harness topology"]
   oneC["1c Data Sync push source\nImplementation-ready\nCan start without P/Q"]
   two["Direction 2 materialized cache\nImplementation-ready\nNode-child Skip host, write-log tail, native comparator"]
@@ -64,12 +64,12 @@ flowchart LR
   oneC["1c implementation"] --> oneCProof["1c integration validation"]
   two["Direction 2 native implementation"] --> twoProof["Direction 2 validation"]
 
-  pBaseline -. "planned sequencing gate" .-> oneA
-  qHarness -. "planned sequencing gate" .-> oneA
-  pBaseline -. "planned sequencing gate" .-> oneB
-  qHarness -. "planned sequencing gate" .-> oneB
+  pBaseline -->|"direct dependency"| oneAProof
+  qHarness -->|"direct dependency, incl. Q13 and Q14"| oneAProof
+  pBaseline -->|"direct dependency"| oneBProof
+  qHarness -->|"direct dependency, incl. Q13 and Q14"| oneBProof
   usableP -->|"direct dependency, incl. revision-delta extension"| oneCProof
-  usableQ -->|"direct dependency, incl. Q13 fixture and both Q6 tiers"| oneCProof
+  usableQ -->|"direct dependency, incl. Q13, Q14, applicable Q6 faults"| oneCProof
   q12 -. "shared-prereqs-q-language-neutral-methodology-spec" .-> two
   oneAProof --> decision["Generalization decision"]
   oneBProof --> decision
@@ -91,7 +91,7 @@ flowchart TB
 
   subgraph Delivery["Implementation and validation"]
     d1["P/Q built → usable → stable"]
-    d2["1a/1b build and validate"]
+    d2["1a/1b build; validate with P/Q snapshot baseline"]
     d3["1c build; validate with P/Q (no fallback)"]
     d4["Direction 2 native build; validate against shared-prereqs-q-language-neutral-methodology-spec"]
     d5["Generalization decision"]
@@ -102,7 +102,7 @@ flowchart TB
   plan1b --> d2
   plan1c --> d3
   plan2 --> d4
-  d1 -. "sequencing claim for 1a/1b" .-> d2
+  d1 -->|"direct dependency for 1a/1b"| d2
   d1 -->|"direct dependency for 1c U4-U6"| d3
   d2 --> d5
   d3 --> d5

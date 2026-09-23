@@ -18,19 +18,22 @@ flowchart LR
     q3["Metrics (Q11 catalog authority) and two-tier fault fixture"]
     q4["Language-neutral methodology specification"]
     q13["Q13 proof-vehicle fixture"]
+    q14["Q14 no-torn observer"]
   end
 
   p1 --> p2 --> p3 --> p4
   q13 --> q1 --> q2 --> q3 --> q4
+  q2 --> q14
 ```
 
 | Output | Produces | 1a / 1b | 1c | Direction 2 |
 |---|---|---|---|---|
-| P snapshot baseline | `AtomicSourceBatch` specification (both encodings), TypeScript `SnapshotBatch` helpers, split/key/order helpers, single-fork rule | Planned external-source code reuse; the only P tier 1a/1b wait on | Direct dependency (U4) | Native implementation follows the specification; no TypeScript dependency |
+| P snapshot baseline | `AtomicSourceBatch` specification (both encodings), TypeScript `SnapshotBatch` helpers, split/key/order helpers, single-fork rule | Direct dependency (adopted 2026-09-23); the only P tier 1a/1b wait on | Direct dependency (U4) | Native implementation follows the specification; no TypeScript dependency |
 | P revision-delta extension (P4, P5, `shared-prereqs-p-generation-fencing-extension`) | TypeScript `RevisionDeltaBatch` helpers: revision watermarks, tombstone/GC, staging generation, promotion, pending ledger, generation-scoped watermarks | Not a dependency | Direct dependency (U4); 1c is its first validator | Design reference only |
-| Q harness | Settled detector, dual-reader comparator, recorder under Q11's single catalog authority, snapshot-path fault baseline, and structured report | Planned code reuse | Direct dependency (U6) | Design reference only |
+| Q harness | Settled detector (quiesced or workload-revision-tagged), dual-reader comparator (same-deployment `ConvexClient` default; `convex-test` only after a parity check), recorder under Q11's single catalog authority, snapshot-path fault baseline, and structured report | Direct dependency; query-state faults apply here, and 1b reuses Q7's assertions for its split/invalid-cursor triggers | Direct dependency (U6); baseline query-state faults do not apply to Data Sync | Design reference only |
 | Q6 revision-delta fault extension | Cursor expiry, table replacement, oversized transaction, restart mid-CDC injectors | Not a dependency | Direct dependency (U6); proven against 1c's Data Sync triggers | Design reference only |
-| `shared-prereqs-q-proof-vehicle-fixture` (Q13) | Five-table tutorial schema, indexes, deterministic mutations, native oracle and baseline queries, V1-V6 corpus loader | Planned fixture | Direct dependency (U5) | May vendor the same schema and corpus manifest |
+| `shared-prereqs-q-proof-vehicle-fixture` (Q13) | Five-table tutorial schema, indexes, deterministic mutations with acknowledgment data, native oracle, per-table queries, bounded monolithic and all-selected-rows baselines, V1-V6 corpus loader | Direct dependency: 1a's R8 subscriptions, 1b's supporting inputs and R13 baseline | Direct dependency (U5), including the KTD11 all-selected-rows baseline | May vendor the same schema and corpus manifest |
+| `shared-prereqs-q-no-torn-observer` (Q14) | Observer of every published intermediate feed state; asserts no partial atomic group through the full chained graph | Direct dependency (1a Transition, 1b page-region swap) | Direct dependency (U6, exact-`ts` groups) | Implements the equivalent from Q12 |
 | `shared-prereqs-q-language-neutral-methodology-spec` | Four checkpoint gates, runtime/harness vocabulary, normalization, and N/K/F metric definitions | Reference | Reference (R15 gates) | Specification consumption for native comparator and scaling work |
 
 ```mermaid
@@ -39,16 +42,16 @@ flowchart TB
   p9["shared-prereqs-p-generation-fencing-extension"]
   q["Q harness"]
   q12["shared-prereqs-q-language-neutral-methodology-spec"]
-  oneA["1a and 1b\nplanned code consumers"]
+  oneA["1a and 1b\ndirect code consumers"]
   oneC["1c\ndirect code consumer"]
   oneCValidation["1c integration validation"]
   two["Direction 2\nnative implementation"]
 
-  p -->|"planned code reuse"| oneA
-  q -->|"planned code reuse"| oneA
+  p -->|"direct dependency (snapshot baseline)"| oneA
+  q -->|"direct dependency, incl. Q13, Q14, snapshot-path faults"| oneA
   p -->|"direct dependency"| oneC
   p9 -->|"direct dependency (revision-delta extension)"| oneC
-  q -->|"direct dependency, incl. Q13 and both Q6 tiers"| oneC
+  q -->|"direct dependency, incl. Q13, Q14, applicable Q6 faults"| oneC
   oneC --> oneCValidation
   q12 -. "methodology reference" .-> oneCValidation
   q12 -->|"specification consumption"| two

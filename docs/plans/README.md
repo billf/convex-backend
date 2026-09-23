@@ -34,10 +34,10 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 
 **Independence and isolation:**
 - Direction 1 and Direction 2 are intentionally separate. Direction 1 evaluates Skip as an external incremental consumer across full-query, page, and document-revision granularity; Direction 2 evaluates a backend-owned materialized-view engine with its own atomicity, comparator, and deployment boundary.
-- Within Direction 1, 1a provides a full-snapshot baseline, 1b changes query topology, and 1c exports document revisions. 1a and 1b carry the shared plan's current P/Q sequencing proposal, but that is not evidence they are technically impossible to implement independently. 1c is implementation-ready and can start its backend units without P/Q, but it adopts P/Q as direct dependencies (2026-09-23): its push service imports P including the revision-delta extension, its tutorial unit consumes Q's shared proof-vehicle fixture, and its comparison harness builds on Q. There is no bespoke fallback.
+- Within Direction 1, 1a provides a full-snapshot baseline, 1b changes query topology, and 1c exports document revisions. 1a and 1b adopt the shared plan's P snapshot baseline and Q as direct dependencies (2026-09-23), a decision to avoid duplicate work rather than evidence they are technically impossible to implement independently. 1c is implementation-ready and can start its backend units without P/Q, but it adopts P/Q as direct dependencies (2026-09-23): its push service imports P including the revision-delta extension, its tutorial unit consumes Q's shared proof-vehicle fixture, and its comparison harness builds on Q. There is no bespoke fallback.
 
 **Shared P/Q tier:**
-- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` proposes a reusable envelope/atomic-write convention (P) and comparator/fault harness (Q). It is a planned shared dependency for 1a/1b (snapshot baseline only), a direct dependency for 1c (including the revision-delta extensions), and a design reference for Direction 2. Direction 2 consumes `shared-prereqs-q-language-neutral-methodology-spec` as a specification, while retaining its backend-native atomicity and comparator implementations.
+- `docs/plans/2026-09-11-1159-feat-skip-shared-prerequisites-plan.md` proposes a reusable envelope/atomic-write convention (P) and comparator/fault harness (Q). It is a direct dependency for 1a/1b (snapshot baseline only), a direct dependency for 1c (including the revision-delta extensions), and a design reference for Direction 2. Direction 2 consumes `shared-prereqs-q-language-neutral-methodology-spec` as a specification, while retaining its backend-native atomicity and comparator implementations.
 - That shared plan also defines the one five-table room-feed proof vehicle used by 1a, 1b, 1c, and Direction 2, so the transport experiments differ without changing the product or oracle they evaluate.
 
 **Shared constraints:**
@@ -55,7 +55,7 @@ Skip runs inside convex-backend, consumes committed row-level changes, and serve
 
 - [Cross-spike traceability](CROSS-SPIKE-TRACEABILITY.md) maps the shared `AtomicSourceBatch`, Q12, V1–V6, metrics, and indexes across all four directions.
 - [Planning timeline](planning-timeline.md) defines the common maturity taxonomy and maps planning through validation.
-- [Prerequisite map](prerequisites.md) distinguishes planned sequencing gates, direct dependencies, specification consumption, and design references.
+- [Prerequisite map](prerequisites.md) distinguishes direct dependencies, specification consumption, and design references.
 - [Detailed prerequisites](detailed-prerequisites.md) names P/Q outputs and each downstream consumption mode.
 - [Identifier map](IDENTIFIER-MAP.md) owns the descriptive anchors used by cross-plan graphs and prose.
 

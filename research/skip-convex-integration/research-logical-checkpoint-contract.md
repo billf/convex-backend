@@ -68,6 +68,6 @@ watermark storage, deadline values.
 
 ## Open questions
 
-- Quiesced vs revision-tagged equivalence: normative equal, or prefer tagging?
+- Quiesced vs revision-tagged equivalence: normative equal, or prefer tagging? (Both are implemented once by the shared plan's Q1 as of 2026-09-23; only the normative preference remains open.)
 - Abandoned-checkpoint state in Q12, or non-comparison by convention?
 - Q12 versioning vs 1c KTD10/Q11 JSONL evolution: spec-first or code-first?

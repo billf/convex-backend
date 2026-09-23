@@ -115,5 +115,5 @@ Single transaction delta: set `M(ma,r,a,false)` and add `L(l2,a1,b)`.
 
 Expected settled final output: `Out()` (the inactive membership excludes the
 message, regardless of its now-two like rows). Every direction compares this
-same final state to its native oracle. Its live no-torn observation remains
-direction-specific.
+same final state to its native oracle. Its live no-torn observation uses the
+shared plan's Q14 observer, with each direction naming its own atomic group.
