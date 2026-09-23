@@ -14,7 +14,7 @@ related_plans:
 Resolves the apparent conflict between the Shared proof-vehicle contract
 ("take exactly 50, do not paginate") and 1b's reactive paginated acquisition
 plus bounded loaded prefix. Three explicit layers preserve one common product
-while allowing 1b's actual experiment.
+while allowing 1b's experiment.
 
 ## Layer A — fixed product semantics and canonical 50-row output
 

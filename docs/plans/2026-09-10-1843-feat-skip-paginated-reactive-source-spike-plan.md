@@ -14,7 +14,7 @@ reconciled: 2026-09-23
 
 ## Goal Capsule
 
-- **Objective:** Determine whether index-ordered Convex page subscriptions let Skip maintain a correct reactive feed with source-to-Skip steady-state update work governed by affected page size rather than the total loaded result.
+- **Objective:** Determine whether index-ordered Convex page subscriptions let Skip maintain a correct reactive feed. Steady-state update work from source to Skip follows affected page size rather than the total loaded result.
 - **Means:** Preserve Convex reactive pages as separate Skip input regions, replace split pages atomically, and let Skip merge, order, and reduce the loaded window.
 - **Product authority:** The user selected page subscriptions over point-query fan-out and application-defined shards. This plan owns Direction 1b only; the direct client, a backend changefeed, and backend-native Skip remain separate work.
 - **Open blockers:** None at product scope. **(Resolved 2026-09-23)** Page replacement uses the shared-prerequisites plan's P `SnapshotBatch` keyed by page-region ID, the smallest atomic representation that keeps page granularity (one key per live page, one update per swap).

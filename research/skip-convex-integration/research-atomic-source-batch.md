@@ -11,8 +11,8 @@ related_plans:
 # Abstract atomic-source-batch contract
 
 Transitions (1a), page-group swaps (1b), timestamp groups (1c), and committed
-transactions (Direction 2) are all their direction's indivisible source unit —
-but 1a/1b ingest **complete snapshots** while 1c/D2 ingest **revisioned
+transactions (Direction 2) are all their direction's indivisible source unit.
+1a and 1b ingest **complete snapshots** while 1c and D2 ingest **revisioned
 deltas**. The contract below separates transport-neutral invariants (all four)
 from the two encodings, plus an explicit 1b mapping. No direction is asked to
 adopt the other's input form.

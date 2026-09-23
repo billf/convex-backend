@@ -12,8 +12,8 @@ related_plans:
 
 Promotes a language-neutral logical-checkpoint definition into Q12
 (`...1159...:83`: standalone spec of Q1 checkpoint + Q3 normalization + Q5
-names, implementation-independent; Direction 2 implements native-Rust against
-it — `...1702...:317`). Each plan names the same "when may equality be
+names, implementation-independent). Direction 2 implements native-Rust against
+it (`...1702...:317`). Each plan names the same "when may equality be
 claimed" concept differently; this doc fixes one shared definition with
 per-direction bindings.
 
