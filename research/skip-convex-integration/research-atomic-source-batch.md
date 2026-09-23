@@ -36,8 +36,12 @@ adopt the other's input form.
 
 ## Snapshot encoding (1a/1b only)
 
-Complete per-query/per-page values forwarded with `isInit: true`
-reconciliation; bridge-side diffing explicitly prohibited
+Complete per-query/per-page values, keyed by query ID (1a) or page-region
+ID (1b), forwarded with `isInit: false` in one update per Transition or
+swap; whole-collection `isInit: true` only when every live query/region is
+included (bootstrap or reconnect), since a partial `isInit: true` empties
+every omitted key (`Runtime.sk` `writeInCollection`) and reads as a mass
+delete (shared P2/P3, updated 2026-09-23). Bridge-side diffing explicitly prohibited
 (`research-sync-protocol-skip-mapping.md:70-72`;
 `paginated-reactive-source-stable-page-snapshot-region` (1b R3)). Deletes
 arrive as full new values (1a `QueryRemoved` inside the enclosing update —

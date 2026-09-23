@@ -89,5 +89,8 @@ key or a re-keying mapper is required (`research-1b-page-topology.md:58-63`).
 ## Open questions
 
 - `take(50)` key schema: `_id` vs `[creationTime,_id]` composite (`research-1b-page-topology.md:90-93`).
-- R4 atomic-swap primitive: tagged-combined (A, loses per-page `isInit`) vs
-  scoped `updateMany`/fork-handle (B) vs P adoption (`...1843...:219,228`).
+- ~~R4 atomic-swap primitive: tagged-combined (A, loses per-page `isInit`) vs
+  scoped `updateMany`/fork-handle (B) vs P adoption.~~ **Resolved 2026-09-23:**
+  P adoption. P's `SnapshotBatch` keys each page region in one collection and
+  writes changed regions with `isInit: false`, so per-page `isInit` is not
+  needed; no runtime change (B) is required.
