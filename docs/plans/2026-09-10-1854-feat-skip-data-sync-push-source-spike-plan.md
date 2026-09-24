@@ -635,9 +635,9 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - `skip: package-lock.json` — lock the new workspace dependency graph.
   - `skip: examples/convex_data_sync_push/README.md` — document setup, administrative scope, expected lifecycle, how to interpret results, and the dependencies on P and Q.
   - `skip: examples/convex_data_sync_push/shared/model.ts` — define tagged source, control, joined-message, and count shapes, built on P's `RevisionDeltaBatch` type.
-  - `skip: examples/convex_data_sync_push/skip/service.ts` — build the persistent split, join, descending latest-50 ordering, and grouped reduction, using P's split-mapper/order-key helpers for the split and ordering stages.
+  - `skip: examples/convex_data_sync_push/skip/service.ts` — build the persistent split, join, descending latest-50 ordering, and grouped reduction, using P's split-mapper/order-key helpers for the split and ordering stages, and mount P's exported `groupProbe` graph function for Q14's V6 no-torn assertion.
   - `skip: examples/convex_data_sync_push/skip/service.test.ts` — prove incremental graph behavior and publication atomicity.
-  - `skip: examples/convex_data_sync_push/skip/server.ts` — expose the proof resources and instrumentation only on a loopback or equivalent isolated test-network listener.
+  - `skip: examples/convex_data_sync_push/skip/server.ts` — expose the proof resources (including `groupProbe`) and instrumentation only on a loopback or equivalent isolated test-network listener.
   - `skip: examples/convex_data_sync_push/bench/compare.ts` — wire Q's settled-checkpoint detector, dual-reader comparator, and counter/timer recorder to this plan's `N`/`K`/`F` sweep and R15's fault scenarios, rather than reimplementing comparison logic.
   - `skip: examples/convex_data_sync_push/bench/compare.test.ts` — verify this unit's wiring of Q against controlled fixtures; Q's own comparator/fault-injection correctness is proven by Q's test suite (Q8), not re-verified here.
   - `skip: examples/convex_data_sync_push/bench/verify_protocol_fixtures.ts` — compare the backend's canonical KTD6 wire-format fixture corpus with U4's vendored copy before live integration (distinct from Q's own fixtures; this stays this unit's concern).
