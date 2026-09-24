@@ -607,6 +607,12 @@ The parity function must match the golden hashes.
 
 U8 tests use synthetic transcripts.
 
+A valid transcript must replay with no error.
+
+A transcript with bad data must fail with a parse error.
+
+The parse error names the event.
+
 ### U9: Build the No-Torn Observer
 
 Record every published state of the watched resource.
@@ -654,6 +660,18 @@ Run each fault.
 Record the SSE transcripts.
 
 Replay recorded transcripts through the reader in U11.
+
+The server package exports only `server.js`.
+
+Import the route functions from the `rest.ts` source file in the Skip workspace.
+
+This import is for tests only and does not change Skip.
+
+Register those routes on a test app on `127.0.0.1`.
+
+Compare their methods, paths, and framing with the mirror.
+
+If the file or a route function is missing, stop with the error `skip-route-source-missing`.
 
 Write the report.
 
