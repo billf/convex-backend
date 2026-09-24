@@ -265,6 +265,10 @@ The coupling is four items.
 - The corpus file.
 - The loader command and its JSON output.
 
+U4 publishes the four items as a versioned contract.
+
+U8 and U11 stop on a version mismatch before any comparison.
+
 ### KTD4: Use a Hand-Written Reference Source
 
 The reference source subscribes to `allSelectedRows` through `ConvexClient`.
@@ -292,6 +296,14 @@ After each write, the coordinator runs the marker mutation.
 The marker acknowledgment gives a sequence number.
 
 Gate one uses the first source transition that shows that sequence number or a higher one.
+
+Admission needs the marker sequence at or past the acknowledgment, carried by a source transition.
+
+The coordinator retries the marker one time after a trailing patch.
+
+More trailing writes stop the run with a harness error.
+
+U7, U8, and U11 test each order as admitted or not comparable.
 
 Skip sends nothing to a stream when a result does not change.
 
@@ -335,6 +347,10 @@ For the V4 tie, the larger `_id` gets the label that sorts first.
 
 After binding, a mutation corrects the body of each tied row.
 
+The loader reads each `_creationTime` before and after the correction.
+
+The loader stops the vector when a tied row moved.
+
 Q keeps a copy of the corpus.
 
 Q checks the copy with a semantic hash, not a byte comparison.
@@ -346,6 +362,12 @@ Keep the catalog as one TypeScript constant and one JSON Schema.
 The recorder rejects unknown metric names.
 
 A missing required metric is a harness error.
+
+U12 generates both schemas from the catalog record.
+
+The schemas carry a versioned schema ID.
+
+U16 counts as consumed only when a consumer cites that schema version.
 
 ### KTD7: Write a Small SSE Reader
 
@@ -359,7 +381,21 @@ A heartbeat has no `id` line.
 
 The reader refuses hosts that are not loopback.
 
-The reader stops on an unknown event or bad data.
+An unknown `init` or `update` variant stops the reader.
+
+The reader ignores other unknown event names and counts them.
+
+Bad data stops the reader.
+
+The accepted framing carries the tested server version.
+
+U11 names that version when the mirror differs.
+
+U11 checks the mirror against the real server routes.
+
+In quiesced mode, an unknown event stops the checkpoint with a harness error.
+
+The hold on new writes ends at the same time.
 
 ### KTD8: Keep the Tutorial Working
 
@@ -391,6 +427,12 @@ If the build fails, stop and escalate.
 
 Do not replace the runtime with a mock.
 
+U3 and U11 check the toolchain before any vector runs.
+
+Without the toolchain, they stop with the error `skip-toolchain-missing`.
+
+U11 pins its routes to one tested server version.
+
 Do not use `runService`, because it listens on all interfaces.
 
 It is not known if `convex-test` accepts an explicit `_creationTime`.
@@ -402,6 +444,8 @@ If it does not, prove the V4 tie on the deployment.
 Build the snapshot baseline first.
 
 The snapshot baseline is U1 to U12.
+
+U6 starts after U5.
 
 U11 comes last in the snapshot baseline.
 
@@ -501,6 +545,8 @@ Write `corpus/v1.json`.
 
 Record the golden parity hashes beside the corpus.
 
+The parity file carries the corpus version and the hash method.
+
 Build the loader command.
 
 Build a `convex-test` loader and a mutation log.
@@ -559,6 +605,8 @@ Build the parity function as pure code.
 
 The parity function must match the golden hashes.
 
+U8 tests use synthetic transcripts.
+
 ### U9: Build the No-Torn Observer
 
 Record every published state of the watched resource.
@@ -597,9 +645,15 @@ After the loader stops, run the marker mutation.
 
 Compare at each checkpoint.
 
+For harness deltas, gate one uses the timestamp from the resolved mutation.
+
+For loaded base states, gate one uses the marker transition.
+
 Run each fault.
 
 Record the SSE transcripts.
+
+Replay recorded transcripts through the reader in U11.
 
 Write the report.
 
@@ -621,7 +675,7 @@ Test that Q imports no spike package.
 
 Build the revision envelope.
 
-Keep `ts` as a decimal string and compare it as a big integer.
+Keep `ts` as a string or bigint so large values stay ordered.
 
 Apply a revision only when it is newer.
 
