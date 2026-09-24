@@ -7,9 +7,12 @@ artifact_contract: ce-unified-plan/v1
 product_contract_source: ce-brainstorm
 execution: code
 reconciled: 2026-09-23
+ste_companion: 2026-09-11-1159-feat-skip-shared-prerequisites-plan.ste.md
 ---
 
 # Skip Shared Prerequisites - Plan
+
+This plan is authoritative. A Simplified Technical English companion, [the STE version](2026-09-11-1159-feat-skip-shared-prerequisites-plan.ste.md), restates it for easier reading and translation; regenerate the companion after every change here, and use this plan wherever the two differ.
 
 ## Goal Capsule
 
