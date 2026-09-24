@@ -12,10 +12,10 @@ execution_started: 2026-09-24
 execution_status: in-progress
 units:
   U1: done
-  U2: in-progress
-  U3: pending
-  U4: pending
-  U5: pending
+  U2: done
+  U3: blocked (skip-toolchain-missing; same-tick scenario needs @skipruntime/wasm)
+  U4: done
+  U5: in-progress
   U6: pending
   U7: pending
   U8: pending
