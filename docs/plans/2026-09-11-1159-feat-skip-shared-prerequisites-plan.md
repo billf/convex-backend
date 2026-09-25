@@ -13,17 +13,17 @@ execution_status: in-progress
 units:
   U1: done
   U2: done
-  U3: blocked (skip-toolchain-missing; same-tick scenario needs @skipruntime/wasm)
+  U3: in-progress (toolchain unblocked, @skipruntime/wasm built via Docker/`container`; live same-tick scenario deferred to U11's reference service)
   U4: done
-  U5: in-progress
-  U6: pending
-  U7: pending
-  U8: pending
-  U9: pending
-  U10: pending
-  U11: pending
-  U12: pending
-  U13: pending
+  U5: done (deployment loader CLI unverified against a live deployment)
+  U6: done
+  U7: done
+  U8: done (native-reader ConvexClient wiring and real-server SSE transcript replay deferred to U11)
+  U9: done (live proof against a real service deferred to U11)
+  U10: done
+  U11: pending (needs U12 and a live deployment this environment doesn't have; deferred until U12-U16 are done)
+  U12: done
+  U13: in-progress
   U14: pending
   U15: pending
   U16: pending
