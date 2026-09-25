@@ -301,6 +301,12 @@ Admission needs the marker sequence at or past the acknowledgment, carried by a 
 
 The coordinator retries the marker one time after a trailing patch.
 
+The retry applies only to loader and patch cases.
+
+Patch cases and source cases stop with different errors.
+
+The report counts each retry.
+
 More trailing writes stop the run with a harness error.
 
 U7, U8, and U11 test each order as admitted or not comparable.
@@ -392,6 +398,16 @@ The accepted framing carries the tested server version.
 U11 names that version when the mirror differs.
 
 U11 checks the mirror against the real server routes.
+
+The check imports the route functions by workspace path.
+
+A missing route file stops the run with its own error.
+
+The check allows only the checkpoint event and owned routes.
+
+Other differences stop the run and name the server version.
+
+A checked-in expectation pins the event framing.
 
 In quiesced mode, an unknown event stops the checkpoint with a harness error.
 
@@ -547,6 +563,10 @@ Record the golden parity hashes beside the corpus.
 
 The parity file carries the corpus version and the hash method.
 
+The fixture owner bumps both versions together.
+
+The owner remakes both hash files together.
+
 Build the loader command.
 
 Build a `convex-test` loader and a mutation log.
@@ -636,6 +656,12 @@ Test both write orders.
 Build each injector with a trigger, an expected state, and a counter name.
 
 Build helpers for detection, recovery, and counting.
+
+An unknown event pauses the recovery check for that checkpoint.
+
+The checkpoint records the event name with the fault counter.
+
+The checkpoint stops as a harness error, not as a fault pass or fail.
 
 Test the three query failure states.
 
