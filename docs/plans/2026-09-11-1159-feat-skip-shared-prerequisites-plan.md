@@ -9,7 +9,7 @@ execution: code
 reconciled: 2026-09-23
 ste_companion: 2026-09-11-1159-feat-skip-shared-prerequisites-plan.ste.md
 execution_started: 2026-09-24
-execution_status: in-progress
+execution_status: blocked (only U11/U15 remain, both need a live local Convex deployment this environment doesn't have)
 units:
   U1: done
   U2: done
@@ -21,12 +21,12 @@ units:
   U8: done (native-reader ConvexClient wiring and real-server SSE transcript replay deferred to U11)
   U9: done (live proof against a real service deferred to U11)
   U10: done
-  U11: pending (needs U12 and a live deployment this environment doesn't have; deferred until U12-U16 are done)
+  U11: pending (all code dependencies -- U3, U5, U7-U10, U12 -- done; blocked solely on a live local deployment this environment doesn't have)
   U12: done
-  U13: in-progress
-  U14: pending
-  U15: pending
-  U16: pending
+  U13: done
+  U14: done
+  U15: pending (needs U11, blocked on the same live deployment)
+  U16: done
 ---
 
 # Skip Shared Prerequisites - Plan
