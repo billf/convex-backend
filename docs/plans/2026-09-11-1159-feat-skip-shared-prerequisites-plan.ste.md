@@ -577,7 +577,13 @@ Test that a missing mutation makes the parity check fail.
 
 ### U6: Build the Comparator
 
-Normalize both results.
+Compare both results row by row, in the order each side sent.
+
+Do not re-sort either side before comparing. A swapped tie must show up
+as a mismatch, not get hidden by re-sorting.
+
+Normalize each field's representation only (sender, like count), never
+the row order.
 
 Report each key and field that differs.
 
