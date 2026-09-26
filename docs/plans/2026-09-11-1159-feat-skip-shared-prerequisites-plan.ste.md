@@ -667,6 +667,10 @@ Test the three query failure states.
 
 ### U11: Run the Snapshot Reference
 
+This needs a running local Convex deployment and a built Skip runtime.
+A separate plan builds those:
+2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md.
+
 Run the reference service on `initService`.
 
 Serve the routes on `127.0.0.1` only.
@@ -736,6 +740,9 @@ Test each injector with a scripted mock.
 1c U6 gives the real triggers.
 
 ### U15: Run the Revision Reference
+
+This needs the same running deployment as U11:
+2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md.
 
 Replay V6 as one revision group.
 
