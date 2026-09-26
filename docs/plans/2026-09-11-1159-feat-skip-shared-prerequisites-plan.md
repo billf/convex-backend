@@ -9,7 +9,7 @@ execution: code
 reconciled: 2026-09-23
 ste_companion: 2026-09-11-1159-feat-skip-shared-prerequisites-plan.ste.md
 execution_started: 2026-09-24
-execution_status: blocked (only U11/U15 remain, both need a live local Convex deployment this environment doesn't have)
+execution_status: blocked (only U11/U15 remain, both need a live local Convex deployment; standing that up is split off to 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)
 units:
   U1: done
   U2: done
@@ -21,11 +21,11 @@ units:
   U8: done (native-reader ConvexClient wiring and real-server SSE transcript replay deferred to U11)
   U9: done (live proof against a real service deferred to U11)
   U10: done
-  U11: pending (all code dependencies -- U3, U5, U7-U10, U12 -- done; blocked solely on a live local deployment this environment doesn't have)
+  U11: pending (all code dependencies -- U3, U5, U7-U10, U12 -- done; blocked solely on a live local deployment, split off to 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)
   U12: done
   U13: done
   U14: done
-  U15: pending (needs U11, blocked on the same live deployment)
+  U15: pending (needs U11, blocked on the same live deployment, split off to 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)
   U16: done
 ---
 
@@ -502,14 +502,14 @@ stateDiagram-v2
 
 ### Implementation Sequence
 
-1. Snapshot baseline: U1 → U2 → U3; U4 → U5 → U6 → U7; U8 after U4 and U6; U9 after U8; U10 after U7 and U8; U12 after U6 and U7; U11 last, after U3, U5, U7-U10, and U12. This tier releases 1a and 1b.
+1. Snapshot baseline: U1 → U2 → U3; U4 → U5 → U6 → U7; U8 after U4 and U6; U9 after U8; U10 after U7 and U8; U12 after U6 and U7; U11 last, after U3, U5, U7-U10, and U12, and after [`2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md`](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)'s Definition of Done. This tier releases 1a and 1b.
 2. Revision-delta tier: U13 after U2; U14 after U10 and U13; U15 after U11, U13, and U14. This tier releases verification of 1c's U4 and U6.
 3. Direction 2 specification: U16 after U12, on its own schedule; it gates neither tier.
 
 ### Assumptions
 
 - 1a and 1b have no settled code location yet. To claim the snapshot-baseline release they consume P and Q as Skip workspaces. If either needs to land outside the Skip workspace, that trips the first Goal Capsule stop condition and packaging is re-planned here, not patched over with a cross-repo `file:` link, the fragility KTD1 rejected.
-- `@skipruntime/wasm` must be built before any runtime-backed scenario (U3's same-tick test, U11, U15). In the Skip workspace it links to `skipruntime-ts/wasm`, which has no `dist/` in a fresh checkout; its `build` script runs `skargo` from the Skiplang toolchain (built per `~/src/skip` INSTALL.md, or inside the repo `Dockerfile`). If it cannot be built, stop and escalate under the Goal Capsule stop conditions; do not substitute a mock runtime.
+- `@skipruntime/wasm` must be built before any runtime-backed scenario (U3's same-tick test, U11, U15). In the Skip workspace it links to `skipruntime-ts/wasm`, which has no `dist/` in a fresh checkout; its `build` script runs `skargo` from the Skiplang toolchain (built per `~/src/skip` INSTALL.md, or inside the repo `Dockerfile`). If it cannot be built, stop and escalate under the Goal Capsule stop conditions; do not substitute a mock runtime. Standing up that build (and the local deployment U11/U15 also need) is split off to [`2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md`](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md); U11/U15 consume its Definition of Done rather than re-deriving the toolchain path.
 - With that build in place, a real Skip runtime runs under `tsx --test` through `@skipruntime/wasm`'s `initService`; if `tsx --test` cannot host it, the runtime-backed scenarios move into U11's harness script. `runService` is not used: it calls `listen(port)` with no host (`skip: skipruntime-ts/server/src/server.ts:147,160`), and `@skipruntime/server` exports only `server.ts`, so it cannot bind loopback-only without a Skip change (P8). U3 and U11 pre-flight the toolchain (record the `skargo` version or `Dockerfile` path; without it they fail with the named harness error `skip-toolchain-missing` before any vector runs), and U11 checks its mirrored Express surface against the real route registrars and pins them to the tested server version, failing with that version named on conformance drift. `@skipruntime/server` exports only `server.js`, so the check imports `registerControlServiceRoutes` and `registerStreamingServiceRoutes` from the workspace source file `skip: skipruntime-ts/server/src/rest.ts` by relative path; this is a test-only read of Skip source, not a runtime change (P8).
 - Whether `convex-test` honors an explicit `_creationTime` is unknown. If it does not, the convex-test path proves V4's boundary but not its tie; the tie is proven by the snapshot reference run and by Q3's synthetic tests.
 
@@ -735,7 +735,7 @@ stateDiagram-v2
 
 - **Goal:** Prove Q end to end on a local deployment before any spike exists.
 - **Requirements:** Q9, Q14, AE4, AE6, AE7, AE12, AE13, F1, F3, F4, F5.
-- **Dependencies:** U3, U5, U7-U10, U12.
+- **Dependencies:** U3, U5, U7-U10, U12; the running deployment, pushed fixture, and built Skip runtime this depends on are [`2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md`](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)'s Definition of Done, not a unit in this plan.
 - **Files:** `skip: .../convex_proof_harness/reference/{service,source,run}.ts`, `package.json` script `reference:snapshot`.
 - **Approach:**
   - `service.ts` runs U3's feed and `groupProbe` on `initService`, with Q-owned control and streaming routes mirroring `skip: skipruntime-ts/server/src/rest.ts` (POST/GET/DELETE `/v1/streams`, `init`/`update` with `id:` watermark, 30 s heartbeat) plus KTD4's `checkpoint` event, all through Q's exported checkpoint emitter on Express listeners bound explicitly to `127.0.0.1`.
@@ -807,7 +807,7 @@ stateDiagram-v2
 
 - **Goal:** F2 end to end through the revision-delta extension.
 - **Requirements:** P3, P4, P9, Q14, F2.
-- **Dependencies:** U11, U13, U14.
+- **Dependencies:** U11, U13, U14; same live-deployment dependency as U11, via [`2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md`](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md).
 - **Files:** `skip: .../convex_proof_harness/reference/` additions, `package.json` script `reference:revision`.
 - **Approach:** A scripted `RevisionDeltaBatch` source replays V6 as one exact-`ts` group into U3's feed on the reference service, with the Q14 observer on `groupProbe`. Seeded variants use two groups, one per order.
 - **Test scenarios:**
@@ -837,7 +837,7 @@ stateDiagram-v2
 | Q package | `npm test -w skip-convex-proof-harness` | U6-U10, U12, U14 at unit level |
 | Q12 spec | review of `METHODOLOGY.md` against Direction 2's R4/R12/R13/R15 | U16 (AE11) |
 | Q13 | `npm test` in convex-tutorial (vitest plus convex-test) | U4, U5; V4's boundary only. V4's tie is proven by the snapshot reference run, and the baseline gate fails without it |
-| Snapshot reference | fresh local `npx convex dev` in convex-tutorial, `npx convex env set PROOF_VEHICLE_FIXTURE 1`, then `npm run reference:snapshot -w skip-convex-proof-harness` | U11; AE4, AE6, AE7, AE12, AE13, F1, F3-F5 live |
+| Snapshot reference | fresh local `npx convex dev` in convex-tutorial, `npx convex env set PROOF_VEHICLE_FIXTURE 1`, then `npm run reference:snapshot -w skip-convex-proof-harness` (deployment/runtime stand-up: [`2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md`](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)) | U11; AE4, AE6, AE7, AE12, AE13, F1, F3-F5 live |
 | Revision reference | same deployment setup, then `npm run reference:revision -w skip-convex-proof-harness` | U15; F2 live |
 | Lint | `npm run lint` in each touched Skip workspace | style parity |
 | Docs | render Mermaid in touched `docs/plans/*` and check cross-plan anchors resolve | graph maintenance |
