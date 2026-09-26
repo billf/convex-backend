@@ -649,7 +649,7 @@ stateDiagram-v2
 - **Requirements:** Q3, Q4, Q8, AE4, AE6, AE12.
 - **Dependencies:** U5.
 - **Files:** `skip: examples/convex_proof_harness/src/{comparator,corpus}.ts`, `testdata/semantic-vectors-v1.json`, tests; `skip: package.json` workspace entry.
-- **Approach:** Canonicalize both sides (descending order, nullable sender, exact `likeCount`); emit a structured mismatch `{vector, key, field, expected, actual}` in the shape U12's mismatch schema later formalizes; load the vendored corpus, verify its semantic hash, and resolve labels through the load-binding map. No tolerance options.
+- **Approach:** Compare `expected` against `actual` positionally, row by row as each side emitted it — the comparator never re-sorts either side before comparing. Canonicalization is per-field representation only (nullable sender, exact `likeCount`), never row order; producing the correct descending `(_creationTime, _id)` order is each side's own responsibility (the Skip-side key-encoding trick and the native-side explicit sort, per the Normalization rules), and a swapped tie must surface as a positional mismatch here, not be absorbed by re-sorting both sides back into agreement. Emit a structured mismatch `{vector, key, field, expected, actual}` in the shape U12's mismatch schema later formalizes; load the vendored corpus, verify its semantic hash, and resolve labels through the load-binding map. No tolerance options.
 - **Test scenarios:**
   - Identical feeds match.
   - Covers AE6, AE12. Wrong `likeCount`, a swapped tie, an included 51st row, `"Unknown"` in place of `null`, a missing row, and an extra row each produce a mismatch naming key and field.
