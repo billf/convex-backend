@@ -20,7 +20,9 @@ If this document differs from the source plan, use the source plan.
 
 Use the source plan for exact commands, file paths, and the diagram.
 
-The plan builds a running local Convex deployment and a built Skip runtime.
+The plan builds a local Convex deployment and a Skip runtime.
+
+The plan also updates the fixture loader for the local deployment.
 
 Two other units in the shared prerequisites plan need this deployment and this runtime.
 
@@ -44,17 +46,17 @@ Run a symmetry review against the source plan when meaning changes.
 
 The shared prerequisites plan lists U11 and U15 as not started.
 
-Both units name the same missing thing.
+Both units need a live local Convex deployment.
 
-The missing thing is a live local Convex deployment.
+The fixture loader also needs a change to use this deployment.
 
-Every other requirement for U11 and U15 is already done as code.
+The other named units are already done as code.
 
 Standing up a deployment is not a proof of correctness.
 
 It is infrastructure that U11 and U15 assume already exists.
 
-This plan makes that infrastructure exist.
+This plan supplies the infrastructure and updates the fixture loader.
 
 U11 and U15 stay in the shared prerequisites plan.
 
@@ -67,6 +69,8 @@ The Definition of Done in this plan becomes a dependency for both.
 Give U11 and U15 a real local Convex deployment to run against.
 
 Give U11 and U15 a built Skip runtime to run against.
+
+Update the fixture loader to use the local deployment for reads and imports.
 
 Bind both to fixed loopback addresses.
 
@@ -84,7 +88,9 @@ The first condition is a needed change to the Skip runtime or the FFI layer.
 
 The second condition is a needed change to the Convex backend code.
 
-This plan runs existing tools. It does not change either codebase.
+This plan changes only the fixture loader and its focused test in the tutorial checkout.
+
+It does not change the Convex backend or the Skip runtime.
 
 Stop if the Skip language toolchain fails to build by any documented method.
 
@@ -120,13 +126,23 @@ Pass the admin key and the URL as explicit flags.
 
 The push writes a `.env.local` file.
 
-The loader script and the reference source both read that file.
+The reference source uses the URL in that file.
+
+Give the loader the same URL in its process environment.
+
+Give the loader an admin key in its process environment.
+
+The loader uses that URL and key for reads and all imports.
+
+The loader does not use a deployment name for imports.
+
+The loader stops before any import if the URL or key is missing.
 
 Set `PROOF_VEHICLE_FIXTURE` to 1 on the deployment.
 
 Run the loader script from the tutorial checkout against the deployment.
 
-Check the fixture set version from the loader against the version stored in the Skip workspace.
+Check the source corpus version against the version stored in the Skip workspace.
 
 **The Skip WASM runtime**
 
@@ -166,7 +182,9 @@ Given that clean checkout, the admin key command also returns a key.
 
 Given the running backend, when the push command runs, then it writes the env file with no error.
 
-Given the pushed deployment, when the loader script runs against it, then the fixture set versions match.
+Given the pushed deployment, when the loader script runs against it, then it returns a label-to-ID map.
+
+The source corpus and the Skip parity manifest must have the same fixture set version.
 
 Given the Skip workspace, when the WASM build runs through the container method, then the build exits clean.
 
@@ -180,7 +198,9 @@ This success happens under the sandbox setting.
 
 Change no code in `local_backend`.
 
-Change no code in the tutorial fixture.
+Change only the fixture loader and its focused test in the tutorial checkout.
+
+Do not change the fixture functions or corpus.
 
 Change no code in the Skip workspace.
 
@@ -250,6 +270,20 @@ Do not have one test command start and stop them.
 
 The reference scripts expect a URL that is already live.
 
+### KTD5: Use One Local Target for Reads and Imports
+
+The local development command writes a URL to `.env.local`.
+
+It removes the deployment name from that file.
+
+The current loader requires a deployment name for imports.
+
+The import command cannot use a deployment name with a local URL and admin key.
+
+Update the loader to pass the same URL and key to every import.
+
+Keep the existing corpus and label binding.
+
 ## Assumptions
 
 `cargo`, `just`, `node`, and `npm` are already installed and correctly versioned.
@@ -270,7 +304,7 @@ This plan creates no new checkout.
 
 Build the backend first. This is unit I1.
 
-Push the fixture next. This is unit I2. It depends on I1.
+Push the fixture and update its loader next. This is unit I2. It depends on I1.
 
 Build the Skip runtime in parallel. This is unit I3. It has no dependency.
 
@@ -302,15 +336,31 @@ Push the `proofVehicle` functions with the explicit key and URL flags.
 
 Set the fixture flag to 1 on the deployment.
 
-Run the loader script against the deployment.
+Update the loader to require `CONVEX_URL` and `PROOF_VEHICLE_ADMIN_KEY`.
 
-Compare the fixture set version from the loader against the version stored in the Skip workspace.
+Pass these values as URL and admin key flags to each import.
+
+Do not pass a deployment name to an import.
+
+Test that the loader rejects a missing URL or key before an import.
+
+Test the import arguments without a live deployment.
+
+Run the loader against the deployment with explicit process variables.
+
+Use the same URL that `.env.local` contains.
+
+Get the admin key from the existing key command.
+
+Read the label-to-ID map from the loader.
+
+Compare the source corpus version with the Skip parity manifest version.
 
 Test that the push completes with no schema error and no function error.
 
 Test that the fixture flag reads back as 1.
 
-Test that the version from the loader matches the vendored version.
+Test that the source corpus and parity manifest versions match.
 
 ### I3: Build and Smoke-Test the Skip Runtime
 
@@ -350,9 +400,13 @@ Every other unit follows this same rule.
 
 Keep the backend and the watching `convex dev` process running.
 
-Keep the Skip runtime running under the confirmed sandbox setting.
+Build the Skip runtime before this check.
 
-Run a script that reads from the live backend and from the live runtime in one process.
+Run the check under the confirmed sandbox setting.
+
+Run a script that reads from the live backend and starts the Skip runtime in one process.
+
+Read one value from the Skip runtime.
 
 Make no correctness comparison here.
 
@@ -366,7 +420,11 @@ Test that the script exits clean with no orphan process.
 
 Start the backend and confirm both ports accept a connection. This proves I1.
 
-Push the fixture and read the fixture flag back. This proves I2.
+Push the fixture and read the fixture flag back.
+
+Run the focused loader test and the live loader.
+
+Compare the source corpus and parity manifest versions. This proves I2.
 
 Build the Skip runtime and run its smoke script. This proves I3.
 
@@ -378,7 +436,9 @@ It also proves the Definition of Done for this plan.
 
 ## Out of Scope
 
-Do not change `local_backend`, the tutorial fixture, or the Skip workspace.
+Do not change `local_backend`, the tutorial fixture functions or corpus, or the Skip workspace.
+
+Change only the tutorial loader and its focused test.
 
 Do not build a hosted or production deployment.
 
@@ -390,13 +450,23 @@ Do not build a process supervisor for the backend or for `convex dev`.
 
 The backend serves a fresh deployment on both loopback ports.
 
-The push of the fixture completes. This plan sets the fixture flag. The version from the loader matches.
+The push of the fixture completes. This plan sets the fixture flag.
+
+The loader reads and imports through the same local URL.
+
+The loader returns a label-to-ID map.
+
+The source corpus and parity manifest versions match.
 
 This plan builds the Skip runtime, and it passes its own smoke check.
 
 The confirmed sandbox setting proves the loopback bind of the reference service.
 
-No code changed in `local_backend`, in the tutorial fixture, or in the Skip workspace.
+No code changed in `local_backend` or in the Skip workspace.
+
+Only the tutorial loader and its focused test changed.
+
+The tutorial fixture functions and corpus did not change.
 
 U11 can start against a real, already-reachable deployment.
 

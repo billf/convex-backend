@@ -7,6 +7,7 @@ artifact_contract: ce-unified-plan/v1
 product_contract_source: ce-plan-split
 execution: code
 split_from: 2026-09-11-1159-feat-skip-shared-prerequisites-plan.md
+ste_companion: 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.ste.md
 execution_started: null
 execution_status: not-started
 units:
@@ -19,16 +20,19 @@ units:
 
 # Skip Local Convex Development Infrastructure - Plan
 
+This plan is authoritative. A Simplified Technical English companion, [the STE version](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.ste.md), restates it for easier reading and translation; regenerate the companion after every change here, and use this plan wherever the two differ.
+
 This plan was split out of
 [the Skip Shared Prerequisites plan](2026-09-11-1159-feat-skip-shared-prerequisites-plan.md)
 on 2026-09-26. That plan's U11 and U15 each name the identical unmet
 requirement — "a live local Convex deployment this environment doesn't
-have" — as their sole remaining blocker; every other requirement either
-unit names (Q9, Q14, AE4, AE6, AE7, AE12, AE13, F1-F5, P3, P4, P9) is
+have" — as their main remaining blocker; the other named units (Q9,
+Q14, AE4, AE6, AE7, AE12, AE13, F1-F5, P3, P4, P9) are
 already satisfied by code sitting in the `skip` worktree. Standing up
-that deployment is not itself part of proving Q or P; it is
-infrastructure both units currently assume exists. This plan makes it
-exist. U11 and U15 stay in the parent plan and consume this plan's
+that deployment and adapting the fixture loader to target it are not
+themselves part of proving Q or P; they are prerequisites both units
+currently assume exist. This plan supplies those prerequisites. U11
+and U15 stay in the parent plan and consume this plan's
 Definition of Done as a dependency; they do not move here.
 
 ---
@@ -52,7 +56,8 @@ Definition of Done as a dependency; they do not move here.
   Not separately brainstormed.
 - **Open blockers:** None known going in. Every command below has
   already been located in this repo's `Justfile` and `BUILD.md`; nothing
-  here needs a new tool or a new external service.
+  here needs a new tool or a new external service. The existing fixture
+  loader needs the narrow self-hosted targeting change specified in I2.
 - **Stop conditions:** Stop and escalate to the parent plan's Goal
   Capsule if a unit here turns out to need a Skip runtime, FFI, or
   convex-backend code change (P8 in the parent plan) — this plan only
@@ -62,9 +67,10 @@ Definition of Done as a dependency; they do not move here.
   here for I3).
 - **Execution profile:** Two repositories touched: `convex-backend`
   (running the existing local backend, no code changes) and
-  `convex-tutorial` (pushing the existing `proofVehicle` fixture, no
-  code changes). The `skip` worktree's build is exercised but not
-  edited. No pushes to any remote without explicit user approval.
+  `convex-tutorial` (pushing the existing `proofVehicle` fixture and
+  changing only its loader CLI and focused test). The `skip` worktree's
+  build is exercised but not edited. No pushes to any remote without
+  explicit user approval.
 
 ---
 
@@ -74,16 +80,18 @@ Definition of Done as a dependency; they do not move here.
 
 Stand up, once, the local Convex deployment and Skip WASM runtime that
 the parent plan's U11 and U15 need to run against a real system instead
-of a mock. This plan produces no test code and asserts no correctness
-claims of its own; its Definition of Done is "the deployment and runtime
+of a mock. It makes one compatibility change to the fixture loader and
+tests that change; it asserts no Q/P correctness claims of its own.
+Its Definition of Done is "the deployment and runtime
 exist, are reachable, and hold the expected fixture" — the parent
 plan's own reference scripts remain the thing that proves Q and P.
 
 ### Problem Frame
 
-The parent plan's frontmatter already states, unit by unit, that every
-code dependency for U11 (U3, U5, U7-U10, U12) and for U15 (U11, U13,
-U14) is done. What is not done is infrastructure: no local backend has
+The parent plan's frontmatter already states, unit by unit, that its
+Q/P code dependencies for U11 (U3, U5, U7-U10, U12) and for U15 (U11,
+U13, U14) are done. What remains is local infrastructure and its
+fixture-loader connection: no local backend has
 ever been started in this environment, `convex-tutorial` has never been
 pushed anywhere (no `.env.local` exists), and the Skiplang toolchain's
 build path (LLVM 20 + matching `wasm-ld`, or the `container`-based
@@ -101,8 +109,8 @@ running backend, a pushed fixture, and a built Skip runtime).
 **Convex local backend**
 
 - I1a. `local_backend` builds and runs from source via
-  `just run-local-backend`, listening on `127.0.0.1:3210` (RPC) and
-  `127.0.0.1:3211` (HTTP actions), using the existing `Justfile`
+  `just run-local-backend --interface 127.0.0.1`, listening on
+  `127.0.0.1:3210` (RPC) and `127.0.0.1:3211` (HTTP actions), using the existing `Justfile`
   recipes (`init-instance-secret`, `generate-admin-key`) with no new
   secrets material introduced.
 - I1b. The backend survives a `reset-local-backend` / restart cycle
@@ -114,21 +122,30 @@ running backend, a pushed fixture, and a built Skip runtime).
   running local backend via `npx convex dev --once` with `--admin-key`
   and `--url` passed explicitly from the backend checkout's key recipe
   (the `just convex` wrapper only resolves inside `convex-backend`),
-  producing a `.env.local` the loader CLI and `ConvexClient`-based
-  reference source can both read.
+  producing a `.env.local` whose `CONVEX_URL` the reference source
+  uses. The loader receives the same URL in its process environment;
+  `tsx` does not load `.env.local` automatically.
 - I2b. `PROOF_VEHICLE_FIXTURE=1` is set on the deployment (`npx convex
   env set`), matching the parent plan's Verification Contract row for
   the snapshot reference run.
 - I2c. The parent plan's KTD3 four-thing coupling (function names, `allSelectedRows`'s
   tagged row shape, the corpus file, the loader CLI's JSON output) is
   confirmed live-reachable: the loader CLI runs against this
-  deployment and produces output U5/U8's version check accepts.
+  deployment and produces a label-to-ID JSON map. The tutorial corpus's
+  `fixtureSetVersion` matches the vendored Skip parity manifest.
+- I2d. The loader CLI uses one self-hosted target for its reads and all
+  imports: explicit `CONVEX_URL` and `PROOF_VEHICLE_ADMIN_KEY` process
+  variables, with the URL matching the generated `.env.local` and the
+  key supplied by `generate-admin-key`. It passes `--url`
+  and `--admin-key` to each `npx convex import`, without
+  `--deployment`. It fails before importing if either value is missing.
 
 **Skip WASM runtime**
 
 - I3a. `@skipruntime/wasm` builds successfully (`npm run build -w
-  @skipruntime/wasm` in `~/src/skip`) using the toolchain path the
-  parent plan's U3 already established (`container`-based build in
+  @skipruntime/wasm` in
+  `~/src/skip/.worktrees/feat-skip-shared-prereqs`) using the toolchain
+  path the parent plan's U3 already established (`container`-based build in
   place of a native LLVM 20 + `skargo` install), recorded by version /
   image reference the way U3 already does.
 - I3b. A trivial `initService` smoke (start the runtime, register one
@@ -145,31 +162,30 @@ running backend, a pushed fixture, and a built Skip runtime).
   keep them up across sessions.
 - I4b. Q's reference service (U11's `reference/service.ts`) needs a
   loopback bind; this plan proves that bind succeeds under this
-  environment's sandbox with the narrow loopback permission first
-  (`sandbox.network.allowLocalBinding`), so U11 isn't blocked a
-  second time by an unrelated permission gate right after this plan
-  closes the deployment gap. A bypass — running outside the sandbox
-  or with the sandbox disabled — does not satisfy this requirement.
+  environment's sandbox with a confirmed loopback permission. This
+  prevents a second permission blocker when U11 begins. A bypass —
+  running outside the sandbox or with the sandbox disabled — does not
+  satisfy this requirement.
 
 ### Acceptance Examples
 
 - AE1. Given a clean checkout with no `convex_local_storage/` and no
-  `convex_local_backend.sqlite3`, when `just run-local-backend` is run,
-  then the process listens on `127.0.0.1:3210` and `127.0.0.1:3211` and
+  `convex_local_backend.sqlite3`, when
+  `just run-local-backend --interface 127.0.0.1` runs, then the process
+  listens on `127.0.0.1:3210` and `127.0.0.1:3211` only, and
   `just generate-admin-key` returns a non-empty key derived from the
   freshly-generated instance secret.
-- AE2. Given that running backend, when `just convex dev` is run from
-  `convex-tutorial`, then it pushes with no errors and writes a
-  `.env.local` containing `CONVEX_URL=http://127.0.0.1:3210` (or the
-  self-hosted equivalent variable names `just convex` actually uses).
+- AE2. Given that running backend, when `npx convex dev --once` runs
+  from the fixture worktree with I2's explicit admin key and URL flags,
+  then it pushes with no errors and writes a `.env.local` containing
+  `CONVEX_URL=http://127.0.0.1:3210`.
 - AE3. Given the pushed deployment, when the tutorial's loader CLI
-  (KTD5) is run against it, then its JSON output's `fixtureSetVersion`
-  matches the vendored copy in the Skip worktree at
-  `skip: examples/convex_proof_harness/testdata/v1.parity.json` (U8's
-  parity check target).
-- AE4. Given `~/src/skip`, when `npm run build -w @skipruntime/wasm` is
-  run using the `container`-based path, then it exits 0 and produces a
-  `dist/` this environment didn't have before, and a follow-up
+  (KTD5) is run against it, then its JSON output is a label-to-ID map;
+  the tutorial corpus's `fixtureSetVersion` matches the vendored Skip
+  parity manifest at `skip: examples/convex_proof_harness/testdata/v1.parity.json`.
+- AE4. Given the `feat-skip-shared-prereqs` Skip worktree, when
+  `npm run build -w @skipruntime/wasm` is run using the `container`-based
+  path, then it exits 0 and leaves a usable `dist/`, and a follow-up
   `initService` smoke script starts, registers one resource, observes
   one update, and shuts down without a hung process.
 - AE5. Given both the backend and the Skip runtime running, when U11's
@@ -181,8 +197,10 @@ running backend, a pushed fixture, and a built Skip runtime).
 ### Scope Boundaries
 
 - No changes to `local_backend`, `convex-tutorial`'s `proofVehicle`
-  fixture, or any `skip` source file — this plan runs existing tooling,
-  it does not extend it.
+  functions or corpus, or any `skip` source file. The one code
+  exception is `convex-tutorial/scripts/proof-vehicle-load.ts` and its
+  focused test, to let existing import logic target the self-hosted
+  backend with the same URL used for reads.
 - No production or hosted deployment. Loopback only, matching every
   other unit's loopback-only constraint in the parent plan.
 - No writing of U11's or U15's actual reference scripts
@@ -259,19 +277,29 @@ running backend, a pushed fixture, and a built Skip runtime).
   `run_in_background` or the user's own terminal) rather than having
   any single test command spawn and tear them down, since U11/U15's
   scripts assume a URL that's already live. Governs I1, I4.
+- KTD5. **The fixture loader uses the self-hosted URL and admin key for
+  both read and import operations.** The explicit `--url`/
+  `--admin-key` development path writes `CONVEX_URL` but removes
+  `CONVEX_DEPLOYMENT`; the current loader requires that removed
+  variable and passes `--deployment` to imports. The Convex CLI does
+  not allow `--deployment` with self-hosted credentials. I2 updates
+  only the loader and its focused test to pass the same URL and key to
+  every import, preserving the existing corpus and label binding.
+  Governs I2.
 
 ### High-Level Technical Design
 
 ```mermaid
 flowchart TB
-  A[just install-js / cargo toolchain] --> B[just run-local-backend<br/>127.0.0.1:3210 / :3211]
+  A[just install-js / cargo toolchain] --> B[just run-local-backend --interface 127.0.0.1<br/>127.0.0.1:3210 / :3211]
   B --> C[just generate-admin-key]
-  C --> D[just convex dev<br/>in convex-tutorial]
+  C --> D[npx convex dev --once<br/>in fixture worktree]
   D --> E[proofVehicle fixture pushed<br/>.env.local written]
   E --> F[npx convex env set<br/>PROOF_VEHICLE_FIXTURE=1]
-  G[~/src/skip toolchain<br/>container-based build] --> H[npm run build -w @skipruntime/wasm]
+  F --> M[loader uses same URL and admin key<br/>for reads and imports]
+  G[feat-skip-shared-prereqs worktree<br/>container-based build] --> H[npm run build -w @skipruntime/wasm]
   H --> I[initService smoke]
-  F --> J[Deployment + runtime reachable]
+  M --> J[Deployment + runtime reachable]
   I --> J
   J --> K[Parent plan U11: reference:snapshot]
   K --> L[Parent plan U15: reference:revision]
@@ -303,8 +331,9 @@ flowchart TB
 - **Approach:**
   1. `npm clean-install --prefix scripts && just install-js` (idempotent
      if already done).
-  2. `just run-local-backend` as a long-lived background process;
-     confirm both `127.0.0.1:3210` and `:3211` accept connections.
+  2. `just run-local-backend --interface 127.0.0.1` as a long-lived
+     background process; confirm both `127.0.0.1:3210` and `:3211`
+     accept connections and neither binds a non-loopback interface.
   3. Confirm `just generate-admin-key` returns a stable, non-empty key
      across repeated calls (reuses the persisted secret, per KTD2).
   4. Exercise `just reset-local-backend` once against a throwaway run
@@ -312,21 +341,25 @@ flowchart TB
      fresh.
 - **Test scenarios:**
   - Backend starts with no prior `convex_local_storage/`.
-  - A second `just run-local-backend` after `reset-local-backend`
-    starts clean with a freshly generated secret and key.
+  - A second `just run-local-backend --interface 127.0.0.1` after
+    `reset-local-backend` starts clean with a freshly generated secret
+    and key.
   - `generate-admin-key` is idempotent within one storage directory.
 - **Verification:** `curl` (or equivalent) against `127.0.0.1:3210` and
-  `:3211` succeeds while the process runs; `just generate-admin-key`
-  exits 0 with non-empty output.
+  `:3211` succeeds while the process runs, and both listeners are
+  loopback-only; `just generate-admin-key` exits 0 with non-empty
+  output.
 
 ### I2. Push the proof-vehicle fixture to the running backend
 
 - **Goal:** `convex-tutorial`'s `proofVehicle` functions live on the
   backend from I1, with the fixture flag set.
-- **Requirements:** I2a, I2b, I2c.
+- **Requirements:** I2a, I2b, I2c, I2d.
 - **Dependencies:** I1.
 - **Files:** `/Users/bill/src/convex-tutorial/.worktrees/feat-skip-shared-prereqs/.env.local`
-  (generated, not hand-written).
+  (generated, not hand-written),
+  `scripts/proof-vehicle-load.ts`, and
+  `scripts/proof-vehicle-load.test.ts` in that worktree.
 - **Approach:**
   1. From the fixture worktree
      (`/Users/bill/src/convex-tutorial/.worktrees/feat-skip-shared-prereqs`,
@@ -342,21 +375,35 @@ flowchart TB
      lookup resolves the same way.
   2. `npx convex env set PROOF_VEHICLE_FIXTURE 1` with the same explicit
      key and URL flags, against the same deployment.
-  3. Run the tutorial's loader CLI (KTD5 in the parent plan) against
-     this live deployment and diff its JSON output's
-     `fixtureSetVersion` against
+  3. Update the loader's self-hosted path to require `CONVEX_URL` and
+     `PROOF_VEHICLE_ADMIN_KEY` in its process environment. Pass that URL and key
+     as `--url` and `--admin-key` on every `npx convex import` call;
+     do not pass `--deployment`. Reject a missing URL or key before
+     any import, and test the constructed import arguments without
+     starting a deployment.
+  4. Run the tutorial's loader CLI against this live deployment with
+     `CONVEX_URL=http://127.0.0.1:3210` and
+     `PROOF_VEHICLE_ADMIN_KEY="$(just --justfile ~/src/convex-backend/Justfile generate-admin-key)"`
+     set for this process, for example `npm run proof-vehicle-load -- V1`.
+     Verify that the URL matches the generated `.env.local`. Then
+     parse its label-to-ID JSON map. Compare
+     the tutorial source corpus's `fixtureSetVersion` with
      `skip: examples/convex_proof_harness/testdata/v1.parity.json`
-     (the vendored copy in the Skip worktree).
+     in the Skip worktree.
 - **Test scenarios:**
   - Push succeeds with no schema or function errors.
   - `PROOF_VEHICLE_FIXTURE` reads back as `1` via `npx convex env get`
     with the same explicit key and URL flags.
-  - Loader CLI's live output matches the vendored fixture-set version
-    (I2c); a mismatch fails this unit rather than being silently
-    absorbed by U11 later.
+  - The loader passes the read URL and admin key to each import and
+    rejects a missing value before writing. No import uses
+    `--deployment` on the self-hosted path.
+  - Loader CLI emits a label-to-ID map, and the tutorial corpus and
+    vendored parity manifest have the same `fixtureSetVersion` (I2c);
+    a mismatch fails this unit before U11 starts.
 - **Verification:** `npx convex env get PROOF_VEHICLE_FIXTURE` (same
-  explicit flags) returns `1`; loader CLI exits 0 with a matching
-  `fixtureSetVersion`.
+  explicit flags) returns `1`; the focused loader test passes, the
+  loader CLI exits 0 with a label-to-ID JSON map against the local
+  backend, and the source and vendored manifest versions match.
 
 ### I3. Build and smoke-test the Skip WASM runtime
 
@@ -370,7 +417,8 @@ flowchart TB
      already established; record the image/toolchain version the way
      U3's frontmatter note already does, so a later drift is
      detectable.
-  2. `npm run build -w @skipruntime/wasm` in `~/src/skip`.
+  2. `npm run build -w @skipruntime/wasm` in
+     `~/src/skip/.worktrees/feat-skip-shared-prereqs`.
   3. Write and run a throwaway smoke script (not committed as a test —
      this is infra verification, not a Q test scenario) that calls
      `initService`, registers one resource, writes one value, observes
@@ -441,9 +489,9 @@ flowchart TB
 
 | Scope | Command | Proves |
 |---|---|---|
-| Backend up | `just run-local-backend` (background) + a loopback connectivity check | I1 |
-| Fixture pushed | `npx convex dev --once` with explicit key/URL flags from the fixture worktree, then `npx convex env get PROOF_VEHICLE_FIXTURE` with the same flags | I2 |
-| Skip runtime | `npm run build -w @skipruntime/wasm` in `~/src/skip`, then the I3 smoke script | I3 |
+| Backend up | `just run-local-backend --interface 127.0.0.1` (background) + loopback-only listener checks | I1 |
+| Fixture pushed | `npx convex dev --once` with explicit key/URL flags from the fixture worktree, then `npx convex env get PROOF_VEHICLE_FIXTURE` with the same flags; focused loader test and live loader run using the same URL/key | I2 |
+| Skip runtime | `npm run build -w @skipruntime/wasm` in `~/src/skip/.worktrees/feat-skip-shared-prereqs`, then the I3 smoke script | I3 |
 | Sandbox readiness | throwaway `127.0.0.1` bind under the confirmed sandbox setting | I4 |
 | Reachability | I5's combined smoke script | I5, this plan's Definition of Done |
 
@@ -451,18 +499,21 @@ flowchart TB
 
 ## Definition of Done
 
-- `just run-local-backend` serves a fresh deployment reachable on
-  `127.0.0.1:3210`/`:3211`.
+- `just run-local-backend --interface 127.0.0.1` serves a fresh
+  deployment reachable on `127.0.0.1:3210`/`:3211` only.
 - `convex-tutorial`'s `proofVehicle` fixture is pushed to that
-  deployment with `PROOF_VEHICLE_FIXTURE=1` set, and the loader CLI's
-  live output matches the vendored `fixtureSetVersion`.
+  deployment with `PROOF_VEHICLE_FIXTURE=1` set. The loader CLI emits
+  its label-to-ID map, and the source corpus and vendored parity
+  manifest have the same `fixtureSetVersion`. The loader's imports and
+  reads target the same self-hosted URL.
 - `@skipruntime/wasm` is built and passes a runtime smoke independent
   of any Q test.
 - U11's `reference/service.ts` loopback bind is proven to succeed under
   the confirmed in-sandbox setting, not left to be rediscovered
   mid-U11; a bypass does not satisfy this plan.
-- No code in `local_backend`, `convex-tutorial`, or `skip` was changed
-  to reach this state.
+- No code in `local_backend` or `skip` was changed. In
+  `convex-tutorial`, only the loader CLI and its focused test changed;
+  the fixture functions and corpus remain as they were.
 - The parent plan's U11 can begin writing and running
   `reference/{service,source,run}.ts` against a real, already-reachable
   deployment; U15 follows once U11 passes.
