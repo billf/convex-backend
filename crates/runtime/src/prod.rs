@@ -160,6 +160,7 @@ impl ProdRuntime {
             tokio_builder.worker_threads(*RUNTIME_WORKER_THREADS);
         }
         if *RUNTIME_DISABLE_LIFO_SLOT {
+            #[cfg(tokio_unstable)]
             tokio_builder.disable_lifo_slot();
         }
         let tokio_rt = tokio_builder.enable_all().build()?;
