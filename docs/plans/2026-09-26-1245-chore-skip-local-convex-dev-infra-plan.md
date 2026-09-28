@@ -131,8 +131,8 @@ running backend, a pushed fixture, and a built Skip runtime).
 - I2c. The parent plan's KTD3 four-thing coupling (function names, `allSelectedRows`'s
   tagged row shape, the corpus file, the loader CLI's JSON output) is
   confirmed live-reachable: the loader CLI runs against this
-  deployment and produces a label-to-ID JSON map. The tutorial corpus's
-  `fixtureSetVersion` matches the vendored Skip parity manifest.
+  deployment and produces a label-to-ID JSON map. The tutorial parity
+  manifest's `fixtureSetVersion` matches the vendored Skip parity manifest.
 - I2d. The loader CLI uses one self-hosted target for its reads and all
   imports: explicit `CONVEX_URL` and `PROOF_VEHICLE_ADMIN_KEY` process
   variables, with the URL matching the generated `.env.local` and the
@@ -181,7 +181,7 @@ running backend, a pushed fixture, and a built Skip runtime).
   `CONVEX_URL=http://127.0.0.1:3210`.
 - AE3. Given the pushed deployment, when the tutorial's loader CLI
   (KTD5) is run against it, then its JSON output is a label-to-ID map;
-  the tutorial corpus's `fixtureSetVersion` matches the vendored Skip
+  the tutorial parity manifest's `fixtureSetVersion` matches the vendored Skip
   parity manifest at `skip: examples/convex_proof_harness/testdata/v1.parity.json`.
 - AE4. Given the `feat-skip-shared-prereqs` Skip worktree, when
   `npm run build -w @skipruntime/wasm` is run using the `container`-based
@@ -386,8 +386,8 @@ flowchart TB
      `PROOF_VEHICLE_ADMIN_KEY="$(just --justfile ~/src/convex-backend/Justfile generate-admin-key)"`
      set for this process, for example `npm run proof-vehicle-load -- V1`.
      Verify that the URL matches the generated `.env.local`. Then
-     parse its label-to-ID JSON map. Compare
-     the tutorial source corpus's `fixtureSetVersion` with
+     parse its label-to-ID JSON map. Compare `fixtureSetVersion` in
+     `convex-tutorial: convex/proofVehicle/corpus/v1.parity.json` with
      `skip: examples/convex_proof_harness/testdata/v1.parity.json`
      in the Skip worktree.
 - **Test scenarios:**
@@ -397,13 +397,13 @@ flowchart TB
   - The loader passes the read URL and admin key to each import and
     rejects a missing value before writing. No import uses
     `--deployment` on the self-hosted path.
-  - Loader CLI emits a label-to-ID map, and the tutorial corpus and
-    vendored parity manifest have the same `fixtureSetVersion` (I2c);
+  - Loader CLI emits a label-to-ID map, and the tutorial and Skip
+    parity manifests have the same `fixtureSetVersion` (I2c);
     a mismatch fails this unit before U11 starts.
 - **Verification:** `npx convex env get PROOF_VEHICLE_FIXTURE` (same
   explicit flags) returns `1`; the focused loader test passes, the
   loader CLI exits 0 with a label-to-ID JSON map against the local
-  backend, and the source and vendored manifest versions match.
+  backend, and the two parity manifest versions match.
 
 ### I3. Build and smoke-test the Skip WASM runtime
 
@@ -503,8 +503,8 @@ flowchart TB
   deployment reachable on `127.0.0.1:3210`/`:3211` only.
 - `convex-tutorial`'s `proofVehicle` fixture is pushed to that
   deployment with `PROOF_VEHICLE_FIXTURE=1` set. The loader CLI emits
-  its label-to-ID map, and the source corpus and vendored parity
-  manifest have the same `fixtureSetVersion`. The loader's imports and
+  its label-to-ID map, and the tutorial and Skip parity
+  manifests have the same `fixtureSetVersion`. The loader's imports and
   reads target the same self-hosted URL.
 - `@skipruntime/wasm` is built and passes a runtime smoke independent
   of any Q test.
