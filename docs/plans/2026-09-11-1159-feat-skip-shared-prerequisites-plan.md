@@ -9,11 +9,11 @@ execution: code
 reconciled: 2026-09-23
 ste_companion: 2026-09-11-1159-feat-skip-shared-prerequisites-plan.ste.md
 execution_started: 2026-09-24
-execution_status: blocked (only U11/U15 remain, both need a live local Convex deployment; standing that up is split off to 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)
+execution_status: done (all units verified 2026-09-28 against the live local deployment -- 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md's Definition of Done was met 2026-09-28)
 units:
   U1: done
   U2: done
-  U3: in-progress (toolchain unblocked, @skipruntime/wasm built via Docker/`container`; live same-tick scenario deferred to U11's reference service)
+  U3: done (verified 2026-09-28: U15's `reference:revision` one-group scenario performs a live single-transaction membership+likes update on the real `@skipruntime/wasm` runtime and groupProbe graph, watched by `NoTornObserver`, confirming both outputs change in the same tick with no torn intermediate state)
   U4: done
   U5: done (deployment loader CLI unverified against a live deployment)
   U6: done
@@ -21,11 +21,11 @@ units:
   U8: done (native-reader ConvexClient wiring and real-server SSE transcript replay deferred to U11)
   U9: done (live proof against a real service deferred to U11)
   U10: done
-  U11: pending (all code dependencies -- U3, U5, U7-U10, U12 -- done; blocked solely on a live local deployment, split off to 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)
+  U11: done (verified 2026-09-28: `npm run reference:snapshot -w skip-convex-proof-harness` passes against a live local deployment -- all six vectors, both V6 torn-observation variants, F4 disconnect fault, and the rest.ts conformance check)
   U12: done
   U13: done
   U14: done
-  U15: pending (needs U11, blocked on the same live deployment, split off to 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md)
+  U15: done (verified 2026-09-28: `npm run reference:revision -w skip-convex-proof-harness` passes against the live local deployment -- one-group no-torn, both membership-first/likes-first seeded-split torn-observation variants, and replay-ignored counter, all via reference/revision.ts's scripted RevisionDeltaSource-backed ExternalService feeding U11's SAME room-feed/groupProbe graph)
   U16: done
 ---
 

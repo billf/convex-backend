@@ -8,14 +8,14 @@ product_contract_source: ce-plan-split
 execution: code
 split_from: 2026-09-11-1159-feat-skip-shared-prerequisites-plan.md
 ste_companion: 2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.ste.md
-execution_started: null
-execution_status: not-started
+execution_started: 2026-09-28
+execution_status: done (all five units verified live via `just skip-dev-up`, run by the user outside the agent sandbox on 2026-09-28; see scripts/skip-local-dev/ and docs/solutions/build-errors/agent-sandbox-blocks-loopback-network.md for why an agent session alone couldn't complete I2/I4/I5)
 units:
-  I1: pending
-  I2: pending
-  I3: pending
-  I4: pending
-  I5: pending
+  I1: done (backend up, loopback-only; confirmed live via lsof and, later, a live `npx convex dev --once` push against it)
+  I2: done (proofVehicle pushed via `npx convex dev --once`, PROOF_VEHICLE_FIXTURE=1 set and read back, watch-mode `convex dev` started -- all via push-fixture.sh, run by the user 2026-09-28)
+  I3: done (dist/ already built from a prior session; build-skip-wasm.sh documents the working container recipe including the SKIP_CAPACITY=6G / -m 12G fix; I3b's runtime smoke -- initService, one update, one read, close -- passed both from an agent session and from the user's own terminal)
+  I4: done (smoke-loopback-bind.mjs: 127.0.0.1 bind OK, run by the user 2026-09-28; failed with EPERM only from inside the agent's own sandboxed Bash tool -- see the Troubleshooting doc for that distinction)
+  I5: done (e2e-smoke.mjs: Convex read OK -- allSelectedRows returned 4 rows -- and Skip runtime OK, same process run, by the user 2026-09-28)
 ---
 
 # Skip Local Convex Development Infrastructure - Plan
