@@ -142,7 +142,7 @@ Set `PROOF_VEHICLE_FIXTURE` to 1 on the deployment.
 
 Run the loader script from the tutorial checkout against the deployment.
 
-Check the source corpus version against the version stored in the Skip workspace.
+Compare the fixture set version in the tutorial parity manifest with the version in the Skip parity manifest.
 
 **The Skip WASM runtime**
 
@@ -184,7 +184,7 @@ Given the running backend, when the push command runs, then it writes the env fi
 
 Given the pushed deployment, when the loader script runs against it, then it returns a label-to-ID map.
 
-The source corpus and the Skip parity manifest must have the same fixture set version.
+The tutorial and Skip parity manifests must have the same fixture set version.
 
 Given the Skip workspace, when the WASM build runs through the container method, then the build exits clean.
 
@@ -354,13 +354,13 @@ Get the admin key from the existing key command.
 
 Read the label-to-ID map from the loader.
 
-Compare the source corpus version with the Skip parity manifest version.
+Compare the tutorial and Skip parity manifest versions.
 
 Test that the push completes with no schema error and no function error.
 
 Test that the fixture flag reads back as 1.
 
-Test that the source corpus and parity manifest versions match.
+Test that the two parity manifest versions match.
 
 ### I3: Build and Smoke-Test the Skip Runtime
 
@@ -424,7 +424,7 @@ Push the fixture and read the fixture flag back.
 
 Run the focused loader test and the live loader.
 
-Compare the source corpus and parity manifest versions. This proves I2.
+Compare the two parity manifest versions. This proves I2.
 
 Build the Skip runtime and run its smoke script. This proves I3.
 
@@ -456,7 +456,7 @@ The loader reads and imports through the same local URL.
 
 The loader returns a label-to-ID map.
 
-The source corpus and parity manifest versions match.
+The two parity manifest versions match.
 
 This plan builds the Skip runtime, and it passes its own smoke check.
 
