@@ -71,6 +71,11 @@ flowchart TB
   intentionally distinct.
 - **Design reference:** a relationship informs a design but supplies no code
   dependency or completion gate.
+- **Status (2026-09-28):** every P and Q output above is built and
+  validated. That includes the revision-delta extension, Q13, Q14, both Q6
+  tiers, and Q12. The shared plan's live reference runs pass against a
+  local deployment, so no direct dependency above still blocks a consumer
+  from starting. Each consumer still proves P/Q usable when it integrates.
 
 Cross-document descriptive anchors above resolve through
 [IDENTIFIER-MAP.md](IDENTIFIER-MAP.md); generic P/Q node labels are local to

@@ -38,6 +38,12 @@ flowchart LR
 
 Implementation locations (KTD1-KTD3 of the shared plan): P is `skip: skipruntime-ts/adapters/atomic-batch/` (`@skip-adapter/atomic-batch`), Q is `skip: examples/convex_proof_harness/` (`skip-convex-proof-harness`), and Q13 is `convex-tutorial: convex/proofVehicle/`. The snapshot baseline is units `shared-prereqs-u-p-contract-scaffold` through `shared-prereqs-u-report-schemas` (U1-U12); the revision-delta tier is U13-U15; `shared-prereqs-u-methodology-spec` (U16, Q12's text) gates neither. Q14 watches a dedicated `groupProbe` resource for V6, because the canonical feed alone cannot show a membership-first tear.
 
+**Status (2026-09-28):** every output in the table is built and validated.
+U1-U16 are all done. `reference:snapshot` (U11) and `reference:revision`
+(U15) pass against a live local deployment stood up by
+[the local dev infrastructure plan](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md). 1c's U4 is still the
+revision-delta extension's first validator against real Data Sync pages.
+
 ```mermaid
 flowchart TB
   p["P baseline"]
