@@ -15,11 +15,11 @@ units:
   U2: done
   U3: done (verified 2026-09-28: U15's `reference:revision` one-group scenario performs a live single-transaction membership+likes update on the real `@skipruntime/wasm` runtime and groupProbe graph, watched by `NoTornObserver`, confirming both outputs change in the same tick with no torn intermediate state)
   U4: done
-  U5: done (deployment loader CLI unverified against a live deployment)
+  U5: done (loader CLI verified live 2026-09-28: U11's `reference:snapshot` run invokes `scripts/proof-vehicle-load.ts` for every vector against the local deployment)
   U6: done
   U7: done
-  U8: done (native-reader ConvexClient wiring and real-server SSE transcript replay deferred to U11)
-  U9: done (live proof against a real service deferred to U11)
+  U8: done (verified live 2026-09-28 via U11: `reference/run.ts` reads the real Skip server through `SseReader` and samples the deployment through `NativeReader`)
+  U9: done (verified live 2026-09-28 via U11 and U15: `NoTornObserver` watches the real `groupProbe` resource in both reference runs)
   U10: done
   U11: done (verified 2026-09-28: `npm run reference:snapshot -w skip-convex-proof-harness` passes against a live local deployment -- all six vectors, both V6 torn-observation variants, F4 disconnect fault, and the rest.ts conformance check)
   U12: done
