@@ -25,6 +25,13 @@ means that real-consumer integration has shown its interface needs no custom
 adaptation. A plan can be implementation-ready before the shared P/Q it
 depends on becomes usable or stable.
 
+**Current state (2026-09-28):** P/Q is validated. All 16 shared-plan units
+are done, and both reference runs (`reference:snapshot` and
+`reference:revision`) pass against a live local deployment. The
+[local dev infrastructure plan](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md) stood up that
+deployment and is itself validated. P/Q is not yet usable: no spike has
+integrated it.
+
 ## Planning state
 
 ```mermaid
@@ -33,7 +40,8 @@ flowchart TB
   vehicle["Complete input: common PoC vehicle"]
   oneA["1a sync-protocol client\nRequirements-only\nAdopts P snapshot baseline and Q"]
   oneB["1b paginated reactive source\nRequirements-only\nAdopts P snapshot baseline and Q"]
-  shared["P/Q shared prerequisites\nImplementation-ready\nU1-U12 snapshot baseline, U13-U15 revision-delta"]
+  infra["Local dev infrastructure\nValidated 2026-09-28\nLive Convex deployment + Skip WASM runtime"]
+  shared["P/Q shared prerequisites\nValidated 2026-09-28\nU1-U12 snapshot baseline, U13-U15 revision-delta"]
   oneC["1c Data Sync push source\nImplementation-ready\nU4-U6 verified only with P/Q, no fallback"]
   two["Direction 2 materialized cache\nImplementation-ready\nNode-child Skip host, write-log tail, native comparator"]
 
@@ -43,6 +51,7 @@ flowchart TB
   research --> oneC
   research --> two
   vehicle --> shared
+  infra -->|"live runs for U11 and U15"| shared
   vehicle --> oneC
   vehicle --> two
 ```
@@ -51,8 +60,8 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-  sharedPlan["P/Q planned"] --> pBaseline["P baseline built"]
-  sharedPlan --> qHarness["Q harness and language-neutral methodology specification built"]
+  sharedPlan["P/Q planned"] --> pBaseline["P baseline built and validated"]
+  sharedPlan --> qHarness["Q harness and language-neutral methodology specification built and validated"]
   qHarness --> q12["shared-prereqs-q-language-neutral-methodology-spec"]
   pBaseline --> usableP["P usable after real-consumer integration"]
   qHarness --> usableQ["Q usable after real-consumer integration"]
@@ -84,13 +93,13 @@ flowchart TB
   subgraph Planning["Planning"]
     plan1a["1a requirements-only"]
     plan1b["1b requirements-only"]
-    planPQ["P/Q implementation-ready"]
+    planPQ["P/Q validated"]
     plan1c["1c implementation-ready"]
     plan2["Direction 2 implementation-ready"]
   end
 
   subgraph Delivery["Implementation and validation"]
-    d1["P/Q built → usable → stable"]
+    d1["P/Q validated → usable → stable"]
     d2["1a/1b build; validate with P/Q snapshot baseline"]
     d3["1c build; validate with P/Q (no fallback)"]
     d4["Direction 2 native build; validate against shared-prereqs-q-language-neutral-methodology-spec"]
@@ -118,4 +127,5 @@ The source plans are [1a](2026-09-10-1509-feat-skip-sync-protocol-client-plan.md
 [1b](2026-09-10-1843-feat-skip-paginated-reactive-source-spike-plan.md),
 [1c](2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md),
 [Direction 2](2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md),
-and [the shared P/Q prerequisites](2026-09-11-1159-feat-skip-shared-prerequisites-plan.md).
+[the shared P/Q prerequisites](2026-09-11-1159-feat-skip-shared-prerequisites-plan.md),
+and [the local dev infrastructure](2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md).
