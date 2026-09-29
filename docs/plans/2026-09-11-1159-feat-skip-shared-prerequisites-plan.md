@@ -628,6 +628,7 @@ stateDiagram-v2
 - **Files:** `convex-tutorial: convex/proofVehicle/{mutations,fixture}.ts` (mutations, `fixture:reset`, V4's body-patch mutation, `fixture:marker`), `convex/proofVehicle/corpus/v1.json`, `convex/proofVehicle/corpus/v1.parity.json` (golden per-vector base-state hashes), `scripts/proof-vehicle-load.ts` (deployment loader CLI), tests in `proofVehicle.test.ts`.
 - **Approach:**
   - Mutations: send, update, and delete message; rename and delete user; activate and deactivate membership; add and remove like; dangling sender; `membershipAndLikesTxn`. Every mutation returns `{affectedIds, marker}`. Adding a like and `membershipAndLikesTxn` do not deduplicate `(message, user)`, because V6 adds a second like by `b` on `a1`.
+  - **Added 2026-09-28 for 1c U5:** `membershipAndLikesBatchTxn` patches one membership and inserts 1-100 likes in one transaction. It returns `{affectedIds: {membership, likes}, marker}`, with `likes` in request order. It is additive: V6, the delta harness, and Q's reference run still use `membershipAndLikesTxn`.
   - `corpus/v1.json` per KTD5; the manifest version is exposed to callers.
   - `fixture:reset` behind the `PROOF_VEHICLE_FIXTURE` guard.
   - The deployment loader CLI (`scripts/proof-vehicle-load.ts`): the `legacy-messages-present` check, phased per-vector `npx convex import`, ID read-back through `proofVehicle/tables:*` queries, label binding, and V4's post-bind body patch; it prints the label-binding map as JSON.
