@@ -623,6 +623,7 @@ After the mandatory first page of a response, an established empty `upToDate` pa
   - `likeCount` reflects add, remove, delete, and missing liked-user cases.
   - The all-selected-rows baseline contains every selected room, user, membership, message, and like and grows with `N`.
 - **Verification:** Tutorial tests establish an independent expected result for every harness mutation and distinguish the bounded correctness oracle from the full snapshot baseline.
+- **Status (2026-09-28): done** on `convex-tutorial` branch `billf/1c`. One scenario needed a Q13 change: the multi-table mutation needed more than one like, so Q13 gained `membershipAndLikesBatchTxn` under the shared plan, with its own Q13 tests. The seven scenarios are in `convex/proofVehicle/dataSync.test.ts` rather than `chat.test.ts`, because they exercise Q13's functions, not `chat.ts`. No `chat.ts` change was needed. `npm test` and `npm run build` pass. The Skip half of the latest-50 comparison remains with U6.
 
 ### U6. Build the retained graph and comparison harness
 
