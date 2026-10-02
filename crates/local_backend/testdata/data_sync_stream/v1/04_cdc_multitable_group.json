@@ -1,7 +1,7 @@
 {
   "contractVersion": 1,
   "id": "04_cdc_multitable_group",
-  "description": "Resume after 01. Group T1 deactivates Cy's membership, inserts a like, and tombstones like1 in one Convex transaction (one exact-ts group across two tables); an unselected proofVehicleMarkers write in the same transaction is examined but filtered. Group T2 inserts a message. Drives AE2's single atomic update and the failure-point replay tests.",
+  "description": "Resume after 01. Group T1 deactivates Cy's membership, inserts a like on Cy's own message, and tombstones like1 in one Convex transaction (one exact-ts group across two tables), so groupProbe(msg3) flips active and likeCount together; an unselected proofVehicleMarkers write in the same transaction is examined but filtered. Group T2 inserts a message. Drives AE2's single atomic update and the failure-point replay tests.",
   "after": "01_cold_multipage_uptodate",
   "connections": [
     {
@@ -77,7 +77,7 @@
                   "value": {
                     "_creationTime": 1759300002001.0,
                     "_id": "fixture:likes:like3",
-                    "message": "fixture:messages:msg1",
+                    "message": "fixture:messages:msg3",
                     "user": "fixture:users:cy"
                   }
                 },
