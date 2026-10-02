@@ -47,8 +47,8 @@
     },
     {
       "path": "04_cdc_multitable_group.json",
-      "sha256": "3382fdf4fd7942a71884a2b1af4517f313c754daf9f09a8cb63f57b2f3fe8dbb",
-      "bytes": 4479,
+      "sha256": "24cea1fe94d9dc7ecc74490226af20261227cc14154450785ec0d8c3bf72ac85",
+      "bytes": 4556,
       "covers": [
         "U4:AE2",
         "U4:failure-points",
