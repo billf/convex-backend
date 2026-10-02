@@ -16,7 +16,7 @@ execution: code
 - **Means:** New `convex-skip` coordination repo with the three working repos as pinned submodules, plus consolidated docs and workspace-relative paths (KTD1–KTD4). The subrepos hold the actual code changes; `convex-skip` holds coordination and can disappear once that work lands.
 - **Authority:** Session-settled scope (submodules; Skip/Convex-only; solo; pin-always) outranks inference; research evidence outranks both for mechanics.
 - **Stop conditions:** Stop if a submodule remote refuses the pin (auth), if the scripted path rewrite changes JSON semantics, or if fresh-clone verification fails twice — report, don't force.
-- **Execution profile:** Solo operator; four repos touched (one created, three read plus doc-removal commits); submodule work branches are pushed with explicit approval before pinning (option (a)); no PRs or upstream changes without explicit approval.
+- **Execution profile:** Solo operator; four repos touched (one created, three read plus doc-removal commits); submodule work branches are pushed with explicit approval before pinning; no PRs or upstream changes without explicit approval.
 
 ---
 
@@ -35,7 +35,7 @@ Program knowledge lives in `convex-backend` (get-convex-owned) while the work sp
 **Meta-repo and submodules**
 
 - R1. New personal repo `convex-skip` with `convex-backend`, `skip`, and `convex-tutorial` attached as submodules pinned to recorded SHAs, recursive init covering nested submodules. No pin may point at unpushed content: every pinned SHA is pushed to its remote (with explicit approval) before the milestone superproject commit records it.
-- R2. Submodule remotes match the existing remotes exactly (HTTPS as currently configured); where a repo has two remotes (origin plus upstream), the primary URL is the submodule URL and the second remote is registered explicitly after `submodule add`.
+- R2. Submodule fetch URLs stay HTTPS, matching the existing remotes exactly; where a repo has two remotes (origin plus upstream), the primary URL is the submodule URL and the second remote is registered explicitly after `submodule add`. Fork pushes may use the SSH remote where HTTPS hits token-scope refusal, so every pinned SHA stays fetchable via HTTPS.
 
 **Doc migration**
 
@@ -44,7 +44,7 @@ Program knowledge lives in `convex-backend` (get-convex-owned) while the work sp
 
 **Portability**
 
-- R5. Zero absolute (`/Users/bill/src`, `$HOME/src`) or tilde (`~/src`) paths remain in moved content, except documented runtime env-defaults; line-anchored code references stay valid against the pinned SHAs.
+- R5. Zero absolute (`/Users/bill/src`, `$HOME/src`) or tilde (`~/src`) paths remain in moved content, except the three `SKIP_DEV_*_DIR` default assignments in `scripts/skip-local-dev/lib.sh` and their mirror in its README; line-anchored code references stay valid against the pinned SHAs.
 
 **Entry points and conventions**
 
@@ -128,7 +128,7 @@ flowchart TB
 - **Dependencies:** U1.
 - **Files:** Moved trees in the coordination repo; tombstone READMEs and repaired linkers in source repos.
 - **Approach:**
-  1. Import docs-subtree histories with `git filter-repo --path` (KTD8); pair each removal commit in the source repo with the addition in `convex-skip` (backend plans, research tree, scripts, one solutions entry; skip docs tree; tutorial code-only, nothing moved).
+  1. Confirm `git filter-repo --version` runs (install it first if missing); then import docs-subtree histories with `git filter-repo --path` (KTD8); pair each removal commit in the source repo with the addition in `convex-skip` (backend plans, research tree, scripts, one solutions entry; skip docs tree; tutorial code-only, nothing moved).
   2. Canonicalize duplicates across repos: one survivor per duplicate plan, the other tombstoned, mapping recorded.
   3. Leave tombstones at old dirs; repair handoff links; move the five review JSONs.
   4. Sweep `U`-style cross-references across all moved plans for collisions between repo numbering schemes.
@@ -154,11 +154,11 @@ flowchart TB
 ### U4. Move scripts, thin Justfile, conventions
 
 - **Goal:** Runnable entry points rooted at the coordination repo.
-- **Requirements:** R3, R6.
-- **Dependencies:** U1, U3.
-- **Files:** Moved `scripts/skip-local-dev`, root `Justfile`, `AGENTS.md`, `.gitignore` entries, root plan index.
+- **Requirements:** R6.
+- **Dependencies:** U1, U2, U3.
+- **Files:** `scripts/skip-local-dev` (moved by U2; rewired here), root `Justfile`, `AGENTS.md`, `.gitignore` entries, root plan index.
 - **Approach:**
-  1. Relocate scripts (the 12-file scripts move, counted under R3); re-root directory derivations to the coordination repo with env overrides defaulting to submodule paths.
+  1. Rewire the scripts U2 moved, with no second relocation (the 12-file move and its census stay U2's, counted under R3); re-root directory derivations to the coordination repo with env overrides: the backend-root derivation depth is unchanged (scripts stay two levels below root, now resolving to the coordination root), and the tutorial/skip defaults become `<root>/convex-tutorial` and `<root>/skip`.
   2. Single `Justfile` name with explicit-directory recipes; record submodule, worktree, and environment conventions; extend the identifier-map pattern to a `convex-skip` root index so all plans read in one context.
 - **Execution note:** Packaging and config work; prefer smoke verification over unit coverage.
 - **Test scenarios:**
