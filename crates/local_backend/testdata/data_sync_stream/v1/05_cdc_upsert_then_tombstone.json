@@ -1,0 +1,110 @@
+{
+  "contractVersion": 1,
+  "id": "05_cdc_upsert_then_tombstone",
+  "description": "Resume after 01. One page upserts msg9 at T1 and tombstones it at T2. A replay of this page after a pre-checkpoint cut must not resurrect msg9; after checkpoint the tombstone watermark is released.",
+  "after": "01_cold_multipage_uptodate",
+  "connections": [
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-01-03"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-05-01"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000003002"
+              },
+              "truncates": [],
+              "values": [
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000003001",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300003001.0,
+                    "_id": "fixture:messages:msg9",
+                    "body": "ephemeral",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:bo"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000003002",
+                  "deleted": true,
+                  "value": {
+                    "_id": "fixture:messages:msg9"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-05-02"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 2,
+                "candidateEntries": 2,
+                "selectedEntries": 2,
+                "emittedBytes": 167,
+                "timestampGroups": 2,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "close"
+      }
+    }
+  ]
+}

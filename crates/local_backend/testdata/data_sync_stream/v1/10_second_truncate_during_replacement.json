@@ -1,0 +1,198 @@
+{
+  "contractVersion": 1,
+  "id": "10_second_truncate_during_replacement",
+  "description": "Resume after 01. messages is truncated and partly rebuilt, then users is truncated mid-rebuild. The second truncate clears only users in the existing candidate; the rebuilt messages rows survive. Promotes on the final upToDate page.",
+  "after": "01_cold_multipage_uptodate",
+  "connections": [
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-01-03"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-10-01"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "snapshotting"
+              },
+              "truncates": [
+                {
+                  "component": "",
+                  "table": "messages"
+                }
+              ],
+              "values": [
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000007001",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300007001.0,
+                    "_id": "fixture:messages:r10a",
+                    "body": "replaced a",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:ada"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-10-02"
+              },
+              "diagnostics": {
+                "scanDimension": "byId",
+                "rowsExamined": 1,
+                "candidateEntries": 1,
+                "selectedEntries": 1,
+                "emittedBytes": 138,
+                "timestampGroups": 1,
+                "truncations": 1,
+                "limitCause": "entryLimit",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "snapshotting"
+              },
+              "truncates": [
+                {
+                  "component": "",
+                  "table": "users"
+                }
+              ],
+              "values": [
+                {
+                  "component": "",
+                  "table": "users",
+                  "ts": "1759300000000007002",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300007002.0,
+                    "_id": "fixture:users:r10ada",
+                    "name": "Ada L."
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "users",
+                  "ts": "1759300000000007003",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300007003.0,
+                    "_id": "fixture:users:r10bo",
+                    "name": "Bo"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-10-03"
+              },
+              "diagnostics": {
+                "scanDimension": "byId",
+                "rowsExamined": 2,
+                "candidateEntries": 2,
+                "selectedEntries": 2,
+                "emittedBytes": 151,
+                "timestampGroups": 2,
+                "truncations": 1,
+                "limitCause": "entryLimit",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000007010"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-10-04"
+              },
+              "diagnostics": {
+                "scanDimension": "byId",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "close"
+      }
+    }
+  ]
+}

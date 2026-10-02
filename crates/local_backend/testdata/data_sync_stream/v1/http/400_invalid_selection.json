@@ -1,0 +1,24 @@
+{
+  "contractVersion": 1,
+  "id": "http/400_invalid_selection",
+  "request": {
+    "version": 1,
+    "selection": {
+      "_other": "excluded",
+      "": {
+        "_other": "excluded",
+        "nope": {
+          "_other": "included"
+        }
+      }
+    },
+    "cursor": null
+  },
+  "response": {
+    "httpStatus": 400,
+    "body": {
+      "code": "InvalidDataSyncSelection",
+      "message": "Invalid selection: unknown table 'nope'."
+    }
+  }
+}

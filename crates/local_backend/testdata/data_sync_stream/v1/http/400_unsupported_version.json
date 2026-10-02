@@ -1,0 +1,16 @@
+{
+  "contractVersion": 1,
+  "id": "http/400_unsupported_version",
+  "request": {
+    "version": 2,
+    "selection": "$selection",
+    "cursor": null
+  },
+  "response": {
+    "httpStatus": 400,
+    "body": {
+      "code": "DataSyncStreamUnsupportedVersion",
+      "message": "Unsupported data sync stream version 2; this backend supports version 1."
+    }
+  }
+}
