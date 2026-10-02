@@ -1,0 +1,16 @@
+{
+  "contractVersion": 1,
+  "id": "http/429_saturated",
+  "request": {
+    "version": 1,
+    "selection": "$selection",
+    "cursor": null
+  },
+  "response": {
+    "httpStatus": 429,
+    "body": {
+      "code": "DataSyncStreamSaturated",
+      "message": "Too many active data sync streams for this deployment; retry later."
+    }
+  }
+}

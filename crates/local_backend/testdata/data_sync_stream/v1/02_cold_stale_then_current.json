@@ -1,0 +1,190 @@
+{
+  "contractVersion": 1,
+  "id": "02_cold_stale_then_current",
+  "description": "Cold start whose first consistent page is stale (no values). The client publishes usable stale state there; the later upToDate page carries one CDC group, and that group's update atomically switches control state to current.",
+  "after": null,
+  "connections": [
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": null
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "snapshotting"
+              },
+              "truncates": [
+                {
+                  "component": "",
+                  "table": "likes"
+                },
+                {
+                  "component": "",
+                  "table": "memberships"
+                },
+                {
+                  "component": "",
+                  "table": "messages"
+                },
+                {
+                  "component": "",
+                  "table": "rooms"
+                },
+                {
+                  "component": "",
+                  "table": "users"
+                }
+              ],
+              "values": [
+                {
+                  "component": "",
+                  "table": "rooms",
+                  "ts": "1759300000000000001",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000001.0,
+                    "_id": "fixture:rooms:s02r",
+                    "name": "lobby"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "users",
+                  "ts": "1759300000000000002",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000002.0,
+                    "_id": "fixture:users:s02u",
+                    "name": "Dee"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "memberships",
+                  "ts": "1759300000000000003",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000003.0,
+                    "_id": "fixture:memberships:s02m",
+                    "active": true,
+                    "room": "fixture:rooms:s02r",
+                    "user": "fixture:users:s02u"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-02-01"
+              },
+              "diagnostics": {
+                "scanDimension": "byId",
+                "rowsExamined": 3,
+                "candidateEntries": 3,
+                "selectedEntries": 3,
+                "emittedBytes": 284,
+                "timestampGroups": 3,
+                "truncations": 5,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "stale",
+                "snapshotTs": "1759300000000000020"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-02-02"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000040"
+              },
+              "truncates": [],
+              "values": [
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000000030",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000030.0,
+                    "_id": "fixture:messages:s02msg",
+                    "body": "first",
+                    "room": "fixture:rooms:s02r",
+                    "sender": "fixture:users:s02u"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-02-03"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 1,
+                "candidateEntries": 1,
+                "selectedEntries": 1,
+                "emittedBytes": 138,
+                "timestampGroups": 1,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "close"
+      }
+    }
+  ]
+}

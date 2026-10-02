@@ -1,0 +1,159 @@
+{
+  "contractVersion": 1,
+  "id": "06_established_empty_first_page_reconnect",
+  "description": "Resume after 01. Connection 1: the mandatory empty first page, two heartbeats, then a planned connectionAge reconnect (no stale flip). Connection 2 resumes from page 1's cursor, gets its empty first page, then hits transport EOF (stale). Connection 3 resumes and its empty upToDate first page returns the view to current.",
+  "after": "01_cold_multipage_uptodate",
+  "connections": [
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-01-03"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-06-01"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "comment": ""
+          },
+          {
+            "comment": ""
+          },
+          {
+            "event": "reconnect",
+            "data": {
+              "version": 1,
+              "reason": "connectionAge"
+            }
+          }
+        ],
+        "end": "close"
+      }
+    },
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-06-01"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-06-02"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "eof"
+      }
+    },
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-06-02"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-06-03"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "close"
+      }
+    }
+  ]
+}

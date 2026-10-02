@@ -1,0 +1,13 @@
+{
+  "contractVersion": 1,
+  "id": "http/404_disabled",
+  "request": {
+    "version": 1,
+    "selection": "$selection",
+    "cursor": null
+  },
+  "response": {
+    "httpStatus": 404,
+    "body": null
+  }
+}

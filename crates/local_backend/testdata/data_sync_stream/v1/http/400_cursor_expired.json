@@ -1,0 +1,16 @@
+{
+  "contractVersion": 1,
+  "id": "http/400_cursor_expired",
+  "request": {
+    "version": 1,
+    "selection": "$selection",
+    "cursor": "fixture-cursor-expired"
+  },
+  "response": {
+    "httpStatus": 400,
+    "body": {
+      "code": "DataSyncCursorExpired",
+      "message": "The data sync cursor is outside the retention window; start a new sync without a cursor."
+    }
+  }
+}

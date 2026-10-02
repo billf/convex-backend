@@ -1,0 +1,16 @@
+{
+  "contractVersion": 1,
+  "id": "http/400_invalid_cursor",
+  "request": {
+    "version": 1,
+    "selection": "$selection",
+    "cursor": "not-a-cursor"
+  },
+  "response": {
+    "httpStatus": 400,
+    "body": {
+      "code": "InvalidDataSyncCursor",
+      "message": "Could not parse the data sync cursor."
+    }
+  }
+}

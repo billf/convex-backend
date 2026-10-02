@@ -1,0 +1,114 @@
+{
+  "contractVersion": 1,
+  "id": "03_cdc_adjacent_ts_above_2p53",
+  "description": "Resume after 01. The mandatory empty upToDate first page, then one page with two groups at adjacent timestamps above 2^53 that collide as JS numbers. Both must stay distinct and ordered; the final body is 'edit 2'.",
+  "after": "01_cold_multipage_uptodate",
+  "connections": [
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-01-03"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-03-01"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000001000102"
+              },
+              "truncates": [],
+              "values": [
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000001000101",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000008.0,
+                    "_id": "fixture:messages:msg1",
+                    "body": "edit 1",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:ada"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000001000102",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000008.0,
+                    "_id": "fixture:messages:msg1",
+                    "body": "edit 2",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:ada"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-03-02"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 2,
+                "candidateEntries": 2,
+                "selectedEntries": 2,
+                "emittedBytes": 268,
+                "timestampGroups": 2,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "close"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "_other": "excluded",
+  "": {
+    "_other": "excluded",
+    "rooms": {
+      "_other": "included"
+    },
+    "users": {
+      "_other": "included"
+    },
+    "memberships": {
+      "_other": "included"
+    },
+    "messages": {
+      "_other": "included"
+    },
+    "likes": {
+      "_other": "included"
+    }
+  }
+}
