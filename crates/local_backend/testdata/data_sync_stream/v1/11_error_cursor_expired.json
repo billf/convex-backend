@@ -1,0 +1,311 @@
+{
+  "contractVersion": 1,
+  "id": "11_error_cursor_expired",
+  "description": "Resume after 01. After the first page the stream ends with a non-retryable DataSyncCursorExpired error. The client discards its cursor and reconnects with none; the backend cold-starts, truncating each table on its first page (over a live view this is a replacement that keeps last-good published).",
+  "after": "01_cold_multipage_uptodate",
+  "connections": [
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": "fixture-cursor-01-03"
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000000100"
+              },
+              "truncates": [],
+              "values": [],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-11-01"
+              },
+              "diagnostics": {
+                "scanDimension": "ts",
+                "rowsExamined": 0,
+                "candidateEntries": 0,
+                "selectedEntries": 0,
+                "emittedBytes": 0,
+                "timestampGroups": 0,
+                "truncations": 0,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "error",
+            "data": {
+              "version": 1,
+              "code": "DataSyncCursorExpired",
+              "retryable": false,
+              "message": "The data sync cursor is outside the retention window; start a new sync without a cursor."
+            }
+          }
+        ],
+        "end": "close"
+      }
+    },
+    {
+      "request": {
+        "version": 1,
+        "selection": "$selection",
+        "cursor": null
+      },
+      "response": {
+        "httpStatus": 200,
+        "events": [
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "snapshotting"
+              },
+              "truncates": [
+                {
+                  "component": "",
+                  "table": "rooms"
+                },
+                {
+                  "component": "",
+                  "table": "users"
+                }
+              ],
+              "values": [
+                {
+                  "component": "",
+                  "table": "rooms",
+                  "ts": "1759300000000000001",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000001.0,
+                    "_id": "fixture:rooms:r1",
+                    "name": "general"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "users",
+                  "ts": "1759300000000000002",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000002.0,
+                    "_id": "fixture:users:ada",
+                    "name": "Ada"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "users",
+                  "ts": "1759300000000000003",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000003.0,
+                    "_id": "fixture:users:bo",
+                    "name": "Bo"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "users",
+                  "ts": "1759300000000000004",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000004.0,
+                    "_id": "fixture:users:cy",
+                    "name": "Cy"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-11-02"
+              },
+              "diagnostics": {
+                "scanDimension": "byId",
+                "rowsExamined": 4,
+                "candidateEntries": 4,
+                "selectedEntries": 4,
+                "emittedBytes": 287,
+                "timestampGroups": 4,
+                "truncations": 2,
+                "limitCause": "entryLimit",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          },
+          {
+            "event": "page",
+            "data": {
+              "version": 1,
+              "status": {
+                "type": "upToDate",
+                "snapshotTs": "1759300000000008010"
+              },
+              "truncates": [
+                {
+                  "component": "",
+                  "table": "likes"
+                },
+                {
+                  "component": "",
+                  "table": "memberships"
+                },
+                {
+                  "component": "",
+                  "table": "messages"
+                }
+              ],
+              "values": [
+                {
+                  "component": "",
+                  "table": "memberships",
+                  "ts": "1759300000000000005",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000005.0,
+                    "_id": "fixture:memberships:ada",
+                    "active": true,
+                    "room": "fixture:rooms:r1",
+                    "user": "fixture:users:ada"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "memberships",
+                  "ts": "1759300000000000006",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000006.0,
+                    "_id": "fixture:memberships:bo",
+                    "active": true,
+                    "room": "fixture:rooms:r1",
+                    "user": "fixture:users:bo"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "memberships",
+                  "ts": "1759300000000000007",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000007.0,
+                    "_id": "fixture:memberships:cy",
+                    "active": true,
+                    "room": "fixture:rooms:r1",
+                    "user": "fixture:users:cy"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000000008",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000008.0,
+                    "_id": "fixture:messages:msg1",
+                    "body": "hello",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:ada"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000000009",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000009.0,
+                    "_id": "fixture:messages:msg2",
+                    "body": "hi ada",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:bo"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "messages",
+                  "ts": "1759300000000000010",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000010.0,
+                    "_id": "fixture:messages:msg3",
+                    "body": "hey all",
+                    "room": "fixture:rooms:r1",
+                    "sender": "fixture:users:cy"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "likes",
+                  "ts": "1759300000000000011",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000011.0,
+                    "_id": "fixture:likes:like1",
+                    "message": "fixture:messages:msg1",
+                    "user": "fixture:users:bo"
+                  }
+                },
+                {
+                  "component": "",
+                  "table": "likes",
+                  "ts": "1759300000000000012",
+                  "deleted": false,
+                  "value": {
+                    "_creationTime": 1759300000012.0,
+                    "_id": "fixture:likes:like2",
+                    "message": "fixture:messages:msg2",
+                    "user": "fixture:users:ada"
+                  }
+                }
+              ],
+              "syncId": "fixture-sync-1",
+              "pagination": {
+                "hasMore": true,
+                "nextCursor": "fixture-cursor-11-03"
+              },
+              "diagnostics": {
+                "scanDimension": "byId",
+                "rowsExamined": 8,
+                "candidateEntries": 8,
+                "selectedEntries": 8,
+                "emittedBytes": 1035,
+                "timestampGroups": 8,
+                "truncations": 3,
+                "limitCause": "none",
+                "stageDurationsMicros": {
+                  "page": 0,
+                  "convert": 0,
+                  "encode": 0,
+                  "queue": 0
+                }
+              }
+            }
+          }
+        ],
+        "end": "close"
+      }
+    }
+  ]
+}
