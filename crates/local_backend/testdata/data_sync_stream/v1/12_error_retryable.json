@@ -1,7 +1,7 @@
 {
   "contractVersion": 1,
   "id": "12_error_retryable",
-  "description": "Resume after 01. After the first page the stream ends with a retryable DataSyncStreamUnavailable error. The client backs off and resumes from its last checkpointed cursor.",
+  "description": "Resume after 01. After the first page the stream ends with a retryable DataSyncStreamUnavailable error. The client backs off and resumes from its last checkpointed cursor, page 1's.",
   "after": "01_cold_multipage_uptodate",
   "connections": [
     {
@@ -63,7 +63,7 @@
       "request": {
         "version": 1,
         "selection": "$selection",
-        "cursor": "fixture-cursor-01-03"
+        "cursor": "fixture-cursor-12-01"
       },
       "response": {
         "httpStatus": 200,

@@ -124,8 +124,8 @@
     },
     {
       "path": "12_error_retryable.json",
-      "sha256": "a9f843c9f74185265bd0bfe84d7351e4839ada3ad4a2fdbee0630b7eabe0a9a9",
-      "bytes": 3128,
+      "sha256": "1a7f27a3bc695f8c8f578ee796da8749f84e56611faa3af1593bd4da4f476f89",
+      "bytes": 3138,
       "covers": [
         "U4:retryable-error",
         "U3:post-header-error"
