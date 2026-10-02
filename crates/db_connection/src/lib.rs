@@ -135,7 +135,6 @@ pub fn persistence_seed<RT: Runtime>(
                 },
             }
         },
-        _ => unreachable!(),
     }
 }
 
