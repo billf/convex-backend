@@ -98,3 +98,10 @@ generate-admin-key:
   @just init-instance-secret > /dev/null
   @[ -s '{{admin_key_file}}' ] || cargo run --quiet --bin generate_key -- {{instance_name}} "$(cat '{{instance_secret_file}}')" 2>/dev/null > '{{admin_key_file}}'
   @cat '{{admin_key_file}}'
+
+# --- Skip local dev infra (moved to convex-skip) ---
+# The skip-dev-* recipes lived here while scripts/skip-local-dev/ did.
+# Both now live in the convex-skip coordination repo
+# (private, billf/convex-skip): run them there with `just -f
+# <convex-skip>/Justfile skip-dev-up` (or cd there first).
+# This block stays as a pointer; the recipes are intentionally gone.
