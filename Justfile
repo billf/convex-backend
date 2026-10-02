@@ -99,28 +99,9 @@ generate-admin-key:
   @[ -s '{{admin_key_file}}' ] || cargo run --quiet --bin generate_key -- {{instance_name}} "$(cat '{{instance_secret_file}}')" 2>/dev/null > '{{admin_key_file}}'
   @cat '{{admin_key_file}}'
 
-# --- Skip local dev infra (scripts/skip-local-dev/) ---
-# Stands up the local backend + Skip WASM runtime + proof-vehicle fixture
-# that the Skip/Convex integration plans need. See
-# scripts/skip-local-dev/README.md and
-# docs/plans/2026-09-26-1245-chore-skip-local-convex-dev-infra-plan.md.
-
-# (*) Run the full I1-I5 sequence: backend up, fixture pushed, Skip WASM built, smoke-tested.
-skip-dev-up *ARGS:
-  scripts/skip-local-dev/up.sh "$@"
-
-# (*) Report status of every piece (backend, fixture, Skip runtime) without changing anything.
-skip-dev-status:
-  scripts/skip-local-dev/status.sh
-
-# (*) Stop the backend started by skip-dev-up. Pass --reset to also clear its storage.
-skip-dev-down *ARGS:
-  scripts/skip-local-dev/backend-down.sh "$@"
-
-# Push the proof-vehicle fixture only (I2). Args: an optional V1..V6 corpus vector, and/or --watch.
-skip-dev-push-fixture *ARGS:
-  scripts/skip-local-dev/push-fixture.sh "$@"
-
-# Build @skipruntime/wasm only (I3). Pass --force to rebuild even if dist/ exists.
-skip-dev-build-skip-wasm *ARGS:
-  scripts/skip-local-dev/build-skip-wasm.sh "$@"
+# --- Skip local dev infra (moved to convex-skip) ---
+# The skip-dev-* recipes lived here while scripts/skip-local-dev/ did.
+# Both now live in the convex-skip coordination repo
+# (private, billf/convex-skip): run them there with `just -f
+# <convex-skip>/Justfile skip-dev-up` (or cd there first).
+# This block stays as a pointer; the recipes are intentionally gone.
