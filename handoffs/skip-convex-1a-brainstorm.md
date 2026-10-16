@@ -56,9 +56,13 @@ The user picked 1a first, explicitly calling it foundational ("the other two bui
    - `research-delta-seam.md` — Ranked reactivity seams for backend-side integration (1c-adjacent thinking), OCC/persistence exclusion, and `QueryPatched` wire sketch (early Direction 2 architectural direction, not in scope for 1a).
    - `research-native-operator-spec.md` — Track 2 construction spec recommending composable `QueryOperator::Skip` with touch list and wire example (Direction 2 / 1c boundary, not in scope for 1a).
 
+[2026-10-15 cutover note: `research/skip-convex-integration/` was removed at cutover (commit `5402360f0`); only `research/skip-convex-integration/CONVEX-SKIP.md` remains here and the contents now live in `billf/convex-skip`. The per-file list above is historical.]
+
    **Core finding to keep central in every future plan on this initiative:** Skip's reactive dataflow engine does operator-level delta propagation with memoization; convex-backend's reactivity does not — it re-runs whole queries. This gap is the motivating reason for the entire initiative, and the user has repeated more than once that any plan must genuinely exercise it, not just relay Convex data through Skip untouched.
 
 2. **1a requirements — done, reviewed, has open questions recorded.** `docs/plans/2026-09-10-1509-feat-skip-sync-protocol-client-plan.md` (`artifact_contract: ce-unified-plan/v1`, `artifact_readiness: requirements-only`) — a `ce-brainstorm`-produced Product Contract, then pressure-tested with `ce-doc-review` (coherence, feasibility, product-lens, scope-guardian, adversarial personas; cross-model pass skipped at the user's request to avoid third-party egress).
+
+[2026-10-15 cutover note: this plan moved to `billf/convex-skip` at cutover; see `docs/plans/CONVEX-SKIP.md`.]
 
    Shape of the plan: a Skip sync client speaks convex-backend's real `/api/sync` WebSocket protocol directly (`crates/convex/sync_types`) instead of going through the JS `ConvexClient` and the adapter branch's Node-side snapshot diffing. It writes each Convex transaction into Skip as **one atomic update** covering every query that changed (fixing a real correctness gap: the adapter branch's `ConvexClient.onUpdate` delivers per-query callbacks, so a transaction touching two tables can appear torn). Reconciliation relies on Skip's own `isInit: true` write path (which does a free, exact diff via structural-equality short-circuiting) rather than hand-rolled diffing. Proof vehicle: a chatroom demo combining a Skip example (`~/src/skip/examples/*`) with `~/src/convex-tutorial`, computing a real cross-table aggregate via Skip's reducer mechanism. Success bar is **correctness only** — no performance benchmark against the adapter branch required (a session-settled decision).
 
@@ -102,7 +106,11 @@ Codex (resuming from the handoff) did **not** choose from the suggested next ste
 
 **`docs/plans/2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md`** — a requirements-only feasibility spike for backend-native Skip. The scope is one hand-crafted pre-registered chatroom materialized view, fed by committed Convex changes, with native query execution as the fallback. Key design decisions: maintain from commit-level changes (not invalidation-driven reruns), keep Skip state derived and rebuildable, use Convex indexes and validated IDs as lookup/join contracts, establish correctness and asymptotic scaling behavior before any performance microbenchmark.
 
+[2026-10-15 cutover note: this plan moved to `billf/convex-skip` at cutover; see `docs/plans/CONVEX-SKIP.md`.]
+
 This Direction 2 spike was independent of Direction 1a when written (Direction 2 still is). Since then, 1a, 1b and 1c adopted the shared prerequisites plan's P/Q tier as direct dependencies (2026-09-23; `2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`). The sync-protocol client plan (`2026-09-10-1509-feat-skip-sync-protocol-client-plan.md`) remains a separate, viable work unit and can proceed without waiting on this spike's outcome.
+
+[2026-10-15 cutover note: both plans named above moved to `billf/convex-skip` at cutover; see `docs/plans/CONVEX-SKIP.md`.]
 
 ## Plausible next steps after both plans are settled
 

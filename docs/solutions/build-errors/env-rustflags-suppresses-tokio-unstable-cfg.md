@@ -18,7 +18,7 @@ tags: [rustflags, tokio-unstable, cargo-config, disable-lifo-slot, nix]
 
 ## Problem
 
-`cargo build` failed in `ProdRuntime::init_tokio()` because `tokio::runtime::Builder::disable_lifo_slot` was not visible as a method. The root cause was environmental: the shell's exported `RUSTFLAGS` suppressed the repo's cargo-config `rustflags`, so the `--cfg tokio_unstable` flag the method is gated behind never reached `rustc`. No repo change was needed.
+`cargo build` failed in `ProdRuntime::init_tokio()` because `tokio::runtime::Builder::disable_lifo_slot` was not visible as a method. The root cause was environmental: the shell's exported `RUSTFLAGS` suppressed the repo's cargo-config `rustflags`, so the `--cfg tokio_unstable` flag the method is gated behind never reached `rustc`. No repo change was needed then — but note the code has since changed: commit `ac6ce4d` `#[cfg(tokio_unstable)]`-gated the call, so at HEAD a suppressed cfg silently compiles the call out instead of producing E0599.
 
 ## Symptoms
 
@@ -32,6 +32,7 @@ pointing at `crates/runtime/src/prod.rs:163`, inside `ProdRuntime::init_tokio()`
 
 ```rust
 if *RUNTIME_DISABLE_LIFO_SLOT {
+    #[cfg(tokio_unstable)] // added later by ac6ce4d; absent in the failing revision
     tokio_builder.disable_lifo_slot(); // crates/runtime/src/prod.rs:163
 }
 ```
@@ -50,7 +51,7 @@ Before (fails):
 
 ```sh
 echo "$RUSTFLAGS"  # shows -L/Users/bill/.nix-profile/lib/ without --cfg tokio_unstable
-cargo check -p runtime  # reproduces E0599 at crates/runtime/src/prod.rs:163
+cargo check -p runtime  # reproduces E0599 at crates/runtime/src/prod.rs:163 on the pre-ac6ce4d code
 ```
 
 After (works):
