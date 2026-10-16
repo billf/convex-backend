@@ -64,7 +64,7 @@ Repair the bundled adapter by restoring the working positional order:
 
 ```sh
 opencode run "Follow the attached brief. Return only schema-shaped JSON." \
-  --dir "$PEER_WORKDIR" --format json "--file=$PROMPT_FILE"
+  --format json "--file=$PROMPT_FILE"
 ```
 
 Add a regression test that asserts the prompt immediately follows

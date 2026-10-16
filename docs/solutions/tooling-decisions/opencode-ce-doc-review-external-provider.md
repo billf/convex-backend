@@ -19,7 +19,7 @@ tags:
 
 `ce-doc-review` can use OpenCode for an external cross-model judgment pass. Its command-line interface has integration details that are easy to get wrong: a failed call can be an attachment-parsing failure, an incorrect requested model route, or contention in OpenCode's local state rather than a substantive reviewer result.
 
-Use this route only after the user has explicitly authorized egress of the review material. The requested Muse route below was verified in the 2026-09-13 session, but the response event alone does not independently attest the model that served the request. Version 3.25 of the bundled adapter regressed this argument order by appending the prompt after the options and attachment; use the direct shape below until that adapter is repaired.
+Use this route only after the user has explicitly authorized egress of the review material. The requested Muse route below was verified in the 2026-09-13 session, but the response event alone does not independently attest the model that served the request. Version 3.25 of the bundled adapter regressed this argument order by appending the prompt after the options and attachment; use the direct shape below until that adapter is repaired. (2026-10-15 correction: the installed CLI exposes neither `--dir` nor `--pure` — verify with `opencode run --help`; the shapes below were corrected to a fresh `--session` id instead. Re-run the smoke test before the next egress.)
 
 ## Guidance
 
@@ -27,20 +27,19 @@ Run one reviewer with this command shape:
 
 ```sh
 opencode run 'Return only schema-shaped JSON for the attached review brief.' \
-  --dir "$EMPTY_TEMP_WORKDIR" \
+  --session "$REVIEW_SESSION" \
   --format json \
   --file="$REVIEW_BRIEF" \
-  --model opencode/muse-spark-1.3-contributor-free \
-  --pure
+  --model opencode/muse-spark-1.3-contributor-free
 ```
 
 - Put the message immediately after `opencode run`, before any attachment.
 - Use `--file=<path>`, not a space-form attachment followed by the message. `--file` is array-valued; the wrong shape can make OpenCode treat the review prose as a filename.
 - Use the fully qualified requested model ID `opencode/muse-spark-1.3-contributor-free`; in the 2026-09-13 session, unqualified `muse/spark-1.3-free` did not select the intended configured route.
-- Use an empty temporary `--dir`, not the repository directory. If that workspace cannot be created, treat the review as blocked instead of falling back to the repository.
-- Treat `--pure` as an isolation aid, then run a no-document smoke test against the installed CLI: it does not by itself prove that every ambient OpenCode setting is absent.
+- Use a fresh `--session` id per reviewer (`$REVIEW_SESSION`, e.g. `review-<doc>-<date>`), never a reused session. The installed CLI has no `--dir` flag, so session freshness is the isolation boundary; if a fresh session cannot be created, treat the review as blocked instead of falling back to a dirty session.
+- A fresh session does not by itself prove that every ambient OpenCode setting is absent, so run a no-document smoke test against the installed CLI before egress.
 - Serialize peer calls. The 2026-09-13 session observed concurrent calls contending on OpenCode's shared SQLite database.
-- Before document egress, run a harmless request with the same model and isolation flags. Confirm it produces JSON output.
+- Before document egress, run a harmless request with the same model and a fresh session. Confirm it produces JSON output.
 - With `--format json`, validate the response carried in the JSON event whose `type` is `text` against the expected review schema. A missing or invalid payload means the reviewer is unavailable; it is not a clean review.
 - Do not add `--variant` unless the installed CLI and selected route have been separately tested for it.
 
@@ -62,10 +61,9 @@ Smoke test before egress:
 
 ```sh
 opencode run 'Reply with exactly: ready' \
-  --dir "$EMPTY_TEMP_WORKDIR" \
+  --session "$REVIEW_SESSION" \
   --format json \
-  --model opencode/muse-spark-1.3-contributor-free \
-  --pure
+  --model opencode/muse-spark-1.3-contributor-free
 ```
 
 After explicit authorization, start one schema-directed reviewer, wait for and validate its JSON `text` response, then start the next reviewer. If the call exits without a valid response, record it as unavailable rather than treating silence as agreement.

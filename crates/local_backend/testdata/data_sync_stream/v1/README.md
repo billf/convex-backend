@@ -1,6 +1,6 @@
 # Data Sync stream wire fixtures, version 1
 
-This is the canonical fixture corpus for the experimental `POST /api/data_sync_stream` route. The contract is KTD6 in `docs/plans/2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md`.
+This is the canonical fixture corpus for the experimental `POST /api/data_sync_stream` route. The contract is KTD6 in the data-sync push-source spike plan (moved to `billf/convex-skip` at cutover; see `docs/plans/CONVEX-SKIP.md`).
 
 The corpus was **written by hand from that contract** before the route existed, so nothing here was captured from a running backend. The Skip adapter vendors a byte-identical copy at `skipruntime-ts/adapters/convex/testdata/data_sync_stream/v1/`. `manifest.json` lists every file with its SHA-256 and byte count, and drift between the two copies is a test failure.
 
