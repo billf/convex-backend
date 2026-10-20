@@ -184,3 +184,22 @@ Research only — no design decisions have been made yet. Four spike plans in
 paginated source, 1c Data Sync push source, Direction 2 materialized
 cache), plus a shared-prerequisites plan (`2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`, P/Q tier — the only plan citing `research-spike-comparison.md` and `research-skip-source-state.md`); the index above marks which notes feed each plan and which early
 notes are superseded or historical.
+
+## Requirement code key
+
+Research notes cite requirement codes defined in `docs/plans/` (primarily the
+1a sync-protocol client plan). One-line glosses; the plans carry full text:
+
+- R1: read-only `/api/sync` subset, no JS client, no backend changes.
+- R2: each reassembled Transition is the direction's `SnapshotBatch` (P helpers).
+- R3: full per-query row set, written `isInit:false` in the single update.
+- R4: room-scoped feed + per-message `likeCount` reducer over multiple tables.
+- R5: failed query keeps frozen last-good view, surfaced as possibly stale.
+- R6: Q12 four gates hold at settled checkpoints.
+- R7: demo implements the Shared proof-vehicle contract.
+- R8: demo subscribes Q13 plain per-table queries (no pre-joined queries).
+- 1a F1 (`sync-protocol-client-live-cross-table-aggregate`): multi-table
+  mutation atomicity probe. 1a F2 (`sync-protocol-client-query-failure-recovery`):
+  force `QueryFailed`, assert frozen last-good + recovery.
+- 1a AE1/AE2: cross-table-update and stale-last-good acceptance examples
+  (`2026-09-10-1509-feat-skip-sync-protocol-client-plan.md`, Acceptance Examples).
