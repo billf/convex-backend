@@ -65,8 +65,8 @@ there. Resolves its five "better integration" gaps with a buildable choice.
 ## Acceptance
 
 - TS signatures for resource, scope, logger, resubscribe options frozen.
-- Sequence diagram: mutation → rerun → `onUpdate` → diff → `update(batch)` →
-  map/reduce → SSE.
+- Sequence diagram: mutation → rerun → `onUpdate`/full-value → `update(isInit:true)` →
+  map/reduce → SSE (no bridge diffing; the 1a addendum supersedes the diff step).
 - Failure matrix: bootstrap reject, mid-stream reject, max-attempts inert,
   shutdown drain, restart-initial — all covered by adapter tests.
 

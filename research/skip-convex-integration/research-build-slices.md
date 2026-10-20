@@ -46,9 +46,8 @@ lag and Convex function-call volume per source write.
 
 ## Verify
 
-- `ls research/skip-convex-integration/` shows 4 pre-existing + 4 new files;
-  `git status --short` shows only the 4 new files as untracked/modified.
-- Each new doc ends with an Acceptance section; no existing note edited.
+- `ls research/skip-convex-integration/` shows 13 files at tip: 5 from 448410bc2 (README.md + 4 notes) plus 8 new files in 8d88c7eb1, which also modified README.md.
+- Each new doc ends with an Acceptance section or an explicit gaps section: research-poc-vehicle-and-harness.md, research-skip-atomic-write.md, research-sync-wire-ts-checklist.md, and this doc record planning gaps/non-goals instead of Acceptance.
 
 ## Non-goals
 
