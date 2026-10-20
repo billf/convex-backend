@@ -36,7 +36,7 @@ if *RUNTIME_DISABLE_LIFO_SLOT {
 }
 ```
 
-The "private field, not a method" note makes this look like a tokio version incompatibility (as if the installed tokio simply lacks the API), but per this session's verification the workspace tokio (`tokio = { version = "1.53.1", ... }` in `Cargo.toml:233`) was never the problem.
+The "private field, not a method" note makes this look like a tokio version incompatibility (as if the installed tokio simply lacks the API), but per this session's verification the workspace tokio (`tokio = { version = "1.53.1", ... }` in `Cargo.toml:232`) was never the problem.
 
 ## What Didn't Work
 
@@ -79,7 +79,7 @@ rustflags = ["--cfg", "tokio_unstable"]
 
 `Builder::disable_lifo_slot` only exists as a method under `--cfg tokio_unstable`; without that cfg, name resolution finds only tokio's private field of the same name, producing the misleading "private field, not a method" error at `crates/runtime/src/prod.rs:163`.
 
-Per this session's verification, the exported `RUSTFLAGS` took the place of (rather than added to) the config-file `target` `rustflags`: unsetting `RUSTFLAGS` restored the build and appending `--cfg tokio_unstable` fixed it, so the nix-provided `-L...` flags had silently dropped the `--cfg tokio_unstable` flag. Appending `--cfg tokio_unstable` to the exported `RUSTFLAGS` (or unsetting `RUSTFLAGS` so the config's flags apply) restores the cfg, the method becomes visible, and the crate compiles against the same tokio 1.53.1 (`Cargo.toml:233`).
+Per this session's verification, the exported `RUSTFLAGS` took the place of (rather than added to) the config-file `target` `rustflags`: unsetting `RUSTFLAGS` restored the build and appending `--cfg tokio_unstable` fixed it, so the nix-provided `-L...` flags had silently dropped the `--cfg tokio_unstable` flag. Appending `--cfg tokio_unstable` to the exported `RUSTFLAGS` (or unsetting `RUSTFLAGS` so the config's flags apply) restores the cfg, the method becomes visible, and the crate compiles against the same tokio 1.53.1 (`Cargo.toml:232`).
 
 ## Prevention
 
