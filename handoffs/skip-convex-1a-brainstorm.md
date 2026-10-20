@@ -2,10 +2,10 @@
 artifact_contract: "ce-handoff/v1"
 created_at: "2026-09-10T23:25:52Z"
 title: "Skip/convex-backend integration — sub-direction 1a handoff"
-summary: "Codex's interrupted ce-brainstorm on Skip+convex-backend was completed by another session for sub-direction 1a only; 1b, 1c, and Direction 2 remain unstarted."
+summary: "Codex's interrupted ce-brainstorm on Skip+convex-backend was completed by another session for sub-direction 1a only; 1b and 1c remain unstarted. (Direction 2 was brainstormed after this handoff — see 'What happened after this handoff' below.)"
 keywords: ["skip", "convex-backend", "ce-brainstorm", "sync-protocol", "skiplabs", "incremental-computation"]
 cwd: "/Users/bill/src/convex-backend"
-resume_focus: "Decide whether to run ce-plan on the 1a requirements doc, or start a fresh ce-brainstorm for 1b, 1c, or Direction 2"
+resume_focus: "Decide whether to run ce-plan on the 1a requirements doc, or start a fresh ce-brainstorm for 1b or 1c"
 repository: "convex-backend"
 repo_root_sha: "0780bbe665ae"
 branch: "main"
@@ -33,7 +33,7 @@ You had already reached this same framing before your session ended (see your ow
 
 Direction 1 turned out to have its own internal split, surfaced when the user was asked to scope down further (a `ce-brainstorm` coherent-work-gate requirement — one brainstorm run can only own one coherent piece of work):
 
-- **1a — Client-side only, real sync protocol, no convex-backend changes.** Brainstormed and written up (see below). **This is the only piece with a finished requirements document.**
+- **1a — Client-side only, real sync protocol, no convex-backend changes.** Brainstormed and written up (see below). **This and the Direction 2 spike below are the pieces with finished requirements documents.**
 - **1b — Fine-grained query architecture** (shaping the Convex query set itself — e.g. small/keyed point-queries — so today's per-query update delivery approximates row-level deltas, still no backend changes). **Not started.** No brainstorm has run for this yet.
 - **1c — Modest backend changes** to make convex-backend emit real document/row-level change events for external reactive consumers, without running Skip-authored logic inside the backend (that stays Direction 2's territory). **Not started.**
 
@@ -78,7 +78,7 @@ The user picked 1a first, explicitly calling it foundational ("the other two bui
    
    **Generalization path:** The muse-generated `research-sync-protocol-skip-mapping.md` (§3) recommends a sidecar-bridge architecture (separate process owns the socket/client, passes batches to Skip) as the production generalization. It correctly identifies embedded client as the pragmatic PoC choice and sidecar as a valid follow-up refactoring once the PoC proves concept viability. No action required for 1a PoC; consider for planning or implementation if applicable.
 
-3. **1b, 1c, Direction 2 — early research exists, no brainstorm yet.** While no formal brainstorm/planning has run for these sub-directions, the automated research agent has drafted early construction specs:
+3. **1b, 1c — early research exists, no brainstorm yet.** While no formal brainstorm/planning has run for these two sub-directions, the automated research agent has drafted early construction specs: (Direction 2 has since been brainstormed — see 'What happened after this handoff' below.)
    - `research-native-operator-spec.md` — early Direction 2 exploration (composable `QueryOperator::Skip`, touch list, wire example). Not in 1a scope; reference for future Direction 2 brainstorm.
    - `research-delta-seam.md` — ranked backend reactivity seams for 1c-like architecture (index backfill, subscription invalidation, OCC validation) with exclusion rationale. Useful reference for future 1c scoping.
    - `research-build-slices.md` — synthesis of all research into a multi-track build order, mentioning 1a tracks (T1-MVP, T1-scale, T2-spike on SkipFilter end-to-end, index-cache generalization). Speculative but useful for understanding the dependencies across all three 1x sub-directions.
