@@ -2,7 +2,7 @@
 artifact_contract: "ce-handoff/v1"
 created_at: "2026-09-10T23:25:52Z"
 title: "Skip/convex-backend integration — sub-direction 1a handoff"
-summary: "Codex's interrupted ce-brainstorm on Skip+convex-backend was completed by another session for sub-direction 1a only; 1b and 1c remain unstarted. (Direction 2 was brainstormed after this handoff — see 'What happened after this handoff' below.)"
+summary: "Codex's interrupted ce-brainstorm on Skip+convex-backend was completed by another session for sub-direction 1a only; 1b and 1c were unstarted at handoff time (plans exist since). (Direction 2 was brainstormed after this handoff — see 'What happened after this handoff' below.)"
 keywords: ["skip", "convex-backend", "ce-brainstorm", "sync-protocol", "skiplabs", "incremental-computation"]
 cwd: "/Users/bill/src/convex-backend"
 resume_focus: "Decide whether to run ce-plan on the 1a requirements doc, or start a fresh ce-brainstorm for 1b or 1c"
