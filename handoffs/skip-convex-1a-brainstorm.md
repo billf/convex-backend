@@ -34,8 +34,8 @@ You had already reached this same framing before your session ended (see your ow
 Direction 1 turned out to have its own internal split, surfaced when the user was asked to scope down further (a `ce-brainstorm` coherent-work-gate requirement — one brainstorm run can only own one coherent piece of work):
 
 - **1a — Client-side only, real sync protocol, no convex-backend changes.** Brainstormed and written up (see below). **This is the only piece with a finished requirements document.**
-- **1b — Fine-grained query architecture** (shaping the Convex query set itself — e.g. small/keyed point-queries — so today's per-query update delivery approximates row-level deltas, still no backend changes). **Not started.** No brainstorm has run for this yet.
-- **1c — Modest backend changes** to make convex-backend emit real document/row-level change events for external reactive consumers, without running Skip-authored logic inside the backend (that stays Direction 2's territory). **Not started.**
+- **1b — Fine-grained query architecture** (shaping the Convex query set itself — e.g. small/keyed point-queries — so today's per-query update delivery approximates row-level deltas, still no backend changes). **Status since this handoff:** planned — see `2026-09-10-1843-feat-skip-paginated-reactive-source-spike-plan.md` in `docs/backend/plans/` of `convex-skip`.
+- **1c — Modest backend changes** to make convex-backend emit real document/row-level change events for external reactive consumers, without running Skip-authored logic inside the backend (that stays Direction 2's territory). **Status since this handoff:** planned — see `2026-09-10-1854-feat-skip-data-sync-push-source-spike-plan.md` in `docs/backend/plans/` of `convex-skip`.
 
 The user picked 1a first, explicitly calling it foundational ("the other two build on understanding this baseline") and asked that 1b and 1c be preserved as named, deferred candidates rather than folded into 1a's scope.
 
@@ -102,12 +102,12 @@ Codex (resuming from the handoff) did **not** choose from the suggested next ste
 
 **`docs/plans/2026-09-10-1702-feat-skip-incremental-materialized-cache-spike-plan.md`** — a requirements-only feasibility spike for backend-native Skip. The scope is one hand-crafted pre-registered chatroom materialized view, fed by committed Convex changes, with native query execution as the fallback. Key design decisions: maintain from commit-level changes (not invalidation-driven reruns), keep Skip state derived and rebuildable, use Convex indexes and validated IDs as lookup/join contracts, establish correctness and asymptotic scaling behavior before any performance microbenchmark.
 
-This Direction 2 spike is **entirely independent of Direction 1a**. The sync-protocol client plan (`2026-09-10-1509-feat-skip-sync-protocol-client-plan.md`) remains a separate, viable work unit and can proceed without waiting on this spike's outcome.
+This Direction 2 spike was independent of Direction 1a when written (Direction 2 still is). Since then, 1a, 1b and 1c adopted the shared prerequisites plan's P/Q tier as direct dependencies (2026-09-23; `2026-09-11-1159-feat-skip-shared-prerequisites-plan.md`). The sync-protocol client plan (`2026-09-10-1509-feat-skip-sync-protocol-client-plan.md`) remains a separate, viable work unit and can proceed without waiting on this spike's outcome.
 
 ## Plausible next steps after both plans are settled
 
 - Run `ce-plan` on the 1a sync-protocol plan to enrich it into an implementation-ready execution plan.
 - Run `ce-plan` on the Direction 2 spike plan to enrich it into an implementation-ready execution plan.
-- Start a fresh `ce-brainstorm` for 1b (fine-grained query architecture) or 1c (backend row-level change events) — both still fully unscoped but with richer foundation material from the muse-generated research.
+- ~~Start a fresh `ce-brainstorm` for 1b or 1c~~ — superseded: both now have plans in `convex-skip` `docs/backend/plans/`.
 
 The two plans (1a and Direction 2 spike) establish viability and direction for their respective tracks. Neither blocks the other; the decision to pursue both, one, or neither is a user/product choice, not a technical dependency.
